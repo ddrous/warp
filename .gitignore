@@ -41,7 +41,9 @@ examples/runs/cprofile/*
 runs/*
 data/*
 
-!examples/runs/250303-164950-PetaGenius*
-!examples/runs/250303-190002-SuperCelebA*
+!data/README.md
+!runs/README.md
 
-!examples/data/README.md
+!runs/250303-164950-PetaGenius*
+!runs/250303-190002-SuperCelebA*
+
