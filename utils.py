@@ -74,15 +74,15 @@ def setup_logger(folder_path, training=True):
     # Configure logger
     logger = logging.getLogger('training')
     logger.setLevel(logging.INFO)
-    
+
     # Create file handler
     file_handler = logging.FileHandler(log_filename)
     file_handler.setLevel(logging.INFO)
-    
+
     # Create console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)
-    
+
     # Create formatter and add it to the handlers
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
     file_handler.setFormatter(formatter)
@@ -107,7 +107,8 @@ def setup_run_folder(folder_path, training=True):
     # Save the run scripts in that folder
     os.system(f"cp main.py {folder_path}")
     os.system(f"cp utils.py {folder_path}")
-    os.system(f"cp model.py {folder_path}")
+    os.system(f"cp loaders.py {folder_path}")
+    os.system(f"cp models.py {folder_path}")
     os.system(f"cp config.yaml {folder_path}")
 
     ## Create a folder for the chcekpoints results

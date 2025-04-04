@@ -181,12 +181,26 @@ class WSM_RNN(eqx.Module):
 
 
 
-def make_model(model_key, config):
+def make_model(key, data_size, config):
     """ Make a model using the given key and kwargs """
 
     model_type = config['model']['model_type']
 
     if model_type == "wsm-rnn":
+        model_args = {
+            "data_size": data_size,
+            "width_size": config['model']['mlp_width_size'],
+            "depth": config['model']['mlp_depth'],
+            "activation": config['model']['activation'],
+            "input_prev_data": config['model']['input_prev_data'],
+            "predict_uncertainty": config['training']['use_nll_loss'],
+            "apply_tanh_uncertainty": config['model']['apply_tanh_uncertainty'],
+            "time_as_channel": config['model']['time_as_channel'],
+            "forcing_prob": config['model']['forcing_prob'],
+            "weights_lim": config['model']['weights_lim'],
+            "noisy_theta_init": config['model']['noisy_theta_init']
+        }
+
         model = WSM_RNN(key=key, **model_args)
         print(f"Number of learnable parameters in the root network: {count_params((model.thetas,))/1000:3.1f} k")
         print(f"Number of learnable parameters for the seqtoseq's transition: {count_params((model.As, model.Bs))/1000:3.1f} k")

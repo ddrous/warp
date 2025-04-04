@@ -1,6 +1,4 @@
 #%%
-from utils import NumpyLoader
-
 import numpy as np
 import torch
 import torchvision
@@ -466,20 +464,20 @@ class NumpyLoader(data.DataLoader):
 
 
 
-def make_dataloaders(config):
+def make_dataloaders(data_folder, config):
     """
     Create the dataset and dataloaders for the given dataset
     """
 
     ## Get the parameters
-    dataset = config["dataset"]
-    batch_size = config["batch_size"]
+    dataset = config["general"]["dataset"]
+    batch_size = config["training"]["batch_size"]
 
     if dataset in ["mnist", "mnist_fashion"]:
         # ### MNIST Classification (From Sacha Rush's Annotated S4)
         print(" #### MNIST Dataset ####")
         fashion = dataset=="mnist_fashion"
-        downsample_factor = config["downsample_factor"]
+        downsample_factor = config["data"]["downsample_factor"]
 
         trainloader = NumpyLoader(MNISTDataset(data_folder, data_split="train", mini_res=downsample_factor, traj_prop=1.0, unit_normalise=False, fashion=fashion), 
                                 batch_size=batch_size, 
@@ -490,7 +488,7 @@ def make_dataloaders(config):
                                     shuffle=True, 
                                     num_workers=24)
         nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
-        min_res = 28
+        min_res = 28 // downsample_factor
 
     elif dataset=="cifar":
         print(" #### CIFAR Dataset ####")
@@ -505,7 +503,7 @@ def make_dataloaders(config):
                                     shuffle=True, 
                                     num_workers=24)
         nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
-        min_res = 32
+        min_res = 32 // downsample_factor
 
     elif dataset=="celeba":
         print(" #### CelebA Dataset ####")
@@ -520,7 +518,7 @@ def make_dataloaders(config):
                                     shuffle=True, 
                                     num_workers=24)
         nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
-        min_res = 32
+        min_res = min(resolution)
 
     elif dataset in ["lorentz63"]:                  ## TODO: Fix this
         print(" #### Dynamics Dataset ####")

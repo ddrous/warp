@@ -4,13 +4,15 @@
 general:
   seed: 2024
   train: True
-  dataset: "mnist"  # Options: mnist, cifar, trends, mnist_fashion, lorentz, dynamics
-  data_folder: "./data"
+  dataset: "mnist"  # Options: mnist, cifar, lorentz, dynamics
+  data_path: "./data/"
+  # save_path: "./runs/250404-175026-Test/"
+  save_path: null
 
 # Data hyperparameters (dependent on the dataset)
 data:
-  downsample_factor: 2
-  resolution: [32, 342]         # For celebA
+  downsample_factor: 1
+  resolution: [32, 32]         # For celebA
   traj_length: 1000
 
 # Model hyperparameters
@@ -18,13 +20,13 @@ model:
   mlp_width_size: 24
   mlp_depth: 3
   activation: "relu"
+  input_prev_data: False
   model_type: "wsm-rnn"
   nb_rnn_layers: 1
   weights_lim: null
   apply_tanh_uncertainty: True
   time_as_channel: False
   forcing_prob: 0.15
-  input_prev_data: True
   noisy_theta_init: False
 
 # Optimizer hyperparameters
@@ -41,10 +43,10 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 500
-  batch_size: 6400
-  print_every: 100
-  checkpoint_every: 100
+  nb_epochs: 150
+  batch_size: 1200
+  print_every: 50
+  checkpoint_every: 50
   nb_recons_loss_steps: 400
   use_nll_loss: True
   inference_start: 15
