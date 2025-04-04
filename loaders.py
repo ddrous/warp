@@ -1,13 +1,26 @@
 #%%
+from utils import NumpyLoader
+
 import numpy as np
 import torch
 import torchvision
 from torchvision import transforms
-from selfmod import NumpyLoader
+from torch.utils import data
+
+import pandas as pd
+from typing import Tuple
+from PIL import Image
+import os
+import jax.tree as jtree
+
+
+
+
+
 
 class TimeSeriesDataset:
     """
-    For any time series dataset, from which the others will inherit
+    Base class for any time series dataset, from which the others will inherit
     """
     def __init__(self, dataset, labels, t_eval, traj_prop=1.0):
 
@@ -36,14 +49,6 @@ class TimeSeriesDataset:
             ### STRAIGHFORWARD APPROACH ###
             return (inputs, t_eval), outputs
         else:
-            ### SAMPLING APPROACH ###
-            ## Select a random trajectory of length t-2
-            # start_idx = np.random.randint(0, self.num_steps - traj_len)
-            # end_idx = start_idx + traj_len
-            # ts = t_eval[start_idx:end_idx]
-            # trajs = inputs[start_idx:end_idx, :]
-            # return (trajs, ts), outputs
-
             ## Select a random subset of traj_len-2 indices, then concatenate the start and end points
             indices = np.sort(np.random.choice(np.arange(1,self.num_steps-1), traj_len-2, replace=False))
             indices = np.concatenate(([0], indices, [self.num_steps-1]))
@@ -76,11 +81,11 @@ class TrendsDataset(TimeSeriesDataset):
         n_envs, n_timesteps, n_dimensions = dataset.shape
 
         ## Duplicate t_eval for each environment
-        t_eval = np.linspace(0, 1., n_timesteps)
+        t_eval = np.linspace(0., 1., n_timesteps)
 
         ## We have 600 samples and 6 classes as above. Create the labels
         labels = np.zeros((600,), dtype=int)
-        labels[100:200] = 1 
+        labels[100:200] = 1
         labels[200:300] = 2
         labels[300:400] = 3
         labels[400:500] = 4
@@ -95,15 +100,15 @@ class TrendsDataset(TimeSeriesDataset):
 
 
 
-class DynamicsDataset(TimeSeriesDataset):
+class LorentzDataset(TimeSeriesDataset):
     """
-    For the synthetic control dataset from Time Series Classification
+    For the Lorentz dataset from https://arxiv.org/abs/2410.04814
     """
 
     def __init__(self, data_dir, traj_length=1000):
         try:
             raw_data = torch.load(data_dir)
-            # raw_t_eval = np.linspace(0, 1., raw_data.shape[1])
+            raw_t_eval = np.linspace(0, 1., raw_data.shape[1])
         except:
             raise ValueError(f"Data not loadable at {data_dir}")
 
@@ -113,9 +118,6 @@ class DynamicsDataset(TimeSeriesDataset):
         ## Put things between -1 and 1
         raw_data = (raw_data - 0.5) / 0.5
 
-        # dataset = raw_data[0:1, :traj_length].cpu().numpy()
-        # n_envs, n_timesteps, n_dimensions = dataset.shape
-
         ## Tile the data into -1, traj_length, n_dimensions
         _, raw_timesteps, _ = raw_data.shape
         dataset = []
@@ -124,8 +126,8 @@ class DynamicsDataset(TimeSeriesDataset):
         dataset = np.concatenate(dataset, axis=0)
         n_envs, n_timesteps, n_dimensions = dataset.shape
 
-        t_eval = np.linspace(0, 1., n_timesteps)
-        # t_eval = raw_t_eval[:traj_length]
+        # t_eval = np.linspace(0, 1., n_timesteps)
+        t_eval = raw_t_eval[:traj_length]
         labels = np.arange(n_envs)
 
         self.total_envs = n_envs
@@ -137,48 +139,46 @@ class DynamicsDataset(TimeSeriesDataset):
 
 
 
-# class DynamicsDataset(TimeSeriesDataset):
-#     """
-#     For the synthetic control dataset from Time Series Classification
-#     """
+class DynamicsDataset(TimeSeriesDataset):
+    """
+    For all other dyanmics dataset, e.g. from https://arxiv.org/abs/2405.02154
+    """
 
-#     def __init__(self, data_dir, traj_length=1000):
-#         try:
-#             raw = np.load(data_dir)
-#             raw_data = raw["X"][:, :, :traj_length, :]
-#             raw_t_eval = raw["t"][:traj_length]
-#         except:
-#             raise ValueError(f"Data not loadable at {data_dir}")
+    def __init__(self, data_dir, traj_length=1000):
+        try:
+            raw = np.load(data_dir)
+            raw_data = raw["X"][:, :, :traj_length, :]
+            raw_t_eval = raw["t"][:traj_length]
+        except:
+            raise ValueError(f"Data not loadable at {data_dir}")
 
-#         ## Normalise the dataset between 0 and 1
-#         # raw_data = (raw_data - torch.mean(raw_data)) / torch.std(raw_data)
-#         raw_data = (raw_data - np.min(raw_data)) / (np.max(raw_data) - np.min(raw_data))
-#         ## Put things between -1 and 1
-#         raw_data = (raw_data - 0.5) / 0.5
+        ## Normalise the dataset between 0 and 1
+        # raw_data = (raw_data - torch.mean(raw_data)) / torch.std(raw_data)
+        raw_data = (raw_data - np.min(raw_data)) / (np.max(raw_data) - np.min(raw_data))
+        ## Put things between -1 and 1
+        raw_data = (raw_data - 0.5) / 0.5
 
-#         # dataset = raw_data[0, :]
-#         dataset = raw_data.reshape(-1, traj_length, raw_data.shape[-1])
-#         n_envs, n_timesteps, n_dimensions = dataset.shape
+        # dataset = raw_data[0, :]
+        dataset = raw_data.reshape(-1, traj_length, raw_data.shape[-1])
+        n_envs, n_timesteps, n_dimensions = dataset.shape
 
-#         # t_eval = raw_t_eval
-#         t_eval = np.linspace(0., 1., n_timesteps)
-#         labels = np.arange(n_envs)
+        t_eval = raw_t_eval
+        # t_eval = np.linspace(0., 1., n_timesteps)
+        labels = np.arange(n_envs)
 
-#         self.total_envs = n_envs
-#         self.nb_classes = 64
-#         self.num_steps = n_timesteps
-#         self.data_size = n_dimensions
+        self.total_envs = n_envs
+        self.nb_classes = 64
+        self.num_steps = n_timesteps
+        self.data_size = n_dimensions
 
-#         super().__init__(dataset, labels, t_eval, traj_prop=1.0)
-
-
+        super().__init__(dataset, labels, t_eval, traj_prop=1.0)
 
 
 
 
 class MNISTDataset(TimeSeriesDataset):
     """
-    For the MNIST dataset, where the time series is the pixels of the image, and the example of Trends dataset above
+    For the MNIST dataset, where the time series is the flattened image, pixel-by-pixel
     """
 
     def __init__(self, data_dir, data_split, mini_res=4, traj_prop=1.0, unit_normalise=False, fashion=False):
@@ -209,7 +209,6 @@ class MNISTDataset(TimeSeriesDataset):
 
         ## Get all the data in one large batch (to apply the transform)
         dataset, labels = next(iter(torch.utils.data.DataLoader(data, batch_size=len(data), shuffle=False)))
-        # dataset, labels = next(iter(torch.utils.data.DataLoader(data, batch_size=128, shuffle=True)))
 
         t_eval = np.linspace(0., 1., self.num_steps)
         self.total_envs = dataset.shape[0]
@@ -228,7 +227,7 @@ class MNISTDataset(TimeSeriesDataset):
 
 class CIFARDataset(TimeSeriesDataset):
     """
-    For the MNIST dataset, where the time series is the pixels of the image, and the example of Trends dataset above
+    For the CIFAR-10 dataset
     """
 
     def __init__(self, data_dir, data_split, mini_res=4, traj_prop=1.0, unit_normalise=False):
@@ -256,9 +255,9 @@ class CIFARDataset(TimeSeriesDataset):
         dataset, labels = next(iter(torch.utils.data.DataLoader(data, batch_size=len(data), shuffle=False)))
         # dataset, labels = next(iter(torch.utils.data.DataLoader(data, batch_size=128, shuffle=True)))
 
-        ## Filter and return cats only: class 3
-        dataset = dataset[labels==3]
-        labels = labels[labels==3]
+        ## Filter and return cats only: class 3 (to make the task easier)
+        # dataset = dataset[labels==3]
+        # labels = labels[labels==3]
 
         t_eval = np.linspace(0., 1., self.num_steps)
         self.total_envs = dataset.shape[0]
@@ -270,22 +269,11 @@ class CIFARDataset(TimeSeriesDataset):
 
 
 
-
-
-
-
-import pandas as pd
-from typing import Tuple
-from PIL import Image
-import os
-
-## Set the seed for reproducibility
-torch.manual_seed(42)
-np.random.seed(42)
+####### SPECIAL CLASSES NOT INHERITING FROM THE BASE TIMESERIES CLASS #######
 
 class CelebADataset(torch.utils.data.Dataset):
     """
-    A celeb a dataloader for meta-learning.
+    For the CelebA dataset, adapted for time series from https://github.com/ddrous/self-mod
     """
     def __init__(self, 
                  data_path="./data/", 
@@ -408,135 +396,6 @@ class CelebADataset(torch.utils.data.Dataset):
 
 
 
-
-
-
-
-# if __name__ == "__main__":
-#     import matplotlib.pyplot as plt
-#     ## Reset numpy random seed
-#     np.random.seed(0)
-
-#     data_folder, batch_size = "data/", 128
-#     resolution = (16, 16)
-#     trainloader = NumpyLoader(CelebADataset(data_folder+"celeba/", data_split="train", num_shots=np.prod(resolution), resolution=resolution, order_pixels=True, unit_normalise=False), 
-#                               batch_size=batch_size, 
-#                               shuffle=True, 
-#                               num_workers=24)
-
-#     batch = next(iter(trainloader))
-#     (images, times), labels = batch
-#     print("Images shape:", images.shape)
-#     print("Labels shape:", labels.shape)
-
-#     print("Min and Max in the dataset:", np.min(images), np.max(images), flush=True)
-
-#     ## Plot a few samples, along with their labels as title in a 4x4 grid (chose them at random)
-#     fig, axs = plt.subplots(4, 4, figsize=(10, 10), sharex=True)
-#     colors = ['r', 'g', 'b', 'c', 'm', 'y']
-
-#     dataset = "celeba"
-#     data_size = 3
-#     mini_res_mnist = 4
-#     image_datasets = ["mnist", "mnist_fashion", "cifar", "celeba"]
-#     def get_width(dataset):
-#         if dataset in ["mnist", "mnist_fashion"]:
-#             return 28 // mini_res_mnist
-#         elif dataset=="cifar":
-#             return 32 // mini_res_mnist
-#         elif dataset=="celeba":
-#             return resolution[0]
-#         else:
-#             return 32
-
-#     width = get_width(dataset)
-#     res = (width, width, data_size)
-#     for i in range(4):
-#         for j in range(4):
-#             idx = np.random.randint(0, images.shape[0])
-#             # axs[i, j].imshow(images[idx].reshape(res), cmap='gray', vmin=-1, vmax=1)
-
-#             to_plot = (images[idx].reshape(res) + 1 ) / 2
-#             axs[i, j].imshow(to_plot, cmap='gray')
-
-#             axs[i, j].set_title(f"Class: {labels[idx]}", fontsize=12)
-#             axs[i, j].axis('off')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# class MovingMNISTDataset(torch.utils.data.Dataset):
-#     """
-#     MovingMNIST dataset, returning elements of shape (T, C, H, W)
-#     """
-
-#     def __init__(self, data_dir, data_split, mini_res=4, unit_normalise=False):
-#         self.nb_classes = 10
-#         self.num_steps = 19
-#         self.data_size = (1, 64//mini_res, 64//mini_res)
-#         self.mini_res = mini_res
-
-#         tf = transforms.Compose(
-#             [
-#                 transforms.Lambda(lambda x: (x.float() / 255.) * 2 - 1) if not unit_normalise else transforms.Lambda(lambda x: x),
-#                 transforms.Lambda(lambda x: x[:, :, ::mini_res, ::mini_res]) if mini_res>1 else transforms.Lambda(lambda x: x),
-#             ]
-#         )
-#         data = torchvision.datasets.MovingMNIST(
-#             data_dir, split=data_split, download=True, transform=tf, split_ratio=19 if data_split=="train" else 1,
-#         )
-
-#         ## Get all the data in one large batch (to apply the transform)
-#         self.dataset = next(iter(torch.utils.data.DataLoader(data, batch_size=len(data), shuffle=False)))
-#         self.labels = np.random.randint(0, 10, size=(self.dataset.shape[0],)) * np.nan
-
-#         self.t_eval = np.linspace(0., 1., self.num_steps)
-#         self.total_envs = self.dataset.shape[0]
-
-#     def __getitem__(self, idx):
-#         inputs = self.dataset[idx, ...]
-#         outputs = self.labels[idx]
-#         t_eval = self.t_eval
-
-#         return (inputs, t_eval), outputs
-
-#     def __len__(self):
-#         return self.total_envs
-
-
-
-
-
-
-
 class MovingMNISTDataset(torch.utils.data.Dataset):
     """
     MovingMNIST dataset, returning elements of shape (T, C, H, W)
@@ -572,6 +431,137 @@ class MovingMNISTDataset(torch.utils.data.Dataset):
     def __len__(self):
         return self.total_envs
 
+########################################################################
+
+
+
+
+
+
+
+
+
+def numpy_collate(batch):
+  return jtree.map(np.asarray, data.default_collate(batch))
+
+class NumpyLoader(data.DataLoader):
+  def __init__(self, dataset, batch_size=1,
+                shuffle=False, sampler=None,
+                batch_sampler=None, num_workers=0,
+                pin_memory=False, drop_last=False,
+                timeout=0, worker_init_fn=None):
+    super(self.__class__, self).__init__(dataset,
+        batch_size=batch_size,
+        shuffle=shuffle,
+        sampler=sampler,
+        batch_sampler=batch_sampler,
+        num_workers=num_workers,
+        collate_fn=numpy_collate,
+        pin_memory=pin_memory,
+        drop_last=drop_last,
+        timeout=timeout,
+        worker_init_fn=worker_init_fn)
+    
+    self.num_batches = np.ceil(len(dataset) / batch_size).astype(int)
+
+
+
+def make_dataloaders(config):
+    """
+    Create the dataset and dataloaders for the given dataset
+    """
+
+    ## Get the parameters
+    dataset = config["dataset"]
+    batch_size = config["batch_size"]
+
+    if dataset in ["mnist", "mnist_fashion"]:
+        # ### MNIST Classification (From Sacha Rush's Annotated S4)
+        print(" #### MNIST Dataset ####")
+        fashion = dataset=="mnist_fashion"
+        downsample_factor = config["downsample_factor"]
+
+        trainloader = NumpyLoader(MNISTDataset(data_folder, data_split="train", mini_res=downsample_factor, traj_prop=1.0, unit_normalise=False, fashion=fashion), 
+                                batch_size=batch_size, 
+                                shuffle=True,
+                                num_workers=24)
+        testloader = NumpyLoader(MNISTDataset(data_folder, data_split="test", mini_res=downsample_factor, traj_prop=1.0, unit_normalise=False, fashion=fashion),
+                                    batch_size=batch_size,
+                                    shuffle=True, 
+                                    num_workers=24)
+        nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
+        min_res = 28
+
+    elif dataset=="cifar":
+        print(" #### CIFAR Dataset ####")
+        downsample_factor = config["downsample_factor"]
+
+        trainloader = NumpyLoader(CIFARDataset(data_folder, data_split="train", mini_res=downsample_factor, traj_prop=1.0, unit_normalise=False), 
+                                batch_size=batch_size, 
+                                shuffle=True, 
+                                num_workers=24)
+        testloader = NumpyLoader(CIFARDataset(data_folder, data_split="test", mini_res=downsample_factor, traj_prop=1.0, unit_normalise=False),
+                                    batch_size=batch_size, 
+                                    shuffle=True, 
+                                    num_workers=24)
+        nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
+        min_res = 32
+
+    elif dataset=="celeba":
+        print(" #### CelebA Dataset ####")
+        resolution = config["general"]["resolution"]
+
+        trainloader = NumpyLoader(CelebADataset(data_folder+"celeba/", data_split="train", num_shots=np.prod(resolution), resolution=resolution, order_pixels=True, unit_normalise=False), 
+                                batch_size=batch_size, 
+                                shuffle=True, 
+                                num_workers=24)
+        testloader = NumpyLoader(CelebADataset(data_folder+"celeba/", data_split="test", num_shots=np.prod(resolution), resolution=resolution, order_pixels=True, unit_normalise=False),
+                                    batch_size=batch_size, 
+                                    shuffle=True, 
+                                    num_workers=24)
+        nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
+        min_res = 32
+
+    elif dataset in ["lorentz63"]:                  ## TODO: Fix this
+        print(" #### Dynamics Dataset ####")
+        data_url = "dynamics/lorentz-63/full.pt"
+        traj_len = 500
+    
+        trainloader = NumpyLoader(DynamicsDataset(data_folder+data_url, traj_length=traj_len), 
+                                batch_size=batch_size, 
+                                shuffle=True, 
+                                num_workers=24)
+        testloader = NumpyLoader(DynamicsDataset(data_folder+data_url, traj_length=traj_len),     ## 5500
+                                    batch_size=batch_size, 
+                                    shuffle=True, 
+                                    num_workers=24)
+        nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
+        print("Training sequence length:", seq_length)
+        min_res = None
+
+    else:
+        print(" #### Trends (Synthetic Control) Dataset ####")
+        ## ======= below to run the easy Trends dataset instead!
+        trainloader = NumpyLoader(TrendsDataset(data_folder+"trends/", skip_steps=1, traj_prop=1.0), 
+                                batch_size=batch_size if batch_size<600 else 600, 
+                                shuffle=True)
+        testloader = NumpyLoader(TrendsDataset(data_folder+"trends/", skip_steps=1, traj_prop=1.0), 
+                                batch_size=batch_size if batch_size<600 else 600,
+                                shuffle=True)
+        nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
+
+        min_res = None
+
+    return trainloader, testloader, (nb_classes, seq_length, data_size, min_res)
+
+
+
+
+
+
+
+
+
 
 
 
@@ -580,7 +570,7 @@ if __name__ == "__main__":
     ### Test the MovingMNIST dataset
     import matplotlib.pyplot as plt
     ## Reset numpy random seed
-    np.random.seed(0)
+    # np.random.seed(0)
 
     data_folder, batch_size = "data/", 1
     trainloader = NumpyLoader(MovingMNISTDataset(data_folder, data_split="train", mini_res=1, unit_normalise=False), 
@@ -592,12 +582,12 @@ if __name__ == "__main__":
     (images, times), labels = batch
     print("Images shape:", images.shape)
 
-    print("Min and Max in the dataset:", np.min(images), np.max(images), flush=True)
+    print("Min and Max in the moving images:", np.min(images), np.max(images), flush=True)
 
     ## Plot the single video in the batch
     video = (images[0] + 1)/2       ## Shape: (T, C, H, W)
     # video = (((images[0] + 1)/2) * 255).astype(int)       ## Shape: (T, C, H, W)
-    print("Min an Max in the video:", np.min(video), np.max(video))
+    print("Min an Max in the rescaled images:", np.min(video), np.max(video))
     T, C, H, W = video.shape
     nb_frames = video.shape[0]
     fig, axs = plt.subplots(1, T, figsize=(4*T, 4), sharex=True)
@@ -607,8 +597,5 @@ if __name__ == "__main__":
 
     plt.show()
     print("Labels:", labels)
-
-
-
 
 
