@@ -4,14 +4,15 @@
 
 #%%
 
-%load_ext autoreload
-%autoreload 2
+# %load_ext autoreload
+# %autoreload 2
 
 from utils import *
 from loaders import *
 from models import *
 
 import jax
+print("\n+=+=+=+=+ Training Weight Space Model +=+=+=+=+")
 print("Available devices:", jax.devices())
 
 from jax import config
@@ -26,6 +27,7 @@ import equinox as eqx
 import torch
 import optax
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sb
 sb.set_theme(context='poster', 
@@ -34,9 +36,10 @@ sb.set_theme(context='poster',
              font_scale=1, 
              color_codes=True, 
              rc={"lines.linewidth": 1})
+mpl.rcParams['savefig.facecolor'] = 'w'
 plt.rcParams['font.family'] = 'serif'
 plt.rcParams['mathtext.fontset'] = 'dejavuserif'
-plt.rcParams['savefig.bbox'] = 'tight' #remove extra white space.
+plt.rcParams['savefig.bbox'] = 'tight'
 
 import yaml
 import argparse
@@ -77,7 +80,6 @@ else:
         args = argparse.Namespace(config_file=sys.argv[1])
         print(f"Using command line {sys.argv[1]} as config file")
     else:
-        ## Complain about the usage and exit
         print("Usage: python main.py <config_file>")
         sys.exit(1)
 
@@ -111,7 +113,7 @@ else:
     data_folder = f"../../{data_path}"
 
 print("Using run folder:", run_folder)
-checkpoints_folder, logger = setup_run_folder(run_folder, training=train)
+logger, checkpoints_folder, plots_folder, artefacts_folder = setup_run_folder(run_folder, training=train)
 
 ## Print the config file using the logger and pprint
 logger.info(f"Config file: {args.config_file}")
@@ -177,7 +179,7 @@ for i in range(4):
 
 plt.suptitle(f"{dataset.upper()} Training Samples", fontsize=20)
 plt.draw();
-plt.savefig(run_folder+"samples_train.png", dpi=300, bbox_inches='tight')
+plt.savefig(plots_folder+"samples_train.png", dpi=300, bbox_inches='tight')
 
 
 # %% Define the model and loss function
@@ -259,11 +261,11 @@ if train:
     opt_state = opt.init(eqx.filter(model, eqx.is_array))
 
     ## If a mode file exists, load it and use it
-    if os.path.exists(run_folder+"model.eqx"):
-        model = eqx.tree_deserialise_leaves(run_folder+"model.eqx", model)
+    if os.path.exists(artefacts_folder+"model.eqx"):
+        model = eqx.tree_deserialise_leaves(artefacts_folder+"model.eqx", model)
         logger.info("Model found in run folder. Finetuning from these.")
         try:
-            with open(run_folder+"opt_state.pkl", 'rb') as f:
+            with open(artefacts_folder+"opt_state.pkl", 'rb') as f:
                 opt_state = pickle.load(f)
         except:
             logger.info("No optimizer state for finetuning. Starting from scratch.")
@@ -271,7 +273,7 @@ if train:
         logger.info("No model found in run folder. Training from scratch.")
 
     losses = []
-    mean_losses_per_epoch = []
+    med_losses_per_epoch = []
     lr_scales = []
 
     print_every = config['training']['print_every']
@@ -299,7 +301,7 @@ if train:
             lr_scales.append(optax.tree_utils.tree_get(opt_state, "scale"))
 
         mean_epoch, median_epoch = np.mean(losses_epoch), np.median(losses_epoch)
-        mean_losses_per_epoch.append(mean_epoch)
+        med_losses_per_epoch.append(median_epoch)
 
         if epoch%print_every==0 or epoch<=3 or epoch==nb_epochs-1:
             logger.info(
@@ -308,13 +310,13 @@ if train:
 
         if epoch%checkpoint_every==0 or epoch==nb_epochs-1:
             eqx.tree_serialise_leaves(checkpoints_folder+f"model_{epoch}.eqx", model)
-            np.save(run_folder+"losses.npy", np.array(losses))
-            np.save(run_folder+"lr_scales.npy", np.array(lr_scales))
+            np.save(artefacts_folder+"losses.npy", np.array(losses))
+            np.save(artefacts_folder+"lr_scales.npy", np.array(lr_scales))
 
             ## Only save the best model with the lowest mean loss
-            if epoch>0 and mean_epoch<min(mean_losses_per_epoch[:-1]):
-                eqx.tree_serialise_leaves(run_folder+"model.eqx", model)
-                with open(run_folder+"opt_state.pkl", 'wb') as f:
+            if epoch>0 and median_epoch<=min(med_losses_per_epoch[:-1]):
+                eqx.tree_serialise_leaves(artefacts_folder+"model.eqx", model)
+                with open(artefacts_folder+"opt_state.pkl", 'wb') as f:
                     pickle.dump(opt_state, f)
                 logger.info("Best model saved ...")
 
@@ -322,11 +324,11 @@ if train:
     logger.info("\nTraining complete. Total time: %d hours %d mins %d secs" %seconds_to_hours(wall_time))
 
 else:
-    model = eqx.tree_deserialise_leaves(run_folder+"model.eqx", model)
+    model = eqx.tree_deserialise_leaves(artefacts_folder+"model.eqx", model)
 
     try:
-        losses = np.load(run_folder+"losses.npy")
-        lr_scales = np.load(run_folder+"lr_scales.npy")
+        losses = np.load(artefacts_folder+"losses.npy")
+        lr_scales = np.load(artefacts_folder+"lr_scales.npy")
     except:
         losses = []
 
@@ -356,7 +358,7 @@ if not os.path.exists(run_folder+"losses.npy"):
         logger.info("No losses found in the nohup.log file")
 
 
-fig, (ax, ax2) = plt.subplots(1, 2, figsize=(15, 4))
+fig, (ax, ax2) = plt.subplots(1, 2, figsize=(16, 5))
 
 clean_losses = np.array(losses)
 epochs = np.arange(len(losses))
@@ -368,16 +370,16 @@ clean_losses = np.where(clean_losses<np.percentile(clean_losses, 96), clean_loss
 ax2 = sbplot(epochs, clean_losses, title="Loss History (96th Percentile)", x_label='Train Steps', y_label=loss_name, ax=ax2, y_scale="linear" if use_nll_loss else "log");
 
 plt.draw();
-plt.savefig(run_folder+"loss.png", dpi=300, bbox_inches='tight')
+plt.savefig(plots_folder+"loss.png", dpi=300, bbox_inches='tight')
 
-if os.path.exists(run_folder+"lr_scales.npy"):
-    fig, ax = plt.subplots(1, 1, figsize=(10, 5))
+if os.path.exists(artefacts_folder+"lr_scales.npy"):
+    fig, ax = plt.subplots(1, 1, figsize=(8, 4))
 
-    ax = sbplot(lr_scales, "g-", y_label="LR Scales", x_label='Train Steps', ax=ax, y_scale="log");
+    ax = sbplot(lr_scales, "g-", title="LR Scales", x_label='Train Steps', ax=ax, y_scale="log");
 
     # plt.legend()
     plt.draw();
-    plt.savefig(run_folder+"lr_scales.png", dpi=300, bbox_inches='tight')
+    plt.savefig(plots_folder+"lr_scales.png", dpi=300, bbox_inches='tight')
 
 
 
@@ -399,7 +401,7 @@ axs[1].hist(untrained_model.thetas[0], bins=100, alpha=0.5, label="Before Traini
 axs[1].set_title(r"Histogram of $\theta_0$ values")
 plt.legend();
 plt.draw();
-plt.savefig(run_folder+"A_theta_histograms.png", dpi=300, bbox_inches='tight')
+plt.savefig(plots_folder+"A_theta_histograms.png", dpi=300, bbox_inches='tight')
 
 ## PLot all values of B in a lineplot (all dimensions)
 if not isinstance(model.Bs[0], eqx.nn.Linear):
@@ -408,7 +410,7 @@ if not isinstance(model.Bs[0], eqx.nn.Linear):
     ax.set_title("Values of B")
     ax.set_xlabel("Dimension")
     plt.draw();
-    plt.savefig(run_folder+"B_values.png", dpi=300, bbox_inches='tight')
+    plt.savefig(plots_folder+"B_values.png", dpi=300, bbox_inches='tight')
 
 ## Print the untrained and trained matrices A as imshows with same range
 fig, axs = plt.subplots(1, 2, figsize=(20, 10))
@@ -423,7 +425,7 @@ img = axs[1].imshow(model.As[0], cmap='viridis', vmin=min_val, vmax=max_val)
 axs[1].set_title("Trained A")
 plt.colorbar(img, ax=axs[1], shrink=0.7)
 plt.draw();
-plt.savefig(run_folder+"A_matrices.png", dpi=300, bbox_inches='tight')
+plt.savefig(plots_folder+"A_matrices.png", dpi=300, bbox_inches='tight')
 
 
 
@@ -517,15 +519,12 @@ for i in range(4):
         axs[i, nb_cols*j+1].axis('off')
 
         if use_nll_loss:
+            logger.info(f"Min/Max Uncertainty: {np.min(xs_uncert):.3f}, {np.max(xs_uncert):.3f}")
             if dataset in image_datasets:
                 to_plot = xs_uncert[i*4+j].reshape(res)
-                logger.info(f"Min and Max of the uncertainty: {np.min(to_plot):.3f}, {np.max(to_plot):.3f}")
-                if dataset=="celeba":
-                    to_plot = (to_plot + 1) / 2
-                    axs[i, nb_cols*j+2].imshow(to_plot, cmap='gray')
+                axs[i, nb_cols*j+2].imshow(to_plot, cmap='gray')
             elif dataset in dynamics_datasets:
                 to_plot = xs_uncert[i*4+j]
-                logger.info(f"Min and Max of the uncertainty: {np.min(to_plot):.3f}, {np.max(to_plot):.3f}")
                 axs[i, nb_cols*j+2].plot(to_plot[:, dim0], to_plot[:, dim1], color=colors[labels[i*4+j]%len(colors)])
 
             if i==0:
@@ -534,4 +533,4 @@ for i in range(4):
 
 plt.suptitle(f"Reconstruction using {inference_start} initial pixels", fontsize=65)
 plt.draw();
-plt.savefig(run_folder+"samples_generated.png", dpi=300, bbox_inches='tight')
+plt.savefig(plots_folder+"samples_generated.png", dpi=300, bbox_inches='tight')

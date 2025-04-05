@@ -23,11 +23,11 @@ model:
   input_prev_data: False
   model_type: "wsm-rnn"
   nb_rnn_layers: 1
-  weights_lim: null
+  weights_lim: 5.0e-1
   apply_tanh_uncertainty: True
   time_as_channel: False
   forcing_prob: 0.15
-  noisy_theta_init: False
+  noise_theta_init: null
 
 # Optimizer hyperparameters
 optimizer:
@@ -43,10 +43,10 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 150
-  batch_size: 1200
-  print_every: 50
-  checkpoint_every: 50
+  nb_epochs: 200
+  batch_size: 824
+  print_every: 10
+  checkpoint_every: 10
   nb_recons_loss_steps: 400
   use_nll_loss: True
-  inference_start: 15
+  inference_start: 300

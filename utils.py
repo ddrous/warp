@@ -65,11 +65,11 @@ def make_run_folder(parent_path='./runs/'):
 
 
 
-def setup_logger(folder_path, training=True):
+def setup_logger(folder_path, training):
     """Set up a logger for training progress."""
     # Create logfile
-    fname = "training" if training else "testing"
-    log_filename = os.path.join(folder_path, f"{fname}.log")
+    fname = "training.log" if training else "testing.log"
+    log_filename = os.path.join(folder_path, fname)
 
     # Configure logger
     logger = logging.getLogger('training')
@@ -117,9 +117,21 @@ def setup_run_folder(folder_path, training=True):
         os.mkdir(checkpoints_folder)
         print(" Created a checkpoints folder at:", checkpoints_folder)
 
-    logger = setup_logger(folder_path)
+    ## Create a plot folder
+    plots_folder = folder_path+"plots/"
+    if not os.path.exists(plots_folder):
+        os.mkdir(plots_folder)
+        print(" Created a plots folder at:", plots_folder)
 
-    return checkpoints_folder, logger
+    ## Create a folder for the artefacts
+    artefacts_folder = folder_path+"artefacts/"
+    if not os.path.exists(artefacts_folder):
+        os.mkdir(artefacts_folder)
+        print(" Created a artefacts folder at:", artefacts_folder)
+
+    logger = setup_logger(artefacts_folder, training)
+
+    return logger, checkpoints_folder, plots_folder, artefacts_folder
 
 
 

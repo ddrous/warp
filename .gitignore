@@ -30,6 +30,7 @@ quadqs_statistics.json
 ## Don't save equinox models
 *.eqx
 *.log
+*.out
 
 ## Cprofile
 examples/runs/cprofile/*

@@ -59,7 +59,7 @@ class WSM_RNN(eqx.Module):
     time_as_channel: bool
     forcing_prob: float
     weights_lim: float
-    noisy_theta_init: float
+    noise_theta_init: float
 
     def __init__(self, 
                  data_size, 
@@ -72,7 +72,7 @@ class WSM_RNN(eqx.Module):
                  time_as_channel=True,
                  forcing_prob=1.0,
                  weights_lim=None,
-                 noisy_theta_init=None,             ## Noise to be added to the initial theta 
+                 noise_theta_init=None,             ## Noise to be added to the initial theta 
                  nb_wsm_layers=1,                  ## TODO, to be implemented as in Fig 2. of https://arxiv.org/abs/2202.07022
                  key=None):
 
@@ -115,7 +115,7 @@ class WSM_RNN(eqx.Module):
         self.time_as_channel = time_as_channel
         self.forcing_prob = forcing_prob
         self.weights_lim = weights_lim
-        self.noisy_theta_init = noisy_theta_init
+        self.noise_theta_init = noise_theta_init
 
     def __call__(self, xs, ts, k, inference_start=None):
         """ Forward pass of the model on batch of sequences
@@ -165,8 +165,8 @@ class WSM_RNN(eqx.Module):
 
             ## Call the scan function
             theta_init = self.thetas[0]
-            if self.noisy_theta_init is not None:
-                theta_init += jax.random.normal(k_, theta_init.shape)*self.noisy_theta_init
+            if self.noise_theta_init is not None:
+                theta_init += jax.random.normal(k_, theta_init.shape)*self.noise_theta_init
 
             keys = jax.random.split(k_, xs_.shape[0])
 
@@ -198,7 +198,7 @@ def make_model(key, data_size, config):
             "time_as_channel": config['model']['time_as_channel'],
             "forcing_prob": config['model']['forcing_prob'],
             "weights_lim": config['model']['weights_lim'],
-            "noisy_theta_init": config['model']['noisy_theta_init']
+            "noise_theta_init": config['model']['noise_theta_init']
         }
 
         model = WSM_RNN(key=key, **model_args)
@@ -246,7 +246,7 @@ if __name__ == "__main__":
         "time_as_channel": True,
         "forcing_prob": 1.0,
         "weights_lim": 0.1,
-        "noisy_theta_init": None
+        "noise_theta_init": None
     }
 
     model = make_model(key, "wsm-rnn", model_args)
