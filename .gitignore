@@ -29,14 +29,15 @@ quadqs_statistics.json
 
 ## Don't save equinox models
 *.eqx
-*.log
+# *.log
 *.out
+*.pkl
 
 ## Cprofile
 examples/runs/cprofile/*
 
 ## Ignore all "checkpoint" folders
-**/checkpoint/*
+**/checkpoints/*
 
 ## Data, Runs
 runs/*
@@ -45,6 +46,4 @@ data/*
 !data/README.md
 !runs/README.md
 
-!runs/250303-164950-PetaGenius*
-!runs/250303-190002-SuperCelebA*
-
+!runs/250406-170108-PetaGenius*

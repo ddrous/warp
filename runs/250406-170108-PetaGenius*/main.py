@@ -191,6 +191,14 @@ untrained_model = model
 nb_recons_loss_steps = config['training']['nb_recons_loss_steps']
 use_nll_loss = config['training']['use_nll_loss']
 
+
+def nll_loss(X_hat, X_logcov, X_true):
+    # md = 0.5 * jnp.sum((X_hat - X_true)**2 / jnp.exp(X_logcov), axis=-1)
+    md = 0.5 * jnp.sum((X_hat - X_true)**2 / jnp.exp(X_logcov), axis=-1)
+    # jax.debug.print("First term loss is finite {}", jnp.isfinite(md).all())
+    logdet = 0.5 * X_logcov.sum(axis=-1)
+    return logdet + md
+
 def loss_fn(model, batch, key):
     """ Loss function for the model. A batch contains: (Xs, Ts), Ys
     Xs: (batch, time, data_size)
@@ -218,6 +226,7 @@ def loss_fn(model, batch, key):
         means = X_recons_[:, :, :data_size]
         stds = X_recons_[:, :, data_size:]
         loss_r = jnp.log(stds) + 0.5*((X_true_ - means)/stds)**2
+        # loss_r = nll_loss(means, stds, X_true_)
     else:
         loss_r = optax.l2_loss(X_recons_, X_true_)
 
@@ -342,6 +351,12 @@ else:
 
 
 # %% Visualise the training losses
+
+if hasattr(model, "dtanh"):
+    logger.info(f"Initial model dynamic tanh params: {untrained_model.dtanh}")
+    logger.info(f"Final model dynamic tanh params: {model.dtanh}")
+
+
 
 if not os.path.exists(run_folder+"losses.npy"):
     try:

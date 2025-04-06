@@ -34,7 +34,7 @@ class RootMLP(eqx.Module):
         self.predict_uncertainty = predict_uncertainty
         self.apply_tanh_uncertainty = apply_tanh_uncertainty
 
-    def __call__(self, tx, std_lb=None):
+    def __call__(self, tx, dtanh=None):
         out = self.network(tx)
 
         if not self.predict_uncertainty:
@@ -53,11 +53,7 @@ class RootMLP(eqx.Module):
             #     a, b, alpha, beta = dtanh
             #     std = alpha*jnp.tanh((std - b) / a) + beta
 
-
-            std = jax.nn.softplus(std)
-            if std_lb is not None:
-                std = jnp.clip(std, std_lb, None)
-
+            std = jnp.clip(jax.nn.softplus(std), 5e-1, None)  ## TODO: check if this is the right way to do it
             return jnp.concatenate([mean, std], axis=-1)
 
 
@@ -75,7 +71,7 @@ class WSM_RNN(eqx.Module):
     weights_lim: float
     noise_theta_init: float
 
-    std_lower_bound: float
+    dtanh: jnp.ndarray
 
     def __init__(self, 
                  data_size, 
@@ -87,7 +83,6 @@ class WSM_RNN(eqx.Module):
                  apply_tanh_uncertainty=True,
                  time_as_channel=True,
                  forcing_prob=1.0,
-                 std_lower_bound=None,
                  weights_lim=None,
                  noise_theta_init=None,             ## Noise to be added to the initial theta 
                  nb_wsm_layers=1,                  ## TODO, to be implemented as in Fig 2. of https://arxiv.org/abs/2202.07022
@@ -134,7 +129,8 @@ class WSM_RNN(eqx.Module):
         self.weights_lim = weights_lim
         self.noise_theta_init = noise_theta_init
 
-        self.std_lower_bound = std_lower_bound
+        # self.dtanh = jnp.array([1., 0.2, 0.5, 0.8])
+        self.dtanh = jnp.array([0.99, 0.19, 0.53, 0.77])
 
     def __call__(self, xs, ts, k, inference_start=None):
         """ Forward pass of the model on batch of sequences
@@ -176,7 +172,7 @@ class WSM_RNN(eqx.Module):
                 root_in = t_curr+delta_t
                 if self.input_prev_data:
                     root_in = jnp.concatenate([root_in, x_prev], axis=-1)
-                x_next = root_fun(root_in, self.std_lower_bound)                                  ## Evaluated at the next time step
+                x_next = root_fun(root_in, self.dtanh)                                  ## Evaluated at the next time step
 
                 x_next_mean = x_next[:x_true.shape[0]]
 
@@ -217,7 +213,6 @@ def make_model(key, data_size, config):
             "apply_tanh_uncertainty": config['model']['apply_tanh_uncertainty'],
             "time_as_channel": config['model']['time_as_channel'],
             "forcing_prob": config['model']['forcing_prob'],
-            "std_lower_bound": config['model']['std_lower_bound'],
             "weights_lim": config['model']['weights_lim'],
             "noise_theta_init": config['model']['noise_theta_init']
         }

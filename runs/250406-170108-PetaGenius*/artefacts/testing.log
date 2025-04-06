@@ -1,0 +1,3105 @@
+2025-04-06 17:06:49,643 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:06:49,644 - INFO - Config file: config.yaml
+2025-04-06 17:06:49,644 - INFO - ==== Config file's contents ====
+2025-04-06 17:06:49,644 - INFO - general:
+2025-04-06 17:06:49,645 - INFO -   seed: 2024
+2025-04-06 17:06:49,645 - INFO -   train: False
+2025-04-06 17:06:49,645 - INFO -   dataset: mnist
+2025-04-06 17:06:49,646 - INFO -   data_path: ./data/
+2025-04-06 17:06:49,646 - INFO -   save_path: None
+2025-04-06 17:06:49,646 - INFO - data:
+2025-04-06 17:06:49,646 - INFO -   downsample_factor: 1
+2025-04-06 17:06:49,646 - INFO -   resolution: [32, 32]
+2025-04-06 17:06:49,647 - INFO -   traj_length: 1000
+2025-04-06 17:06:49,647 - INFO - model:
+2025-04-06 17:06:49,647 - INFO -   mlp_width_size: 24
+2025-04-06 17:06:49,647 - INFO -   mlp_depth: 3
+2025-04-06 17:06:49,647 - INFO -   activation: relu
+2025-04-06 17:06:49,648 - INFO -   input_prev_data: False
+2025-04-06 17:06:49,648 - INFO -   model_type: wsm-rnn
+2025-04-06 17:06:49,649 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:06:49,649 - INFO -   weights_lim: 0.5
+2025-04-06 17:06:49,649 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:06:49,649 - INFO -   time_as_channel: False
+2025-04-06 17:06:49,649 - INFO -   forcing_prob: 0.15
+2025-04-06 17:06:49,649 - INFO -   noise_theta_init: None
+2025-04-06 17:06:49,650 - INFO - optimizer:
+2025-04-06 17:06:49,650 - INFO -   init_lr: 0.0001
+2025-04-06 17:06:49,650 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:06:49,650 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:06:49,650 - INFO - training:
+2025-04-06 17:06:49,650 - INFO -   nb_epochs: 500
+2025-04-06 17:06:49,651 - INFO -   batch_size: 640
+2025-04-06 17:06:49,651 - INFO -   print_every: 10
+2025-04-06 17:06:49,651 - INFO -   checkpoint_every: 10
+2025-04-06 17:06:49,651 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:06:49,651 - INFO -   use_nll_loss: True
+2025-04-06 17:06:49,652 - INFO -   inference_start: 300
+2025-04-06 17:06:52,603 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:06:52,604 - INFO - Labels shape: (640,)
+2025-04-06 17:06:52,604 - INFO - Seq length: 784
+2025-04-06 17:06:52,604 - INFO - Data size: 1
+2025-04-06 17:06:52,604 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:06:52,605 - INFO - Number of batches:
+2025-04-06 17:06:52,605 - INFO -   - Train: 94
+2025-04-06 17:06:52,605 - INFO -   - Test: 16
+2025-04-06 17:06:54,324 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:06:54,374 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:06:54,375 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:06:54,375 - INFO - No losses found in the nohup.log file
+2025-04-06 17:07:01,751 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:07:01,752 - INFO -     - Mean : 0.366053
+2025-04-06 17:07:01,752 - INFO -     - Median : 0.365108
+2025-04-06 17:07:01,753 - INFO -     - Min : 0.358655
+2025-04-06 17:07:02,190 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,203 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,217 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,230 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,243 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,257 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,270 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,283 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,293 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,307 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,322 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,335 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,349 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,362 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,376 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:07:02,389 - INFO - Min/Max Uncertainty: 0.500, 2.262
+2025-04-06 17:15:00,442 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:15:00,442 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:15:00,442 - INFO - Config file: config.yaml
+2025-04-06 17:15:00,442 - INFO - Config file: config.yaml
+2025-04-06 17:15:00,443 - INFO - ==== Config file's contents ====
+2025-04-06 17:15:00,443 - INFO - ==== Config file's contents ====
+2025-04-06 17:15:00,443 - INFO - general:
+2025-04-06 17:15:00,443 - INFO - general:
+2025-04-06 17:15:00,443 - INFO -   seed: 2024
+2025-04-06 17:15:00,443 - INFO -   seed: 2024
+2025-04-06 17:15:00,444 - INFO -   train: False
+2025-04-06 17:15:00,444 - INFO -   train: False
+2025-04-06 17:15:00,444 - INFO -   dataset: mnist
+2025-04-06 17:15:00,444 - INFO -   dataset: mnist
+2025-04-06 17:15:00,444 - INFO -   data_path: ./data/
+2025-04-06 17:15:00,444 - INFO -   data_path: ./data/
+2025-04-06 17:15:00,444 - INFO -   save_path: None
+2025-04-06 17:15:00,444 - INFO -   save_path: None
+2025-04-06 17:15:00,444 - INFO - data:
+2025-04-06 17:15:00,444 - INFO - data:
+2025-04-06 17:15:00,445 - INFO -   downsample_factor: 1
+2025-04-06 17:15:00,445 - INFO -   downsample_factor: 1
+2025-04-06 17:15:00,446 - INFO -   resolution: [32, 32]
+2025-04-06 17:15:00,446 - INFO -   resolution: [32, 32]
+2025-04-06 17:15:00,446 - INFO -   traj_length: 1000
+2025-04-06 17:15:00,446 - INFO -   traj_length: 1000
+2025-04-06 17:15:00,446 - INFO - model:
+2025-04-06 17:15:00,446 - INFO - model:
+2025-04-06 17:15:00,446 - INFO -   mlp_width_size: 24
+2025-04-06 17:15:00,446 - INFO -   mlp_width_size: 24
+2025-04-06 17:15:00,447 - INFO -   mlp_depth: 3
+2025-04-06 17:15:00,447 - INFO -   mlp_depth: 3
+2025-04-06 17:15:00,447 - INFO -   activation: relu
+2025-04-06 17:15:00,447 - INFO -   activation: relu
+2025-04-06 17:15:00,447 - INFO -   input_prev_data: False
+2025-04-06 17:15:00,447 - INFO -   input_prev_data: False
+2025-04-06 17:15:00,447 - INFO -   model_type: wsm-rnn
+2025-04-06 17:15:00,447 - INFO -   model_type: wsm-rnn
+2025-04-06 17:15:00,447 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:15:00,447 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:15:00,448 - INFO -   weights_lim: 0.5
+2025-04-06 17:15:00,448 - INFO -   weights_lim: 0.5
+2025-04-06 17:15:00,448 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:15:00,448 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:15:00,448 - INFO -   time_as_channel: False
+2025-04-06 17:15:00,448 - INFO -   time_as_channel: False
+2025-04-06 17:15:00,449 - INFO -   forcing_prob: 0.15
+2025-04-06 17:15:00,449 - INFO -   forcing_prob: 0.15
+2025-04-06 17:15:00,449 - INFO -   noise_theta_init: None
+2025-04-06 17:15:00,449 - INFO -   noise_theta_init: None
+2025-04-06 17:15:00,449 - INFO - optimizer:
+2025-04-06 17:15:00,449 - INFO - optimizer:
+2025-04-06 17:15:00,450 - INFO -   init_lr: 0.0001
+2025-04-06 17:15:00,450 - INFO -   init_lr: 0.0001
+2025-04-06 17:15:00,450 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:15:00,450 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:15:00,450 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:15:00,450 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:15:00,450 - INFO - training:
+2025-04-06 17:15:00,450 - INFO - training:
+2025-04-06 17:15:00,451 - INFO -   nb_epochs: 500
+2025-04-06 17:15:00,451 - INFO -   nb_epochs: 500
+2025-04-06 17:15:00,451 - INFO -   batch_size: 640
+2025-04-06 17:15:00,451 - INFO -   batch_size: 640
+2025-04-06 17:15:00,451 - INFO -   print_every: 10
+2025-04-06 17:15:00,451 - INFO -   print_every: 10
+2025-04-06 17:15:00,451 - INFO -   checkpoint_every: 10
+2025-04-06 17:15:00,451 - INFO -   checkpoint_every: 10
+2025-04-06 17:15:00,451 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:15:00,451 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:15:00,452 - INFO -   use_nll_loss: True
+2025-04-06 17:15:00,452 - INFO -   use_nll_loss: True
+2025-04-06 17:15:00,452 - INFO -   inference_start: 300
+2025-04-06 17:15:00,452 - INFO -   inference_start: 300
+2025-04-06 17:15:03,422 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:15:03,422 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:15:03,423 - INFO - Labels shape: (640,)
+2025-04-06 17:15:03,423 - INFO - Labels shape: (640,)
+2025-04-06 17:15:03,424 - INFO - Seq length: 784
+2025-04-06 17:15:03,424 - INFO - Seq length: 784
+2025-04-06 17:15:03,424 - INFO - Data size: 1
+2025-04-06 17:15:03,424 - INFO - Data size: 1
+2025-04-06 17:15:03,425 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:15:03,425 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:15:03,425 - INFO - Number of batches:
+2025-04-06 17:15:03,425 - INFO - Number of batches:
+2025-04-06 17:15:03,425 - INFO -   - Train: 94
+2025-04-06 17:15:03,425 - INFO -   - Train: 94
+2025-04-06 17:15:03,426 - INFO -   - Test: 16
+2025-04-06 17:15:03,426 - INFO -   - Test: 16
+2025-04-06 17:15:04,391 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:15:04,391 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:15:04,403 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:15:04,403 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:15:04,404 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:15:04,404 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:15:04,404 - INFO - No losses found in the nohup.log file
+2025-04-06 17:15:04,404 - INFO - No losses found in the nohup.log file
+2025-04-06 17:15:10,991 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:15:10,991 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:15:10,992 - INFO -     - Mean : 0.223217
+2025-04-06 17:15:10,992 - INFO -     - Mean : 0.223217
+2025-04-06 17:15:10,992 - INFO -     - Median : 0.223474
+2025-04-06 17:15:10,992 - INFO -     - Median : 0.223474
+2025-04-06 17:15:10,993 - INFO -     - Min : 0.220134
+2025-04-06 17:15:10,993 - INFO -     - Min : 0.220134
+2025-04-06 17:15:11,283 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,283 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,296 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,296 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,314 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,314 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,333 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,333 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,349 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,349 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,362 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,362 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,376 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,376 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,390 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,390 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,403 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,403 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,416 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,416 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,430 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,430 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,443 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,443 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,456 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,456 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,470 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,470 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,483 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,483 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,496 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:15:11,496 - INFO - Min/Max Uncertainty: 0.500, 1.482
+2025-04-06 17:23:31,924 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:23:31,924 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:23:31,924 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:23:31,925 - INFO - Config file: config.yaml
+2025-04-06 17:23:31,925 - INFO - Config file: config.yaml
+2025-04-06 17:23:31,925 - INFO - Config file: config.yaml
+2025-04-06 17:23:31,926 - INFO - ==== Config file's contents ====
+2025-04-06 17:23:31,926 - INFO - ==== Config file's contents ====
+2025-04-06 17:23:31,926 - INFO - ==== Config file's contents ====
+2025-04-06 17:23:31,927 - INFO - general:
+2025-04-06 17:23:31,927 - INFO - general:
+2025-04-06 17:23:31,927 - INFO - general:
+2025-04-06 17:23:31,927 - INFO -   seed: 2024
+2025-04-06 17:23:31,927 - INFO -   seed: 2024
+2025-04-06 17:23:31,927 - INFO -   seed: 2024
+2025-04-06 17:23:31,929 - INFO -   train: False
+2025-04-06 17:23:31,929 - INFO -   train: False
+2025-04-06 17:23:31,929 - INFO -   train: False
+2025-04-06 17:23:31,929 - INFO -   dataset: mnist
+2025-04-06 17:23:31,929 - INFO -   dataset: mnist
+2025-04-06 17:23:31,929 - INFO -   dataset: mnist
+2025-04-06 17:23:31,930 - INFO -   data_path: ./data/
+2025-04-06 17:23:31,930 - INFO -   data_path: ./data/
+2025-04-06 17:23:31,930 - INFO -   data_path: ./data/
+2025-04-06 17:23:31,931 - INFO -   save_path: None
+2025-04-06 17:23:31,931 - INFO -   save_path: None
+2025-04-06 17:23:31,931 - INFO -   save_path: None
+2025-04-06 17:23:31,932 - INFO - data:
+2025-04-06 17:23:31,932 - INFO - data:
+2025-04-06 17:23:31,932 - INFO - data:
+2025-04-06 17:23:31,933 - INFO -   downsample_factor: 1
+2025-04-06 17:23:31,933 - INFO -   downsample_factor: 1
+2025-04-06 17:23:31,933 - INFO -   downsample_factor: 1
+2025-04-06 17:23:31,933 - INFO -   resolution: [32, 32]
+2025-04-06 17:23:31,933 - INFO -   resolution: [32, 32]
+2025-04-06 17:23:31,933 - INFO -   resolution: [32, 32]
+2025-04-06 17:23:31,934 - INFO -   traj_length: 1000
+2025-04-06 17:23:31,934 - INFO -   traj_length: 1000
+2025-04-06 17:23:31,934 - INFO -   traj_length: 1000
+2025-04-06 17:23:31,935 - INFO - model:
+2025-04-06 17:23:31,935 - INFO - model:
+2025-04-06 17:23:31,935 - INFO - model:
+2025-04-06 17:23:31,936 - INFO -   mlp_width_size: 24
+2025-04-06 17:23:31,936 - INFO -   mlp_width_size: 24
+2025-04-06 17:23:31,936 - INFO -   mlp_width_size: 24
+2025-04-06 17:23:31,937 - INFO -   mlp_depth: 3
+2025-04-06 17:23:31,937 - INFO -   mlp_depth: 3
+2025-04-06 17:23:31,937 - INFO -   mlp_depth: 3
+2025-04-06 17:23:31,937 - INFO -   activation: relu
+2025-04-06 17:23:31,937 - INFO -   activation: relu
+2025-04-06 17:23:31,937 - INFO -   activation: relu
+2025-04-06 17:23:31,938 - INFO -   input_prev_data: False
+2025-04-06 17:23:31,938 - INFO -   input_prev_data: False
+2025-04-06 17:23:31,938 - INFO -   input_prev_data: False
+2025-04-06 17:23:31,939 - INFO -   model_type: wsm-rnn
+2025-04-06 17:23:31,939 - INFO -   model_type: wsm-rnn
+2025-04-06 17:23:31,939 - INFO -   model_type: wsm-rnn
+2025-04-06 17:23:31,940 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:23:31,940 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:23:31,940 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:23:31,941 - INFO -   weights_lim: 0.5
+2025-04-06 17:23:31,941 - INFO -   weights_lim: 0.5
+2025-04-06 17:23:31,941 - INFO -   weights_lim: 0.5
+2025-04-06 17:23:31,941 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:23:31,941 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:23:31,941 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:23:31,942 - INFO -   time_as_channel: False
+2025-04-06 17:23:31,942 - INFO -   time_as_channel: False
+2025-04-06 17:23:31,942 - INFO -   time_as_channel: False
+2025-04-06 17:23:31,943 - INFO -   forcing_prob: 0.15
+2025-04-06 17:23:31,943 - INFO -   forcing_prob: 0.15
+2025-04-06 17:23:31,943 - INFO -   forcing_prob: 0.15
+2025-04-06 17:23:31,944 - INFO -   noise_theta_init: None
+2025-04-06 17:23:31,944 - INFO -   noise_theta_init: None
+2025-04-06 17:23:31,944 - INFO -   noise_theta_init: None
+2025-04-06 17:23:31,945 - INFO - optimizer:
+2025-04-06 17:23:31,945 - INFO - optimizer:
+2025-04-06 17:23:31,945 - INFO - optimizer:
+2025-04-06 17:23:31,945 - INFO -   init_lr: 0.0001
+2025-04-06 17:23:31,945 - INFO -   init_lr: 0.0001
+2025-04-06 17:23:31,945 - INFO -   init_lr: 0.0001
+2025-04-06 17:23:31,946 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:23:31,946 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:23:31,946 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:23:31,947 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:23:31,947 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:23:31,947 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:23:31,948 - INFO - training:
+2025-04-06 17:23:31,948 - INFO - training:
+2025-04-06 17:23:31,948 - INFO - training:
+2025-04-06 17:23:31,948 - INFO -   nb_epochs: 500
+2025-04-06 17:23:31,948 - INFO -   nb_epochs: 500
+2025-04-06 17:23:31,948 - INFO -   nb_epochs: 500
+2025-04-06 17:23:31,949 - INFO -   batch_size: 640
+2025-04-06 17:23:31,949 - INFO -   batch_size: 640
+2025-04-06 17:23:31,949 - INFO -   batch_size: 640
+2025-04-06 17:23:31,950 - INFO -   print_every: 10
+2025-04-06 17:23:31,950 - INFO -   print_every: 10
+2025-04-06 17:23:31,950 - INFO -   print_every: 10
+2025-04-06 17:23:31,951 - INFO -   checkpoint_every: 10
+2025-04-06 17:23:31,951 - INFO -   checkpoint_every: 10
+2025-04-06 17:23:31,951 - INFO -   checkpoint_every: 10
+2025-04-06 17:23:31,951 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:23:31,951 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:23:31,951 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:23:31,952 - INFO -   use_nll_loss: True
+2025-04-06 17:23:31,952 - INFO -   use_nll_loss: True
+2025-04-06 17:23:31,952 - INFO -   use_nll_loss: True
+2025-04-06 17:23:31,953 - INFO -   inference_start: 300
+2025-04-06 17:23:31,953 - INFO -   inference_start: 300
+2025-04-06 17:23:31,953 - INFO -   inference_start: 300
+2025-04-06 17:23:34,818 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:23:34,818 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:23:34,818 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:23:34,819 - INFO - Labels shape: (640,)
+2025-04-06 17:23:34,819 - INFO - Labels shape: (640,)
+2025-04-06 17:23:34,819 - INFO - Labels shape: (640,)
+2025-04-06 17:23:34,820 - INFO - Seq length: 784
+2025-04-06 17:23:34,820 - INFO - Seq length: 784
+2025-04-06 17:23:34,820 - INFO - Seq length: 784
+2025-04-06 17:23:34,820 - INFO - Data size: 1
+2025-04-06 17:23:34,820 - INFO - Data size: 1
+2025-04-06 17:23:34,820 - INFO - Data size: 1
+2025-04-06 17:23:34,821 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:23:34,821 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:23:34,821 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:23:34,822 - INFO - Number of batches:
+2025-04-06 17:23:34,822 - INFO - Number of batches:
+2025-04-06 17:23:34,822 - INFO - Number of batches:
+2025-04-06 17:23:34,822 - INFO -   - Train: 94
+2025-04-06 17:23:34,822 - INFO -   - Train: 94
+2025-04-06 17:23:34,822 - INFO -   - Train: 94
+2025-04-06 17:23:34,822 - INFO -   - Test: 16
+2025-04-06 17:23:34,822 - INFO -   - Test: 16
+2025-04-06 17:23:34,822 - INFO -   - Test: 16
+2025-04-06 17:23:35,798 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:23:35,798 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:23:35,798 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:23:35,814 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:23:35,814 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:23:35,814 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:23:35,815 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:23:35,815 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:23:35,815 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:23:35,815 - INFO - No losses found in the nohup.log file
+2025-04-06 17:23:35,815 - INFO - No losses found in the nohup.log file
+2025-04-06 17:23:35,815 - INFO - No losses found in the nohup.log file
+2025-04-06 17:23:42,265 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:23:42,265 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:23:42,265 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:23:42,267 - INFO -     - Mean : 0.186285
+2025-04-06 17:23:42,267 - INFO -     - Mean : 0.186285
+2025-04-06 17:23:42,267 - INFO -     - Mean : 0.186285
+2025-04-06 17:23:42,268 - INFO -     - Median : 0.186551
+2025-04-06 17:23:42,268 - INFO -     - Median : 0.186551
+2025-04-06 17:23:42,268 - INFO -     - Median : 0.186551
+2025-04-06 17:23:42,269 - INFO -     - Min : 0.183185
+2025-04-06 17:23:42,269 - INFO -     - Min : 0.183185
+2025-04-06 17:23:42,269 - INFO -     - Min : 0.183185
+2025-04-06 17:23:42,766 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,766 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,766 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,780 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,780 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,780 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,793 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,793 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,793 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,808 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,808 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,808 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,823 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,823 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,823 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,836 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,836 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,836 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,850 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,850 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,850 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,863 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,863 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,863 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,876 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,876 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,876 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,890 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,890 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,890 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,903 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,903 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,903 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,916 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,916 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,916 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,930 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,930 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,930 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,940 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,940 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,940 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,953 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,953 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,953 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,966 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,966 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:23:42,966 - INFO - Min/Max Uncertainty: 0.500, 1.484
+2025-04-06 17:42:06,982 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:42:06,982 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:42:06,982 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:42:06,982 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:42:06,982 - INFO - Config file: config.yaml
+2025-04-06 17:42:06,982 - INFO - Config file: config.yaml
+2025-04-06 17:42:06,982 - INFO - Config file: config.yaml
+2025-04-06 17:42:06,982 - INFO - Config file: config.yaml
+2025-04-06 17:42:06,983 - INFO - ==== Config file's contents ====
+2025-04-06 17:42:06,983 - INFO - ==== Config file's contents ====
+2025-04-06 17:42:06,983 - INFO - ==== Config file's contents ====
+2025-04-06 17:42:06,983 - INFO - ==== Config file's contents ====
+2025-04-06 17:42:06,983 - INFO - general:
+2025-04-06 17:42:06,983 - INFO - general:
+2025-04-06 17:42:06,983 - INFO - general:
+2025-04-06 17:42:06,983 - INFO - general:
+2025-04-06 17:42:06,984 - INFO -   seed: 2024
+2025-04-06 17:42:06,984 - INFO -   seed: 2024
+2025-04-06 17:42:06,984 - INFO -   seed: 2024
+2025-04-06 17:42:06,984 - INFO -   seed: 2024
+2025-04-06 17:42:06,985 - INFO -   train: False
+2025-04-06 17:42:06,985 - INFO -   train: False
+2025-04-06 17:42:06,985 - INFO -   train: False
+2025-04-06 17:42:06,985 - INFO -   train: False
+2025-04-06 17:42:06,985 - INFO -   dataset: mnist
+2025-04-06 17:42:06,985 - INFO -   dataset: mnist
+2025-04-06 17:42:06,985 - INFO -   dataset: mnist
+2025-04-06 17:42:06,985 - INFO -   dataset: mnist
+2025-04-06 17:42:06,986 - INFO -   data_path: ./data/
+2025-04-06 17:42:06,986 - INFO -   data_path: ./data/
+2025-04-06 17:42:06,986 - INFO -   data_path: ./data/
+2025-04-06 17:42:06,986 - INFO -   data_path: ./data/
+2025-04-06 17:42:06,986 - INFO -   save_path: None
+2025-04-06 17:42:06,986 - INFO -   save_path: None
+2025-04-06 17:42:06,986 - INFO -   save_path: None
+2025-04-06 17:42:06,986 - INFO -   save_path: None
+2025-04-06 17:42:06,986 - INFO - data:
+2025-04-06 17:42:06,986 - INFO - data:
+2025-04-06 17:42:06,986 - INFO - data:
+2025-04-06 17:42:06,986 - INFO - data:
+2025-04-06 17:42:06,987 - INFO -   downsample_factor: 1
+2025-04-06 17:42:06,987 - INFO -   downsample_factor: 1
+2025-04-06 17:42:06,987 - INFO -   downsample_factor: 1
+2025-04-06 17:42:06,987 - INFO -   downsample_factor: 1
+2025-04-06 17:42:06,988 - INFO -   resolution: [32, 32]
+2025-04-06 17:42:06,988 - INFO -   resolution: [32, 32]
+2025-04-06 17:42:06,988 - INFO -   resolution: [32, 32]
+2025-04-06 17:42:06,988 - INFO -   resolution: [32, 32]
+2025-04-06 17:42:06,988 - INFO -   traj_length: 1000
+2025-04-06 17:42:06,988 - INFO -   traj_length: 1000
+2025-04-06 17:42:06,988 - INFO -   traj_length: 1000
+2025-04-06 17:42:06,988 - INFO -   traj_length: 1000
+2025-04-06 17:42:06,989 - INFO - model:
+2025-04-06 17:42:06,989 - INFO - model:
+2025-04-06 17:42:06,989 - INFO - model:
+2025-04-06 17:42:06,989 - INFO - model:
+2025-04-06 17:42:06,989 - INFO -   mlp_width_size: 24
+2025-04-06 17:42:06,989 - INFO -   mlp_width_size: 24
+2025-04-06 17:42:06,989 - INFO -   mlp_width_size: 24
+2025-04-06 17:42:06,989 - INFO -   mlp_width_size: 24
+2025-04-06 17:42:06,990 - INFO -   mlp_depth: 3
+2025-04-06 17:42:06,990 - INFO -   mlp_depth: 3
+2025-04-06 17:42:06,990 - INFO -   mlp_depth: 3
+2025-04-06 17:42:06,990 - INFO -   mlp_depth: 3
+2025-04-06 17:42:06,990 - INFO -   activation: relu
+2025-04-06 17:42:06,990 - INFO -   activation: relu
+2025-04-06 17:42:06,990 - INFO -   activation: relu
+2025-04-06 17:42:06,990 - INFO -   activation: relu
+2025-04-06 17:42:06,991 - INFO -   input_prev_data: False
+2025-04-06 17:42:06,991 - INFO -   input_prev_data: False
+2025-04-06 17:42:06,991 - INFO -   input_prev_data: False
+2025-04-06 17:42:06,991 - INFO -   input_prev_data: False
+2025-04-06 17:42:06,991 - INFO -   model_type: wsm-rnn
+2025-04-06 17:42:06,991 - INFO -   model_type: wsm-rnn
+2025-04-06 17:42:06,991 - INFO -   model_type: wsm-rnn
+2025-04-06 17:42:06,991 - INFO -   model_type: wsm-rnn
+2025-04-06 17:42:06,992 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:42:06,992 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:42:06,992 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:42:06,992 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:42:06,992 - INFO -   weights_lim: 0.5
+2025-04-06 17:42:06,992 - INFO -   weights_lim: 0.5
+2025-04-06 17:42:06,992 - INFO -   weights_lim: 0.5
+2025-04-06 17:42:06,992 - INFO -   weights_lim: 0.5
+2025-04-06 17:42:06,993 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:42:06,993 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:42:06,993 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:42:06,993 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:42:06,994 - INFO -   time_as_channel: False
+2025-04-06 17:42:06,994 - INFO -   time_as_channel: False
+2025-04-06 17:42:06,994 - INFO -   time_as_channel: False
+2025-04-06 17:42:06,994 - INFO -   time_as_channel: False
+2025-04-06 17:42:06,994 - INFO -   forcing_prob: 0.15
+2025-04-06 17:42:06,994 - INFO -   forcing_prob: 0.15
+2025-04-06 17:42:06,994 - INFO -   forcing_prob: 0.15
+2025-04-06 17:42:06,994 - INFO -   forcing_prob: 0.15
+2025-04-06 17:42:06,995 - INFO -   noise_theta_init: None
+2025-04-06 17:42:06,995 - INFO -   noise_theta_init: None
+2025-04-06 17:42:06,995 - INFO -   noise_theta_init: None
+2025-04-06 17:42:06,995 - INFO -   noise_theta_init: None
+2025-04-06 17:42:06,995 - INFO - optimizer:
+2025-04-06 17:42:06,995 - INFO - optimizer:
+2025-04-06 17:42:06,995 - INFO - optimizer:
+2025-04-06 17:42:06,995 - INFO - optimizer:
+2025-04-06 17:42:06,996 - INFO -   init_lr: 0.0001
+2025-04-06 17:42:06,996 - INFO -   init_lr: 0.0001
+2025-04-06 17:42:06,996 - INFO -   init_lr: 0.0001
+2025-04-06 17:42:06,996 - INFO -   init_lr: 0.0001
+2025-04-06 17:42:06,997 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:42:06,997 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:42:06,997 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:42:06,997 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:42:06,997 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:42:06,997 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:42:06,997 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:42:06,997 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:42:06,997 - INFO - training:
+2025-04-06 17:42:06,997 - INFO - training:
+2025-04-06 17:42:06,997 - INFO - training:
+2025-04-06 17:42:06,997 - INFO - training:
+2025-04-06 17:42:06,998 - INFO -   nb_epochs: 500
+2025-04-06 17:42:06,998 - INFO -   nb_epochs: 500
+2025-04-06 17:42:06,998 - INFO -   nb_epochs: 500
+2025-04-06 17:42:06,998 - INFO -   nb_epochs: 500
+2025-04-06 17:42:06,998 - INFO -   batch_size: 640
+2025-04-06 17:42:06,998 - INFO -   batch_size: 640
+2025-04-06 17:42:06,998 - INFO -   batch_size: 640
+2025-04-06 17:42:06,998 - INFO -   batch_size: 640
+2025-04-06 17:42:06,999 - INFO -   print_every: 10
+2025-04-06 17:42:06,999 - INFO -   print_every: 10
+2025-04-06 17:42:06,999 - INFO -   print_every: 10
+2025-04-06 17:42:06,999 - INFO -   print_every: 10
+2025-04-06 17:42:06,999 - INFO -   checkpoint_every: 10
+2025-04-06 17:42:06,999 - INFO -   checkpoint_every: 10
+2025-04-06 17:42:06,999 - INFO -   checkpoint_every: 10
+2025-04-06 17:42:06,999 - INFO -   checkpoint_every: 10
+2025-04-06 17:42:06,999 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:42:06,999 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:42:06,999 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:42:06,999 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:42:07,000 - INFO -   use_nll_loss: True
+2025-04-06 17:42:07,000 - INFO -   use_nll_loss: True
+2025-04-06 17:42:07,000 - INFO -   use_nll_loss: True
+2025-04-06 17:42:07,000 - INFO -   use_nll_loss: True
+2025-04-06 17:42:07,001 - INFO -   inference_start: 300
+2025-04-06 17:42:07,001 - INFO -   inference_start: 300
+2025-04-06 17:42:07,001 - INFO -   inference_start: 300
+2025-04-06 17:42:07,001 - INFO -   inference_start: 300
+2025-04-06 17:42:09,887 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:42:09,887 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:42:09,887 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:42:09,887 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:42:09,888 - INFO - Labels shape: (640,)
+2025-04-06 17:42:09,888 - INFO - Labels shape: (640,)
+2025-04-06 17:42:09,888 - INFO - Labels shape: (640,)
+2025-04-06 17:42:09,888 - INFO - Labels shape: (640,)
+2025-04-06 17:42:09,889 - INFO - Seq length: 784
+2025-04-06 17:42:09,889 - INFO - Seq length: 784
+2025-04-06 17:42:09,889 - INFO - Seq length: 784
+2025-04-06 17:42:09,889 - INFO - Seq length: 784
+2025-04-06 17:42:09,890 - INFO - Data size: 1
+2025-04-06 17:42:09,890 - INFO - Data size: 1
+2025-04-06 17:42:09,890 - INFO - Data size: 1
+2025-04-06 17:42:09,890 - INFO - Data size: 1
+2025-04-06 17:42:09,891 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:42:09,891 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:42:09,891 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:42:09,891 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:42:09,891 - INFO - Number of batches:
+2025-04-06 17:42:09,891 - INFO - Number of batches:
+2025-04-06 17:42:09,891 - INFO - Number of batches:
+2025-04-06 17:42:09,891 - INFO - Number of batches:
+2025-04-06 17:42:09,892 - INFO -   - Train: 94
+2025-04-06 17:42:09,892 - INFO -   - Train: 94
+2025-04-06 17:42:09,892 - INFO -   - Train: 94
+2025-04-06 17:42:09,892 - INFO -   - Train: 94
+2025-04-06 17:42:09,892 - INFO -   - Test: 16
+2025-04-06 17:42:09,892 - INFO -   - Test: 16
+2025-04-06 17:42:09,892 - INFO -   - Test: 16
+2025-04-06 17:42:09,892 - INFO -   - Test: 16
+2025-04-06 17:42:10,866 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:42:10,866 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:42:10,866 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:42:10,866 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:42:10,878 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:42:10,878 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:42:10,878 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:42:10,878 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:42:10,879 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:42:10,879 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:42:10,879 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:42:10,879 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:42:10,879 - INFO - No losses found in the nohup.log file
+2025-04-06 17:42:10,879 - INFO - No losses found in the nohup.log file
+2025-04-06 17:42:10,879 - INFO - No losses found in the nohup.log file
+2025-04-06 17:42:10,879 - INFO - No losses found in the nohup.log file
+2025-04-06 17:42:17,028 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:42:17,028 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:42:17,028 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:42:17,028 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:42:17,031 - INFO -     - Mean : 0.162606
+2025-04-06 17:42:17,031 - INFO -     - Mean : 0.162606
+2025-04-06 17:42:17,031 - INFO -     - Mean : 0.162606
+2025-04-06 17:42:17,031 - INFO -     - Mean : 0.162606
+2025-04-06 17:42:17,032 - INFO -     - Median : 0.162405
+2025-04-06 17:42:17,032 - INFO -     - Median : 0.162405
+2025-04-06 17:42:17,032 - INFO -     - Median : 0.162405
+2025-04-06 17:42:17,032 - INFO -     - Median : 0.162405
+2025-04-06 17:42:17,032 - INFO -     - Min : 0.160243
+2025-04-06 17:42:17,032 - INFO -     - Min : 0.160243
+2025-04-06 17:42:17,032 - INFO -     - Min : 0.160243
+2025-04-06 17:42:17,032 - INFO -     - Min : 0.160243
+2025-04-06 17:42:17,492 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,492 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,492 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,492 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,506 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,506 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,506 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,506 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,519 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,519 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,519 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,519 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,532 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,532 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,532 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,532 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,546 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,546 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,546 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,546 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,559 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,559 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,559 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,559 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,573 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,573 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,573 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,573 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,586 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,586 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,586 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,586 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,606 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,606 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,606 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,606 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,625 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,625 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,625 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,625 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,632 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,632 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,632 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,632 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,638 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,638 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,638 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,638 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,644 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,644 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,644 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,644 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,651 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,651 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,651 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,651 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,657 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,657 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,657 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,657 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,663 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,663 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,663 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:42:17,663 - INFO - Min/Max Uncertainty: 0.500, 1.203
+2025-04-06 17:49:43,285 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:49:43,285 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:49:43,285 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:49:43,285 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:49:43,285 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:49:43,286 - INFO - Config file: config.yaml
+2025-04-06 17:49:43,286 - INFO - Config file: config.yaml
+2025-04-06 17:49:43,286 - INFO - Config file: config.yaml
+2025-04-06 17:49:43,286 - INFO - Config file: config.yaml
+2025-04-06 17:49:43,286 - INFO - Config file: config.yaml
+2025-04-06 17:49:43,287 - INFO - ==== Config file's contents ====
+2025-04-06 17:49:43,287 - INFO - ==== Config file's contents ====
+2025-04-06 17:49:43,287 - INFO - ==== Config file's contents ====
+2025-04-06 17:49:43,287 - INFO - ==== Config file's contents ====
+2025-04-06 17:49:43,287 - INFO - ==== Config file's contents ====
+2025-04-06 17:49:43,288 - INFO - general:
+2025-04-06 17:49:43,288 - INFO - general:
+2025-04-06 17:49:43,288 - INFO - general:
+2025-04-06 17:49:43,288 - INFO - general:
+2025-04-06 17:49:43,288 - INFO - general:
+2025-04-06 17:49:43,289 - INFO -   seed: 2024
+2025-04-06 17:49:43,289 - INFO -   seed: 2024
+2025-04-06 17:49:43,289 - INFO -   seed: 2024
+2025-04-06 17:49:43,289 - INFO -   seed: 2024
+2025-04-06 17:49:43,289 - INFO -   seed: 2024
+2025-04-06 17:49:43,290 - INFO -   train: False
+2025-04-06 17:49:43,290 - INFO -   train: False
+2025-04-06 17:49:43,290 - INFO -   train: False
+2025-04-06 17:49:43,290 - INFO -   train: False
+2025-04-06 17:49:43,290 - INFO -   train: False
+2025-04-06 17:49:43,291 - INFO -   dataset: mnist
+2025-04-06 17:49:43,291 - INFO -   dataset: mnist
+2025-04-06 17:49:43,291 - INFO -   dataset: mnist
+2025-04-06 17:49:43,291 - INFO -   dataset: mnist
+2025-04-06 17:49:43,291 - INFO -   dataset: mnist
+2025-04-06 17:49:43,293 - INFO -   data_path: ./data/
+2025-04-06 17:49:43,293 - INFO -   data_path: ./data/
+2025-04-06 17:49:43,293 - INFO -   data_path: ./data/
+2025-04-06 17:49:43,293 - INFO -   data_path: ./data/
+2025-04-06 17:49:43,293 - INFO -   data_path: ./data/
+2025-04-06 17:49:43,293 - INFO -   save_path: None
+2025-04-06 17:49:43,293 - INFO -   save_path: None
+2025-04-06 17:49:43,293 - INFO -   save_path: None
+2025-04-06 17:49:43,293 - INFO -   save_path: None
+2025-04-06 17:49:43,293 - INFO -   save_path: None
+2025-04-06 17:49:43,294 - INFO - data:
+2025-04-06 17:49:43,294 - INFO - data:
+2025-04-06 17:49:43,294 - INFO - data:
+2025-04-06 17:49:43,294 - INFO - data:
+2025-04-06 17:49:43,294 - INFO - data:
+2025-04-06 17:49:43,295 - INFO -   downsample_factor: 1
+2025-04-06 17:49:43,295 - INFO -   downsample_factor: 1
+2025-04-06 17:49:43,295 - INFO -   downsample_factor: 1
+2025-04-06 17:49:43,295 - INFO -   downsample_factor: 1
+2025-04-06 17:49:43,295 - INFO -   downsample_factor: 1
+2025-04-06 17:49:43,296 - INFO -   resolution: [32, 32]
+2025-04-06 17:49:43,296 - INFO -   resolution: [32, 32]
+2025-04-06 17:49:43,296 - INFO -   resolution: [32, 32]
+2025-04-06 17:49:43,296 - INFO -   resolution: [32, 32]
+2025-04-06 17:49:43,296 - INFO -   resolution: [32, 32]
+2025-04-06 17:49:43,297 - INFO -   traj_length: 1000
+2025-04-06 17:49:43,297 - INFO -   traj_length: 1000
+2025-04-06 17:49:43,297 - INFO -   traj_length: 1000
+2025-04-06 17:49:43,297 - INFO -   traj_length: 1000
+2025-04-06 17:49:43,297 - INFO -   traj_length: 1000
+2025-04-06 17:49:43,297 - INFO - model:
+2025-04-06 17:49:43,297 - INFO - model:
+2025-04-06 17:49:43,297 - INFO - model:
+2025-04-06 17:49:43,297 - INFO - model:
+2025-04-06 17:49:43,297 - INFO - model:
+2025-04-06 17:49:43,298 - INFO -   mlp_width_size: 24
+2025-04-06 17:49:43,298 - INFO -   mlp_width_size: 24
+2025-04-06 17:49:43,298 - INFO -   mlp_width_size: 24
+2025-04-06 17:49:43,298 - INFO -   mlp_width_size: 24
+2025-04-06 17:49:43,298 - INFO -   mlp_width_size: 24
+2025-04-06 17:49:43,299 - INFO -   mlp_depth: 3
+2025-04-06 17:49:43,299 - INFO -   mlp_depth: 3
+2025-04-06 17:49:43,299 - INFO -   mlp_depth: 3
+2025-04-06 17:49:43,299 - INFO -   mlp_depth: 3
+2025-04-06 17:49:43,299 - INFO -   mlp_depth: 3
+2025-04-06 17:49:43,300 - INFO -   activation: relu
+2025-04-06 17:49:43,300 - INFO -   activation: relu
+2025-04-06 17:49:43,300 - INFO -   activation: relu
+2025-04-06 17:49:43,300 - INFO -   activation: relu
+2025-04-06 17:49:43,300 - INFO -   activation: relu
+2025-04-06 17:49:43,300 - INFO -   input_prev_data: False
+2025-04-06 17:49:43,300 - INFO -   input_prev_data: False
+2025-04-06 17:49:43,300 - INFO -   input_prev_data: False
+2025-04-06 17:49:43,300 - INFO -   input_prev_data: False
+2025-04-06 17:49:43,300 - INFO -   input_prev_data: False
+2025-04-06 17:49:43,301 - INFO -   model_type: wsm-rnn
+2025-04-06 17:49:43,301 - INFO -   model_type: wsm-rnn
+2025-04-06 17:49:43,301 - INFO -   model_type: wsm-rnn
+2025-04-06 17:49:43,301 - INFO -   model_type: wsm-rnn
+2025-04-06 17:49:43,301 - INFO -   model_type: wsm-rnn
+2025-04-06 17:49:43,302 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:49:43,302 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:49:43,302 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:49:43,302 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:49:43,302 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:49:43,303 - INFO -   weights_lim: 0.5
+2025-04-06 17:49:43,303 - INFO -   weights_lim: 0.5
+2025-04-06 17:49:43,303 - INFO -   weights_lim: 0.5
+2025-04-06 17:49:43,303 - INFO -   weights_lim: 0.5
+2025-04-06 17:49:43,303 - INFO -   weights_lim: 0.5
+2025-04-06 17:49:43,303 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:49:43,303 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:49:43,303 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:49:43,303 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:49:43,303 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:49:43,304 - INFO -   time_as_channel: False
+2025-04-06 17:49:43,304 - INFO -   time_as_channel: False
+2025-04-06 17:49:43,304 - INFO -   time_as_channel: False
+2025-04-06 17:49:43,304 - INFO -   time_as_channel: False
+2025-04-06 17:49:43,304 - INFO -   time_as_channel: False
+2025-04-06 17:49:43,305 - INFO -   forcing_prob: 0.15
+2025-04-06 17:49:43,305 - INFO -   forcing_prob: 0.15
+2025-04-06 17:49:43,305 - INFO -   forcing_prob: 0.15
+2025-04-06 17:49:43,305 - INFO -   forcing_prob: 0.15
+2025-04-06 17:49:43,305 - INFO -   forcing_prob: 0.15
+2025-04-06 17:49:43,305 - INFO -   noise_theta_init: None
+2025-04-06 17:49:43,305 - INFO -   noise_theta_init: None
+2025-04-06 17:49:43,305 - INFO -   noise_theta_init: None
+2025-04-06 17:49:43,305 - INFO -   noise_theta_init: None
+2025-04-06 17:49:43,305 - INFO -   noise_theta_init: None
+2025-04-06 17:49:43,306 - INFO - optimizer:
+2025-04-06 17:49:43,306 - INFO - optimizer:
+2025-04-06 17:49:43,306 - INFO - optimizer:
+2025-04-06 17:49:43,306 - INFO - optimizer:
+2025-04-06 17:49:43,306 - INFO - optimizer:
+2025-04-06 17:49:43,307 - INFO -   init_lr: 0.0001
+2025-04-06 17:49:43,307 - INFO -   init_lr: 0.0001
+2025-04-06 17:49:43,307 - INFO -   init_lr: 0.0001
+2025-04-06 17:49:43,307 - INFO -   init_lr: 0.0001
+2025-04-06 17:49:43,307 - INFO -   init_lr: 0.0001
+2025-04-06 17:49:43,308 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:49:43,308 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:49:43,308 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:49:43,308 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:49:43,308 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:49:43,308 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:49:43,308 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:49:43,308 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:49:43,308 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:49:43,308 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:49:43,309 - INFO - training:
+2025-04-06 17:49:43,309 - INFO - training:
+2025-04-06 17:49:43,309 - INFO - training:
+2025-04-06 17:49:43,309 - INFO - training:
+2025-04-06 17:49:43,309 - INFO - training:
+2025-04-06 17:49:43,310 - INFO -   nb_epochs: 500
+2025-04-06 17:49:43,310 - INFO -   nb_epochs: 500
+2025-04-06 17:49:43,310 - INFO -   nb_epochs: 500
+2025-04-06 17:49:43,310 - INFO -   nb_epochs: 500
+2025-04-06 17:49:43,310 - INFO -   nb_epochs: 500
+2025-04-06 17:49:43,310 - INFO -   batch_size: 640
+2025-04-06 17:49:43,310 - INFO -   batch_size: 640
+2025-04-06 17:49:43,310 - INFO -   batch_size: 640
+2025-04-06 17:49:43,310 - INFO -   batch_size: 640
+2025-04-06 17:49:43,310 - INFO -   batch_size: 640
+2025-04-06 17:49:43,311 - INFO -   print_every: 10
+2025-04-06 17:49:43,311 - INFO -   print_every: 10
+2025-04-06 17:49:43,311 - INFO -   print_every: 10
+2025-04-06 17:49:43,311 - INFO -   print_every: 10
+2025-04-06 17:49:43,311 - INFO -   print_every: 10
+2025-04-06 17:49:43,312 - INFO -   checkpoint_every: 10
+2025-04-06 17:49:43,312 - INFO -   checkpoint_every: 10
+2025-04-06 17:49:43,312 - INFO -   checkpoint_every: 10
+2025-04-06 17:49:43,312 - INFO -   checkpoint_every: 10
+2025-04-06 17:49:43,312 - INFO -   checkpoint_every: 10
+2025-04-06 17:49:43,312 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:49:43,312 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:49:43,312 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:49:43,312 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:49:43,312 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:49:43,313 - INFO -   use_nll_loss: True
+2025-04-06 17:49:43,313 - INFO -   use_nll_loss: True
+2025-04-06 17:49:43,313 - INFO -   use_nll_loss: True
+2025-04-06 17:49:43,313 - INFO -   use_nll_loss: True
+2025-04-06 17:49:43,313 - INFO -   use_nll_loss: True
+2025-04-06 17:49:43,314 - INFO -   inference_start: 300
+2025-04-06 17:49:43,314 - INFO -   inference_start: 300
+2025-04-06 17:49:43,314 - INFO -   inference_start: 300
+2025-04-06 17:49:43,314 - INFO -   inference_start: 300
+2025-04-06 17:49:43,314 - INFO -   inference_start: 300
+2025-04-06 17:49:46,208 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:49:46,208 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:49:46,208 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:49:46,208 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:49:46,208 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:49:46,210 - INFO - Labels shape: (640,)
+2025-04-06 17:49:46,210 - INFO - Labels shape: (640,)
+2025-04-06 17:49:46,210 - INFO - Labels shape: (640,)
+2025-04-06 17:49:46,210 - INFO - Labels shape: (640,)
+2025-04-06 17:49:46,210 - INFO - Labels shape: (640,)
+2025-04-06 17:49:46,211 - INFO - Seq length: 784
+2025-04-06 17:49:46,211 - INFO - Seq length: 784
+2025-04-06 17:49:46,211 - INFO - Seq length: 784
+2025-04-06 17:49:46,211 - INFO - Seq length: 784
+2025-04-06 17:49:46,211 - INFO - Seq length: 784
+2025-04-06 17:49:46,212 - INFO - Data size: 1
+2025-04-06 17:49:46,212 - INFO - Data size: 1
+2025-04-06 17:49:46,212 - INFO - Data size: 1
+2025-04-06 17:49:46,212 - INFO - Data size: 1
+2025-04-06 17:49:46,212 - INFO - Data size: 1
+2025-04-06 17:49:46,213 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:49:46,213 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:49:46,213 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:49:46,213 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:49:46,213 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:49:46,214 - INFO - Number of batches:
+2025-04-06 17:49:46,214 - INFO - Number of batches:
+2025-04-06 17:49:46,214 - INFO - Number of batches:
+2025-04-06 17:49:46,214 - INFO - Number of batches:
+2025-04-06 17:49:46,214 - INFO - Number of batches:
+2025-04-06 17:49:46,216 - INFO -   - Train: 94
+2025-04-06 17:49:46,216 - INFO -   - Train: 94
+2025-04-06 17:49:46,216 - INFO -   - Train: 94
+2025-04-06 17:49:46,216 - INFO -   - Train: 94
+2025-04-06 17:49:46,216 - INFO -   - Train: 94
+2025-04-06 17:49:46,217 - INFO -   - Test: 16
+2025-04-06 17:49:46,217 - INFO -   - Test: 16
+2025-04-06 17:49:46,217 - INFO -   - Test: 16
+2025-04-06 17:49:46,217 - INFO -   - Test: 16
+2025-04-06 17:49:46,217 - INFO -   - Test: 16
+2025-04-06 17:49:47,169 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:49:47,169 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:49:47,169 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:49:47,169 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:49:47,169 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:49:47,182 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:49:47,182 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:49:47,182 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:49:47,182 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:49:47,182 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:49:47,184 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:49:47,184 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:49:47,184 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:49:47,184 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:49:47,184 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:49:47,184 - INFO - No losses found in the nohup.log file
+2025-04-06 17:49:47,184 - INFO - No losses found in the nohup.log file
+2025-04-06 17:49:47,184 - INFO - No losses found in the nohup.log file
+2025-04-06 17:49:47,184 - INFO - No losses found in the nohup.log file
+2025-04-06 17:49:47,184 - INFO - No losses found in the nohup.log file
+2025-04-06 17:49:53,695 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:49:53,695 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:49:53,695 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:49:53,695 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:49:53,695 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:49:53,697 - INFO -     - Mean : 0.154035
+2025-04-06 17:49:53,697 - INFO -     - Mean : 0.154035
+2025-04-06 17:49:53,697 - INFO -     - Mean : 0.154035
+2025-04-06 17:49:53,697 - INFO -     - Mean : 0.154035
+2025-04-06 17:49:53,697 - INFO -     - Mean : 0.154035
+2025-04-06 17:49:53,698 - INFO -     - Median : 0.153967
+2025-04-06 17:49:53,698 - INFO -     - Median : 0.153967
+2025-04-06 17:49:53,698 - INFO -     - Median : 0.153967
+2025-04-06 17:49:53,698 - INFO -     - Median : 0.153967
+2025-04-06 17:49:53,698 - INFO -     - Median : 0.153967
+2025-04-06 17:49:53,699 - INFO -     - Min : 0.150697
+2025-04-06 17:49:53,699 - INFO -     - Min : 0.150697
+2025-04-06 17:49:53,699 - INFO -     - Min : 0.150697
+2025-04-06 17:49:53,699 - INFO -     - Min : 0.150697
+2025-04-06 17:49:53,699 - INFO -     - Min : 0.150697
+2025-04-06 17:49:54,158 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,158 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,158 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,158 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,158 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,173 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,173 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,173 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,173 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,173 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,187 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,187 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,187 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,187 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,187 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,200 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,200 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,200 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,200 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,200 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,213 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,213 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,213 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,213 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,213 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,227 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,227 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,227 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,227 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,227 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,240 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,240 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,240 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,240 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,240 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,253 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,253 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,253 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,253 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,253 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,267 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,267 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,267 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,267 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,267 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,280 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,280 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,280 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,280 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,280 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,295 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,295 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,295 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,295 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,295 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,306 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,306 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,306 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,306 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,306 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,320 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,320 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,320 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,320 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,320 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,333 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,333 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,333 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,333 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,333 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,351 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,351 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,351 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,351 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,351 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,366 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,366 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,366 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,366 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:49:54,366 - INFO - Min/Max Uncertainty: 0.500, 1.080
+2025-04-06 17:53:29,054 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:53:29,054 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:53:29,054 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:53:29,054 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:53:29,054 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:53:29,054 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 17:53:29,056 - INFO - Config file: config.yaml
+2025-04-06 17:53:29,056 - INFO - Config file: config.yaml
+2025-04-06 17:53:29,056 - INFO - Config file: config.yaml
+2025-04-06 17:53:29,056 - INFO - Config file: config.yaml
+2025-04-06 17:53:29,056 - INFO - Config file: config.yaml
+2025-04-06 17:53:29,056 - INFO - Config file: config.yaml
+2025-04-06 17:53:29,057 - INFO - ==== Config file's contents ====
+2025-04-06 17:53:29,057 - INFO - ==== Config file's contents ====
+2025-04-06 17:53:29,057 - INFO - ==== Config file's contents ====
+2025-04-06 17:53:29,057 - INFO - ==== Config file's contents ====
+2025-04-06 17:53:29,057 - INFO - ==== Config file's contents ====
+2025-04-06 17:53:29,057 - INFO - ==== Config file's contents ====
+2025-04-06 17:53:29,058 - INFO - general:
+2025-04-06 17:53:29,058 - INFO - general:
+2025-04-06 17:53:29,058 - INFO - general:
+2025-04-06 17:53:29,058 - INFO - general:
+2025-04-06 17:53:29,058 - INFO - general:
+2025-04-06 17:53:29,058 - INFO - general:
+2025-04-06 17:53:29,059 - INFO -   seed: 2024
+2025-04-06 17:53:29,059 - INFO -   seed: 2024
+2025-04-06 17:53:29,059 - INFO -   seed: 2024
+2025-04-06 17:53:29,059 - INFO -   seed: 2024
+2025-04-06 17:53:29,059 - INFO -   seed: 2024
+2025-04-06 17:53:29,059 - INFO -   seed: 2024
+2025-04-06 17:53:29,060 - INFO -   train: False
+2025-04-06 17:53:29,060 - INFO -   train: False
+2025-04-06 17:53:29,060 - INFO -   train: False
+2025-04-06 17:53:29,060 - INFO -   train: False
+2025-04-06 17:53:29,060 - INFO -   train: False
+2025-04-06 17:53:29,060 - INFO -   train: False
+2025-04-06 17:53:29,062 - INFO -   dataset: mnist
+2025-04-06 17:53:29,062 - INFO -   dataset: mnist
+2025-04-06 17:53:29,062 - INFO -   dataset: mnist
+2025-04-06 17:53:29,062 - INFO -   dataset: mnist
+2025-04-06 17:53:29,062 - INFO -   dataset: mnist
+2025-04-06 17:53:29,062 - INFO -   dataset: mnist
+2025-04-06 17:53:29,063 - INFO -   data_path: ./data/
+2025-04-06 17:53:29,063 - INFO -   data_path: ./data/
+2025-04-06 17:53:29,063 - INFO -   data_path: ./data/
+2025-04-06 17:53:29,063 - INFO -   data_path: ./data/
+2025-04-06 17:53:29,063 - INFO -   data_path: ./data/
+2025-04-06 17:53:29,063 - INFO -   data_path: ./data/
+2025-04-06 17:53:29,065 - INFO -   save_path: None
+2025-04-06 17:53:29,065 - INFO -   save_path: None
+2025-04-06 17:53:29,065 - INFO -   save_path: None
+2025-04-06 17:53:29,065 - INFO -   save_path: None
+2025-04-06 17:53:29,065 - INFO -   save_path: None
+2025-04-06 17:53:29,065 - INFO -   save_path: None
+2025-04-06 17:53:29,066 - INFO - data:
+2025-04-06 17:53:29,066 - INFO - data:
+2025-04-06 17:53:29,066 - INFO - data:
+2025-04-06 17:53:29,066 - INFO - data:
+2025-04-06 17:53:29,066 - INFO - data:
+2025-04-06 17:53:29,066 - INFO - data:
+2025-04-06 17:53:29,067 - INFO -   downsample_factor: 1
+2025-04-06 17:53:29,067 - INFO -   downsample_factor: 1
+2025-04-06 17:53:29,067 - INFO -   downsample_factor: 1
+2025-04-06 17:53:29,067 - INFO -   downsample_factor: 1
+2025-04-06 17:53:29,067 - INFO -   downsample_factor: 1
+2025-04-06 17:53:29,067 - INFO -   downsample_factor: 1
+2025-04-06 17:53:29,068 - INFO -   resolution: [32, 32]
+2025-04-06 17:53:29,068 - INFO -   resolution: [32, 32]
+2025-04-06 17:53:29,068 - INFO -   resolution: [32, 32]
+2025-04-06 17:53:29,068 - INFO -   resolution: [32, 32]
+2025-04-06 17:53:29,068 - INFO -   resolution: [32, 32]
+2025-04-06 17:53:29,068 - INFO -   resolution: [32, 32]
+2025-04-06 17:53:29,069 - INFO -   traj_length: 1000
+2025-04-06 17:53:29,069 - INFO -   traj_length: 1000
+2025-04-06 17:53:29,069 - INFO -   traj_length: 1000
+2025-04-06 17:53:29,069 - INFO -   traj_length: 1000
+2025-04-06 17:53:29,069 - INFO -   traj_length: 1000
+2025-04-06 17:53:29,069 - INFO -   traj_length: 1000
+2025-04-06 17:53:29,070 - INFO - model:
+2025-04-06 17:53:29,070 - INFO - model:
+2025-04-06 17:53:29,070 - INFO - model:
+2025-04-06 17:53:29,070 - INFO - model:
+2025-04-06 17:53:29,070 - INFO - model:
+2025-04-06 17:53:29,070 - INFO - model:
+2025-04-06 17:53:29,071 - INFO -   mlp_width_size: 24
+2025-04-06 17:53:29,071 - INFO -   mlp_width_size: 24
+2025-04-06 17:53:29,071 - INFO -   mlp_width_size: 24
+2025-04-06 17:53:29,071 - INFO -   mlp_width_size: 24
+2025-04-06 17:53:29,071 - INFO -   mlp_width_size: 24
+2025-04-06 17:53:29,071 - INFO -   mlp_width_size: 24
+2025-04-06 17:53:29,072 - INFO -   mlp_depth: 3
+2025-04-06 17:53:29,072 - INFO -   mlp_depth: 3
+2025-04-06 17:53:29,072 - INFO -   mlp_depth: 3
+2025-04-06 17:53:29,072 - INFO -   mlp_depth: 3
+2025-04-06 17:53:29,072 - INFO -   mlp_depth: 3
+2025-04-06 17:53:29,072 - INFO -   mlp_depth: 3
+2025-04-06 17:53:29,073 - INFO -   activation: relu
+2025-04-06 17:53:29,073 - INFO -   activation: relu
+2025-04-06 17:53:29,073 - INFO -   activation: relu
+2025-04-06 17:53:29,073 - INFO -   activation: relu
+2025-04-06 17:53:29,073 - INFO -   activation: relu
+2025-04-06 17:53:29,073 - INFO -   activation: relu
+2025-04-06 17:53:29,073 - INFO -   input_prev_data: False
+2025-04-06 17:53:29,073 - INFO -   input_prev_data: False
+2025-04-06 17:53:29,073 - INFO -   input_prev_data: False
+2025-04-06 17:53:29,073 - INFO -   input_prev_data: False
+2025-04-06 17:53:29,073 - INFO -   input_prev_data: False
+2025-04-06 17:53:29,073 - INFO -   input_prev_data: False
+2025-04-06 17:53:29,074 - INFO -   model_type: wsm-rnn
+2025-04-06 17:53:29,074 - INFO -   model_type: wsm-rnn
+2025-04-06 17:53:29,074 - INFO -   model_type: wsm-rnn
+2025-04-06 17:53:29,074 - INFO -   model_type: wsm-rnn
+2025-04-06 17:53:29,074 - INFO -   model_type: wsm-rnn
+2025-04-06 17:53:29,074 - INFO -   model_type: wsm-rnn
+2025-04-06 17:53:29,075 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:53:29,075 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:53:29,075 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:53:29,075 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:53:29,075 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:53:29,075 - INFO -   nb_rnn_layers: 1
+2025-04-06 17:53:29,076 - INFO -   weights_lim: 0.5
+2025-04-06 17:53:29,076 - INFO -   weights_lim: 0.5
+2025-04-06 17:53:29,076 - INFO -   weights_lim: 0.5
+2025-04-06 17:53:29,076 - INFO -   weights_lim: 0.5
+2025-04-06 17:53:29,076 - INFO -   weights_lim: 0.5
+2025-04-06 17:53:29,076 - INFO -   weights_lim: 0.5
+2025-04-06 17:53:29,077 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:53:29,077 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:53:29,077 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:53:29,077 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:53:29,077 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:53:29,077 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 17:53:29,078 - INFO -   time_as_channel: False
+2025-04-06 17:53:29,078 - INFO -   time_as_channel: False
+2025-04-06 17:53:29,078 - INFO -   time_as_channel: False
+2025-04-06 17:53:29,078 - INFO -   time_as_channel: False
+2025-04-06 17:53:29,078 - INFO -   time_as_channel: False
+2025-04-06 17:53:29,078 - INFO -   time_as_channel: False
+2025-04-06 17:53:29,079 - INFO -   forcing_prob: 0.15
+2025-04-06 17:53:29,079 - INFO -   forcing_prob: 0.15
+2025-04-06 17:53:29,079 - INFO -   forcing_prob: 0.15
+2025-04-06 17:53:29,079 - INFO -   forcing_prob: 0.15
+2025-04-06 17:53:29,079 - INFO -   forcing_prob: 0.15
+2025-04-06 17:53:29,079 - INFO -   forcing_prob: 0.15
+2025-04-06 17:53:29,080 - INFO -   noise_theta_init: None
+2025-04-06 17:53:29,080 - INFO -   noise_theta_init: None
+2025-04-06 17:53:29,080 - INFO -   noise_theta_init: None
+2025-04-06 17:53:29,080 - INFO -   noise_theta_init: None
+2025-04-06 17:53:29,080 - INFO -   noise_theta_init: None
+2025-04-06 17:53:29,080 - INFO -   noise_theta_init: None
+2025-04-06 17:53:29,081 - INFO - optimizer:
+2025-04-06 17:53:29,081 - INFO - optimizer:
+2025-04-06 17:53:29,081 - INFO - optimizer:
+2025-04-06 17:53:29,081 - INFO - optimizer:
+2025-04-06 17:53:29,081 - INFO - optimizer:
+2025-04-06 17:53:29,081 - INFO - optimizer:
+2025-04-06 17:53:29,082 - INFO -   init_lr: 0.0001
+2025-04-06 17:53:29,082 - INFO -   init_lr: 0.0001
+2025-04-06 17:53:29,082 - INFO -   init_lr: 0.0001
+2025-04-06 17:53:29,082 - INFO -   init_lr: 0.0001
+2025-04-06 17:53:29,082 - INFO -   init_lr: 0.0001
+2025-04-06 17:53:29,082 - INFO -   init_lr: 0.0001
+2025-04-06 17:53:29,083 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:53:29,083 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:53:29,083 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:53:29,083 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:53:29,083 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:53:29,083 - INFO -   gradients_lim: 1e-07
+2025-04-06 17:53:29,083 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:53:29,083 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:53:29,083 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:53:29,083 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:53:29,083 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:53:29,083 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 17:53:29,084 - INFO - training:
+2025-04-06 17:53:29,084 - INFO - training:
+2025-04-06 17:53:29,084 - INFO - training:
+2025-04-06 17:53:29,084 - INFO - training:
+2025-04-06 17:53:29,084 - INFO - training:
+2025-04-06 17:53:29,084 - INFO - training:
+2025-04-06 17:53:29,085 - INFO -   nb_epochs: 500
+2025-04-06 17:53:29,085 - INFO -   nb_epochs: 500
+2025-04-06 17:53:29,085 - INFO -   nb_epochs: 500
+2025-04-06 17:53:29,085 - INFO -   nb_epochs: 500
+2025-04-06 17:53:29,085 - INFO -   nb_epochs: 500
+2025-04-06 17:53:29,085 - INFO -   nb_epochs: 500
+2025-04-06 17:53:29,086 - INFO -   batch_size: 640
+2025-04-06 17:53:29,086 - INFO -   batch_size: 640
+2025-04-06 17:53:29,086 - INFO -   batch_size: 640
+2025-04-06 17:53:29,086 - INFO -   batch_size: 640
+2025-04-06 17:53:29,086 - INFO -   batch_size: 640
+2025-04-06 17:53:29,086 - INFO -   batch_size: 640
+2025-04-06 17:53:29,086 - INFO -   print_every: 10
+2025-04-06 17:53:29,086 - INFO -   print_every: 10
+2025-04-06 17:53:29,086 - INFO -   print_every: 10
+2025-04-06 17:53:29,086 - INFO -   print_every: 10
+2025-04-06 17:53:29,086 - INFO -   print_every: 10
+2025-04-06 17:53:29,086 - INFO -   print_every: 10
+2025-04-06 17:53:29,087 - INFO -   checkpoint_every: 10
+2025-04-06 17:53:29,087 - INFO -   checkpoint_every: 10
+2025-04-06 17:53:29,087 - INFO -   checkpoint_every: 10
+2025-04-06 17:53:29,087 - INFO -   checkpoint_every: 10
+2025-04-06 17:53:29,087 - INFO -   checkpoint_every: 10
+2025-04-06 17:53:29,087 - INFO -   checkpoint_every: 10
+2025-04-06 17:53:29,088 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:53:29,088 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:53:29,088 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:53:29,088 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:53:29,088 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:53:29,088 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 17:53:29,089 - INFO -   use_nll_loss: True
+2025-04-06 17:53:29,089 - INFO -   use_nll_loss: True
+2025-04-06 17:53:29,089 - INFO -   use_nll_loss: True
+2025-04-06 17:53:29,089 - INFO -   use_nll_loss: True
+2025-04-06 17:53:29,089 - INFO -   use_nll_loss: True
+2025-04-06 17:53:29,089 - INFO -   use_nll_loss: True
+2025-04-06 17:53:29,089 - INFO -   inference_start: 300
+2025-04-06 17:53:29,089 - INFO -   inference_start: 300
+2025-04-06 17:53:29,089 - INFO -   inference_start: 300
+2025-04-06 17:53:29,089 - INFO -   inference_start: 300
+2025-04-06 17:53:29,089 - INFO -   inference_start: 300
+2025-04-06 17:53:29,089 - INFO -   inference_start: 300
+2025-04-06 17:53:31,982 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:53:31,982 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:53:31,982 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:53:31,982 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:53:31,982 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:53:31,982 - INFO - Images shape: (640, 784, 1)
+2025-04-06 17:53:31,983 - INFO - Labels shape: (640,)
+2025-04-06 17:53:31,983 - INFO - Labels shape: (640,)
+2025-04-06 17:53:31,983 - INFO - Labels shape: (640,)
+2025-04-06 17:53:31,983 - INFO - Labels shape: (640,)
+2025-04-06 17:53:31,983 - INFO - Labels shape: (640,)
+2025-04-06 17:53:31,983 - INFO - Labels shape: (640,)
+2025-04-06 17:53:31,984 - INFO - Seq length: 784
+2025-04-06 17:53:31,984 - INFO - Seq length: 784
+2025-04-06 17:53:31,984 - INFO - Seq length: 784
+2025-04-06 17:53:31,984 - INFO - Seq length: 784
+2025-04-06 17:53:31,984 - INFO - Seq length: 784
+2025-04-06 17:53:31,984 - INFO - Seq length: 784
+2025-04-06 17:53:31,985 - INFO - Data size: 1
+2025-04-06 17:53:31,985 - INFO - Data size: 1
+2025-04-06 17:53:31,985 - INFO - Data size: 1
+2025-04-06 17:53:31,985 - INFO - Data size: 1
+2025-04-06 17:53:31,985 - INFO - Data size: 1
+2025-04-06 17:53:31,985 - INFO - Data size: 1
+2025-04-06 17:53:31,986 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:53:31,986 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:53:31,986 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:53:31,986 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:53:31,986 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:53:31,986 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 17:53:31,987 - INFO - Number of batches:
+2025-04-06 17:53:31,987 - INFO - Number of batches:
+2025-04-06 17:53:31,987 - INFO - Number of batches:
+2025-04-06 17:53:31,987 - INFO - Number of batches:
+2025-04-06 17:53:31,987 - INFO - Number of batches:
+2025-04-06 17:53:31,987 - INFO - Number of batches:
+2025-04-06 17:53:31,987 - INFO -   - Train: 94
+2025-04-06 17:53:31,987 - INFO -   - Train: 94
+2025-04-06 17:53:31,987 - INFO -   - Train: 94
+2025-04-06 17:53:31,987 - INFO -   - Train: 94
+2025-04-06 17:53:31,987 - INFO -   - Train: 94
+2025-04-06 17:53:31,987 - INFO -   - Train: 94
+2025-04-06 17:53:31,988 - INFO -   - Test: 16
+2025-04-06 17:53:31,988 - INFO -   - Test: 16
+2025-04-06 17:53:31,988 - INFO -   - Test: 16
+2025-04-06 17:53:31,988 - INFO -   - Test: 16
+2025-04-06 17:53:31,988 - INFO -   - Test: 16
+2025-04-06 17:53:31,988 - INFO -   - Test: 16
+2025-04-06 17:53:33,397 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:53:33,397 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:53:33,397 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:53:33,397 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:53:33,397 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:53:33,397 - INFO - Model loaded from ./model.eqx
+2025-04-06 17:53:33,410 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:53:33,410 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:53:33,410 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:53:33,410 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:53:33,410 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:53:33,410 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:53:33,412 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:53:33,412 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:53:33,412 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:53:33,412 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:53:33,412 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:53:33,412 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 17:53:33,413 - INFO - No losses found in the nohup.log file
+2025-04-06 17:53:33,413 - INFO - No losses found in the nohup.log file
+2025-04-06 17:53:33,413 - INFO - No losses found in the nohup.log file
+2025-04-06 17:53:33,413 - INFO - No losses found in the nohup.log file
+2025-04-06 17:53:33,413 - INFO - No losses found in the nohup.log file
+2025-04-06 17:53:33,413 - INFO - No losses found in the nohup.log file
+2025-04-06 17:53:39,973 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:53:39,973 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:53:39,973 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:53:39,973 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:53:39,973 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:53:39,973 - INFO - Evaluation of MSE the test set:
+2025-04-06 17:53:39,977 - INFO -     - Mean : 0.154549
+2025-04-06 17:53:39,977 - INFO -     - Mean : 0.154549
+2025-04-06 17:53:39,977 - INFO -     - Mean : 0.154549
+2025-04-06 17:53:39,977 - INFO -     - Mean : 0.154549
+2025-04-06 17:53:39,977 - INFO -     - Mean : 0.154549
+2025-04-06 17:53:39,977 - INFO -     - Mean : 0.154549
+2025-04-06 17:53:39,978 - INFO -     - Median : 0.154829
+2025-04-06 17:53:39,978 - INFO -     - Median : 0.154829
+2025-04-06 17:53:39,978 - INFO -     - Median : 0.154829
+2025-04-06 17:53:39,978 - INFO -     - Median : 0.154829
+2025-04-06 17:53:39,978 - INFO -     - Median : 0.154829
+2025-04-06 17:53:39,978 - INFO -     - Median : 0.154829
+2025-04-06 17:53:39,980 - INFO -     - Min : 0.151272
+2025-04-06 17:53:39,980 - INFO -     - Min : 0.151272
+2025-04-06 17:53:39,980 - INFO -     - Min : 0.151272
+2025-04-06 17:53:39,980 - INFO -     - Min : 0.151272
+2025-04-06 17:53:39,980 - INFO -     - Min : 0.151272
+2025-04-06 17:53:39,980 - INFO -     - Min : 0.151272
+2025-04-06 17:53:40,277 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,277 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,277 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,277 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,277 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,277 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,290 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,290 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,290 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,290 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,290 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,290 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,303 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,303 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,303 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,303 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,303 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,303 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,317 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,317 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,317 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,317 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,317 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,317 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,332 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,332 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,332 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,332 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,332 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,332 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,345 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,345 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,345 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,345 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,345 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,345 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,355 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,355 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,355 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,355 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,355 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,355 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,361 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,361 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,361 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,361 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,361 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,361 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,368 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,368 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,368 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,368 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,368 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,368 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,375 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,375 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,375 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,375 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,375 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,375 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,383 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,383 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,383 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,383 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,383 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,383 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,395 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,395 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,395 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,395 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,395 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,395 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,408 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,408 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,408 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,408 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,408 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,408 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,421 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,421 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,421 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,421 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,421 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,421 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,435 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,435 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,435 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,435 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,435 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,435 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,448 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,448 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,448 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,448 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,448 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 17:53:40,448 - INFO - Min/Max Uncertainty: 0.500, 1.093
+2025-04-06 18:06:23,028 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:06:23,028 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:06:23,028 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:06:23,028 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:06:23,028 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:06:23,028 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:06:23,028 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:06:23,029 - INFO - Config file: config.yaml
+2025-04-06 18:06:23,029 - INFO - Config file: config.yaml
+2025-04-06 18:06:23,029 - INFO - Config file: config.yaml
+2025-04-06 18:06:23,029 - INFO - Config file: config.yaml
+2025-04-06 18:06:23,029 - INFO - Config file: config.yaml
+2025-04-06 18:06:23,029 - INFO - Config file: config.yaml
+2025-04-06 18:06:23,029 - INFO - Config file: config.yaml
+2025-04-06 18:06:23,030 - INFO - ==== Config file's contents ====
+2025-04-06 18:06:23,030 - INFO - ==== Config file's contents ====
+2025-04-06 18:06:23,030 - INFO - ==== Config file's contents ====
+2025-04-06 18:06:23,030 - INFO - ==== Config file's contents ====
+2025-04-06 18:06:23,030 - INFO - ==== Config file's contents ====
+2025-04-06 18:06:23,030 - INFO - ==== Config file's contents ====
+2025-04-06 18:06:23,030 - INFO - ==== Config file's contents ====
+2025-04-06 18:06:23,032 - INFO - general:
+2025-04-06 18:06:23,032 - INFO - general:
+2025-04-06 18:06:23,032 - INFO - general:
+2025-04-06 18:06:23,032 - INFO - general:
+2025-04-06 18:06:23,032 - INFO - general:
+2025-04-06 18:06:23,032 - INFO - general:
+2025-04-06 18:06:23,032 - INFO - general:
+2025-04-06 18:06:23,033 - INFO -   seed: 2024
+2025-04-06 18:06:23,033 - INFO -   seed: 2024
+2025-04-06 18:06:23,033 - INFO -   seed: 2024
+2025-04-06 18:06:23,033 - INFO -   seed: 2024
+2025-04-06 18:06:23,033 - INFO -   seed: 2024
+2025-04-06 18:06:23,033 - INFO -   seed: 2024
+2025-04-06 18:06:23,033 - INFO -   seed: 2024
+2025-04-06 18:06:23,034 - INFO -   train: False
+2025-04-06 18:06:23,034 - INFO -   train: False
+2025-04-06 18:06:23,034 - INFO -   train: False
+2025-04-06 18:06:23,034 - INFO -   train: False
+2025-04-06 18:06:23,034 - INFO -   train: False
+2025-04-06 18:06:23,034 - INFO -   train: False
+2025-04-06 18:06:23,034 - INFO -   train: False
+2025-04-06 18:06:23,035 - INFO -   dataset: mnist
+2025-04-06 18:06:23,035 - INFO -   dataset: mnist
+2025-04-06 18:06:23,035 - INFO -   dataset: mnist
+2025-04-06 18:06:23,035 - INFO -   dataset: mnist
+2025-04-06 18:06:23,035 - INFO -   dataset: mnist
+2025-04-06 18:06:23,035 - INFO -   dataset: mnist
+2025-04-06 18:06:23,035 - INFO -   dataset: mnist
+2025-04-06 18:06:23,037 - INFO -   data_path: ./data/
+2025-04-06 18:06:23,037 - INFO -   data_path: ./data/
+2025-04-06 18:06:23,037 - INFO -   data_path: ./data/
+2025-04-06 18:06:23,037 - INFO -   data_path: ./data/
+2025-04-06 18:06:23,037 - INFO -   data_path: ./data/
+2025-04-06 18:06:23,037 - INFO -   data_path: ./data/
+2025-04-06 18:06:23,037 - INFO -   data_path: ./data/
+2025-04-06 18:06:23,038 - INFO -   save_path: None
+2025-04-06 18:06:23,038 - INFO -   save_path: None
+2025-04-06 18:06:23,038 - INFO -   save_path: None
+2025-04-06 18:06:23,038 - INFO -   save_path: None
+2025-04-06 18:06:23,038 - INFO -   save_path: None
+2025-04-06 18:06:23,038 - INFO -   save_path: None
+2025-04-06 18:06:23,038 - INFO -   save_path: None
+2025-04-06 18:06:23,039 - INFO - data:
+2025-04-06 18:06:23,039 - INFO - data:
+2025-04-06 18:06:23,039 - INFO - data:
+2025-04-06 18:06:23,039 - INFO - data:
+2025-04-06 18:06:23,039 - INFO - data:
+2025-04-06 18:06:23,039 - INFO - data:
+2025-04-06 18:06:23,039 - INFO - data:
+2025-04-06 18:06:23,040 - INFO -   downsample_factor: 1
+2025-04-06 18:06:23,040 - INFO -   downsample_factor: 1
+2025-04-06 18:06:23,040 - INFO -   downsample_factor: 1
+2025-04-06 18:06:23,040 - INFO -   downsample_factor: 1
+2025-04-06 18:06:23,040 - INFO -   downsample_factor: 1
+2025-04-06 18:06:23,040 - INFO -   downsample_factor: 1
+2025-04-06 18:06:23,040 - INFO -   downsample_factor: 1
+2025-04-06 18:06:23,041 - INFO -   resolution: [32, 32]
+2025-04-06 18:06:23,041 - INFO -   resolution: [32, 32]
+2025-04-06 18:06:23,041 - INFO -   resolution: [32, 32]
+2025-04-06 18:06:23,041 - INFO -   resolution: [32, 32]
+2025-04-06 18:06:23,041 - INFO -   resolution: [32, 32]
+2025-04-06 18:06:23,041 - INFO -   resolution: [32, 32]
+2025-04-06 18:06:23,041 - INFO -   resolution: [32, 32]
+2025-04-06 18:06:23,042 - INFO -   traj_length: 1000
+2025-04-06 18:06:23,042 - INFO -   traj_length: 1000
+2025-04-06 18:06:23,042 - INFO -   traj_length: 1000
+2025-04-06 18:06:23,042 - INFO -   traj_length: 1000
+2025-04-06 18:06:23,042 - INFO -   traj_length: 1000
+2025-04-06 18:06:23,042 - INFO -   traj_length: 1000
+2025-04-06 18:06:23,042 - INFO -   traj_length: 1000
+2025-04-06 18:06:23,043 - INFO - model:
+2025-04-06 18:06:23,043 - INFO - model:
+2025-04-06 18:06:23,043 - INFO - model:
+2025-04-06 18:06:23,043 - INFO - model:
+2025-04-06 18:06:23,043 - INFO - model:
+2025-04-06 18:06:23,043 - INFO - model:
+2025-04-06 18:06:23,043 - INFO - model:
+2025-04-06 18:06:23,044 - INFO -   mlp_width_size: 24
+2025-04-06 18:06:23,044 - INFO -   mlp_width_size: 24
+2025-04-06 18:06:23,044 - INFO -   mlp_width_size: 24
+2025-04-06 18:06:23,044 - INFO -   mlp_width_size: 24
+2025-04-06 18:06:23,044 - INFO -   mlp_width_size: 24
+2025-04-06 18:06:23,044 - INFO -   mlp_width_size: 24
+2025-04-06 18:06:23,044 - INFO -   mlp_width_size: 24
+2025-04-06 18:06:23,045 - INFO -   mlp_depth: 3
+2025-04-06 18:06:23,045 - INFO -   mlp_depth: 3
+2025-04-06 18:06:23,045 - INFO -   mlp_depth: 3
+2025-04-06 18:06:23,045 - INFO -   mlp_depth: 3
+2025-04-06 18:06:23,045 - INFO -   mlp_depth: 3
+2025-04-06 18:06:23,045 - INFO -   mlp_depth: 3
+2025-04-06 18:06:23,045 - INFO -   mlp_depth: 3
+2025-04-06 18:06:23,046 - INFO -   activation: relu
+2025-04-06 18:06:23,046 - INFO -   activation: relu
+2025-04-06 18:06:23,046 - INFO -   activation: relu
+2025-04-06 18:06:23,046 - INFO -   activation: relu
+2025-04-06 18:06:23,046 - INFO -   activation: relu
+2025-04-06 18:06:23,046 - INFO -   activation: relu
+2025-04-06 18:06:23,046 - INFO -   activation: relu
+2025-04-06 18:06:23,047 - INFO -   input_prev_data: False
+2025-04-06 18:06:23,047 - INFO -   input_prev_data: False
+2025-04-06 18:06:23,047 - INFO -   input_prev_data: False
+2025-04-06 18:06:23,047 - INFO -   input_prev_data: False
+2025-04-06 18:06:23,047 - INFO -   input_prev_data: False
+2025-04-06 18:06:23,047 - INFO -   input_prev_data: False
+2025-04-06 18:06:23,047 - INFO -   input_prev_data: False
+2025-04-06 18:06:23,048 - INFO -   model_type: wsm-rnn
+2025-04-06 18:06:23,048 - INFO -   model_type: wsm-rnn
+2025-04-06 18:06:23,048 - INFO -   model_type: wsm-rnn
+2025-04-06 18:06:23,048 - INFO -   model_type: wsm-rnn
+2025-04-06 18:06:23,048 - INFO -   model_type: wsm-rnn
+2025-04-06 18:06:23,048 - INFO -   model_type: wsm-rnn
+2025-04-06 18:06:23,048 - INFO -   model_type: wsm-rnn
+2025-04-06 18:06:23,049 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:06:23,049 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:06:23,049 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:06:23,049 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:06:23,049 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:06:23,049 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:06:23,049 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:06:23,050 - INFO -   weights_lim: 0.5
+2025-04-06 18:06:23,050 - INFO -   weights_lim: 0.5
+2025-04-06 18:06:23,050 - INFO -   weights_lim: 0.5
+2025-04-06 18:06:23,050 - INFO -   weights_lim: 0.5
+2025-04-06 18:06:23,050 - INFO -   weights_lim: 0.5
+2025-04-06 18:06:23,050 - INFO -   weights_lim: 0.5
+2025-04-06 18:06:23,050 - INFO -   weights_lim: 0.5
+2025-04-06 18:06:23,051 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:06:23,051 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:06:23,051 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:06:23,051 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:06:23,051 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:06:23,051 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:06:23,051 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:06:23,052 - INFO -   time_as_channel: False
+2025-04-06 18:06:23,052 - INFO -   time_as_channel: False
+2025-04-06 18:06:23,052 - INFO -   time_as_channel: False
+2025-04-06 18:06:23,052 - INFO -   time_as_channel: False
+2025-04-06 18:06:23,052 - INFO -   time_as_channel: False
+2025-04-06 18:06:23,052 - INFO -   time_as_channel: False
+2025-04-06 18:06:23,052 - INFO -   time_as_channel: False
+2025-04-06 18:06:23,053 - INFO -   forcing_prob: 0.15
+2025-04-06 18:06:23,053 - INFO -   forcing_prob: 0.15
+2025-04-06 18:06:23,053 - INFO -   forcing_prob: 0.15
+2025-04-06 18:06:23,053 - INFO -   forcing_prob: 0.15
+2025-04-06 18:06:23,053 - INFO -   forcing_prob: 0.15
+2025-04-06 18:06:23,053 - INFO -   forcing_prob: 0.15
+2025-04-06 18:06:23,053 - INFO -   forcing_prob: 0.15
+2025-04-06 18:06:23,054 - INFO -   noise_theta_init: None
+2025-04-06 18:06:23,054 - INFO -   noise_theta_init: None
+2025-04-06 18:06:23,054 - INFO -   noise_theta_init: None
+2025-04-06 18:06:23,054 - INFO -   noise_theta_init: None
+2025-04-06 18:06:23,054 - INFO -   noise_theta_init: None
+2025-04-06 18:06:23,054 - INFO -   noise_theta_init: None
+2025-04-06 18:06:23,054 - INFO -   noise_theta_init: None
+2025-04-06 18:06:23,055 - INFO - optimizer:
+2025-04-06 18:06:23,055 - INFO - optimizer:
+2025-04-06 18:06:23,055 - INFO - optimizer:
+2025-04-06 18:06:23,055 - INFO - optimizer:
+2025-04-06 18:06:23,055 - INFO - optimizer:
+2025-04-06 18:06:23,055 - INFO - optimizer:
+2025-04-06 18:06:23,055 - INFO - optimizer:
+2025-04-06 18:06:23,056 - INFO -   init_lr: 0.0001
+2025-04-06 18:06:23,056 - INFO -   init_lr: 0.0001
+2025-04-06 18:06:23,056 - INFO -   init_lr: 0.0001
+2025-04-06 18:06:23,056 - INFO -   init_lr: 0.0001
+2025-04-06 18:06:23,056 - INFO -   init_lr: 0.0001
+2025-04-06 18:06:23,056 - INFO -   init_lr: 0.0001
+2025-04-06 18:06:23,056 - INFO -   init_lr: 0.0001
+2025-04-06 18:06:23,057 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:06:23,057 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:06:23,057 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:06:23,057 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:06:23,057 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:06:23,057 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:06:23,057 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:06:23,058 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:06:23,058 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:06:23,058 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:06:23,058 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:06:23,058 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:06:23,058 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:06:23,058 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:06:23,059 - INFO - training:
+2025-04-06 18:06:23,059 - INFO - training:
+2025-04-06 18:06:23,059 - INFO - training:
+2025-04-06 18:06:23,059 - INFO - training:
+2025-04-06 18:06:23,059 - INFO - training:
+2025-04-06 18:06:23,059 - INFO - training:
+2025-04-06 18:06:23,059 - INFO - training:
+2025-04-06 18:06:23,060 - INFO -   nb_epochs: 500
+2025-04-06 18:06:23,060 - INFO -   nb_epochs: 500
+2025-04-06 18:06:23,060 - INFO -   nb_epochs: 500
+2025-04-06 18:06:23,060 - INFO -   nb_epochs: 500
+2025-04-06 18:06:23,060 - INFO -   nb_epochs: 500
+2025-04-06 18:06:23,060 - INFO -   nb_epochs: 500
+2025-04-06 18:06:23,060 - INFO -   nb_epochs: 500
+2025-04-06 18:06:23,061 - INFO -   batch_size: 640
+2025-04-06 18:06:23,061 - INFO -   batch_size: 640
+2025-04-06 18:06:23,061 - INFO -   batch_size: 640
+2025-04-06 18:06:23,061 - INFO -   batch_size: 640
+2025-04-06 18:06:23,061 - INFO -   batch_size: 640
+2025-04-06 18:06:23,061 - INFO -   batch_size: 640
+2025-04-06 18:06:23,061 - INFO -   batch_size: 640
+2025-04-06 18:06:23,062 - INFO -   print_every: 10
+2025-04-06 18:06:23,062 - INFO -   print_every: 10
+2025-04-06 18:06:23,062 - INFO -   print_every: 10
+2025-04-06 18:06:23,062 - INFO -   print_every: 10
+2025-04-06 18:06:23,062 - INFO -   print_every: 10
+2025-04-06 18:06:23,062 - INFO -   print_every: 10
+2025-04-06 18:06:23,062 - INFO -   print_every: 10
+2025-04-06 18:06:23,063 - INFO -   checkpoint_every: 10
+2025-04-06 18:06:23,063 - INFO -   checkpoint_every: 10
+2025-04-06 18:06:23,063 - INFO -   checkpoint_every: 10
+2025-04-06 18:06:23,063 - INFO -   checkpoint_every: 10
+2025-04-06 18:06:23,063 - INFO -   checkpoint_every: 10
+2025-04-06 18:06:23,063 - INFO -   checkpoint_every: 10
+2025-04-06 18:06:23,063 - INFO -   checkpoint_every: 10
+2025-04-06 18:06:23,064 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:06:23,064 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:06:23,064 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:06:23,064 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:06:23,064 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:06:23,064 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:06:23,064 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:06:23,065 - INFO -   use_nll_loss: True
+2025-04-06 18:06:23,065 - INFO -   use_nll_loss: True
+2025-04-06 18:06:23,065 - INFO -   use_nll_loss: True
+2025-04-06 18:06:23,065 - INFO -   use_nll_loss: True
+2025-04-06 18:06:23,065 - INFO -   use_nll_loss: True
+2025-04-06 18:06:23,065 - INFO -   use_nll_loss: True
+2025-04-06 18:06:23,065 - INFO -   use_nll_loss: True
+2025-04-06 18:06:23,066 - INFO -   inference_start: 300
+2025-04-06 18:06:23,066 - INFO -   inference_start: 300
+2025-04-06 18:06:23,066 - INFO -   inference_start: 300
+2025-04-06 18:06:23,066 - INFO -   inference_start: 300
+2025-04-06 18:06:23,066 - INFO -   inference_start: 300
+2025-04-06 18:06:23,066 - INFO -   inference_start: 300
+2025-04-06 18:06:23,066 - INFO -   inference_start: 300
+2025-04-06 18:06:25,936 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:06:25,936 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:06:25,936 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:06:25,936 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:06:25,936 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:06:25,936 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:06:25,936 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:06:25,938 - INFO - Labels shape: (640,)
+2025-04-06 18:06:25,938 - INFO - Labels shape: (640,)
+2025-04-06 18:06:25,938 - INFO - Labels shape: (640,)
+2025-04-06 18:06:25,938 - INFO - Labels shape: (640,)
+2025-04-06 18:06:25,938 - INFO - Labels shape: (640,)
+2025-04-06 18:06:25,938 - INFO - Labels shape: (640,)
+2025-04-06 18:06:25,938 - INFO - Labels shape: (640,)
+2025-04-06 18:06:25,939 - INFO - Seq length: 784
+2025-04-06 18:06:25,939 - INFO - Seq length: 784
+2025-04-06 18:06:25,939 - INFO - Seq length: 784
+2025-04-06 18:06:25,939 - INFO - Seq length: 784
+2025-04-06 18:06:25,939 - INFO - Seq length: 784
+2025-04-06 18:06:25,939 - INFO - Seq length: 784
+2025-04-06 18:06:25,939 - INFO - Seq length: 784
+2025-04-06 18:06:25,940 - INFO - Data size: 1
+2025-04-06 18:06:25,940 - INFO - Data size: 1
+2025-04-06 18:06:25,940 - INFO - Data size: 1
+2025-04-06 18:06:25,940 - INFO - Data size: 1
+2025-04-06 18:06:25,940 - INFO - Data size: 1
+2025-04-06 18:06:25,940 - INFO - Data size: 1
+2025-04-06 18:06:25,940 - INFO - Data size: 1
+2025-04-06 18:06:25,941 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:06:25,941 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:06:25,941 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:06:25,941 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:06:25,941 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:06:25,941 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:06:25,941 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:06:25,942 - INFO - Number of batches:
+2025-04-06 18:06:25,942 - INFO - Number of batches:
+2025-04-06 18:06:25,942 - INFO - Number of batches:
+2025-04-06 18:06:25,942 - INFO - Number of batches:
+2025-04-06 18:06:25,942 - INFO - Number of batches:
+2025-04-06 18:06:25,942 - INFO - Number of batches:
+2025-04-06 18:06:25,942 - INFO - Number of batches:
+2025-04-06 18:06:25,943 - INFO -   - Train: 94
+2025-04-06 18:06:25,943 - INFO -   - Train: 94
+2025-04-06 18:06:25,943 - INFO -   - Train: 94
+2025-04-06 18:06:25,943 - INFO -   - Train: 94
+2025-04-06 18:06:25,943 - INFO -   - Train: 94
+2025-04-06 18:06:25,943 - INFO -   - Train: 94
+2025-04-06 18:06:25,943 - INFO -   - Train: 94
+2025-04-06 18:06:25,943 - INFO -   - Test: 16
+2025-04-06 18:06:25,943 - INFO -   - Test: 16
+2025-04-06 18:06:25,943 - INFO -   - Test: 16
+2025-04-06 18:06:25,943 - INFO -   - Test: 16
+2025-04-06 18:06:25,943 - INFO -   - Test: 16
+2025-04-06 18:06:25,943 - INFO -   - Test: 16
+2025-04-06 18:06:25,943 - INFO -   - Test: 16
+2025-04-06 18:06:26,915 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:06:26,915 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:06:26,915 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:06:26,915 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:06:26,915 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:06:26,915 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:06:26,915 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:06:26,928 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:06:26,928 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:06:26,928 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:06:26,928 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:06:26,928 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:06:26,928 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:06:26,928 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:06:26,930 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:06:26,930 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:06:26,930 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:06:26,930 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:06:26,930 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:06:26,930 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:06:26,930 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:06:26,931 - INFO - No losses found in the nohup.log file
+2025-04-06 18:06:26,931 - INFO - No losses found in the nohup.log file
+2025-04-06 18:06:26,931 - INFO - No losses found in the nohup.log file
+2025-04-06 18:06:26,931 - INFO - No losses found in the nohup.log file
+2025-04-06 18:06:26,931 - INFO - No losses found in the nohup.log file
+2025-04-06 18:06:26,931 - INFO - No losses found in the nohup.log file
+2025-04-06 18:06:26,931 - INFO - No losses found in the nohup.log file
+2025-04-06 18:06:33,536 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:06:33,536 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:06:33,536 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:06:33,536 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:06:33,536 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:06:33,536 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:06:33,536 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:06:33,539 - INFO -     - Mean : 0.145843
+2025-04-06 18:06:33,539 - INFO -     - Mean : 0.145843
+2025-04-06 18:06:33,539 - INFO -     - Mean : 0.145843
+2025-04-06 18:06:33,539 - INFO -     - Mean : 0.145843
+2025-04-06 18:06:33,539 - INFO -     - Mean : 0.145843
+2025-04-06 18:06:33,539 - INFO -     - Mean : 0.145843
+2025-04-06 18:06:33,539 - INFO -     - Mean : 0.145843
+2025-04-06 18:06:33,541 - INFO -     - Median : 0.145936
+2025-04-06 18:06:33,541 - INFO -     - Median : 0.145936
+2025-04-06 18:06:33,541 - INFO -     - Median : 0.145936
+2025-04-06 18:06:33,541 - INFO -     - Median : 0.145936
+2025-04-06 18:06:33,541 - INFO -     - Median : 0.145936
+2025-04-06 18:06:33,541 - INFO -     - Median : 0.145936
+2025-04-06 18:06:33,541 - INFO -     - Median : 0.145936
+2025-04-06 18:06:33,542 - INFO -     - Min : 0.142732
+2025-04-06 18:06:33,542 - INFO -     - Min : 0.142732
+2025-04-06 18:06:33,542 - INFO -     - Min : 0.142732
+2025-04-06 18:06:33,542 - INFO -     - Min : 0.142732
+2025-04-06 18:06:33,542 - INFO -     - Min : 0.142732
+2025-04-06 18:06:33,542 - INFO -     - Min : 0.142732
+2025-04-06 18:06:33,542 - INFO -     - Min : 0.142732
+2025-04-06 18:06:34,016 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,016 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,016 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,016 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,016 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,016 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,016 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,031 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,031 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,031 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,031 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,031 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,031 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,031 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,044 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,044 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,044 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,044 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,044 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,044 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,044 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,058 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,058 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,058 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,058 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,058 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,058 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,058 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,071 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,071 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,071 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,071 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,071 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,071 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,071 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,084 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,084 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,084 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,084 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,084 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,084 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,084 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,098 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,098 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,098 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,098 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,098 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,098 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,098 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,113 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,113 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,113 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,113 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,113 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,113 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,113 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,129 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,129 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,129 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,129 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,129 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,129 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,129 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,140 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,140 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,140 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,140 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,140 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,140 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,140 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,153 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,153 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,153 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,153 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,153 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,153 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,153 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,167 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,167 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,167 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,167 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,167 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,167 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,167 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,184 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,184 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,184 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,184 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,184 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,184 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,184 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,198 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,198 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,198 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,198 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,198 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,198 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,198 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,211 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,211 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,211 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,211 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,211 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,211 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,211 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,224 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,224 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,224 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,224 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,224 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,224 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:06:34,224 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:44,745 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:12:44,745 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:12:44,745 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:12:44,745 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:12:44,745 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:12:44,745 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:12:44,745 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:12:44,745 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:12:44,748 - INFO - Config file: config.yaml
+2025-04-06 18:12:44,748 - INFO - Config file: config.yaml
+2025-04-06 18:12:44,748 - INFO - Config file: config.yaml
+2025-04-06 18:12:44,748 - INFO - Config file: config.yaml
+2025-04-06 18:12:44,748 - INFO - Config file: config.yaml
+2025-04-06 18:12:44,748 - INFO - Config file: config.yaml
+2025-04-06 18:12:44,748 - INFO - Config file: config.yaml
+2025-04-06 18:12:44,748 - INFO - Config file: config.yaml
+2025-04-06 18:12:44,750 - INFO - ==== Config file's contents ====
+2025-04-06 18:12:44,750 - INFO - ==== Config file's contents ====
+2025-04-06 18:12:44,750 - INFO - ==== Config file's contents ====
+2025-04-06 18:12:44,750 - INFO - ==== Config file's contents ====
+2025-04-06 18:12:44,750 - INFO - ==== Config file's contents ====
+2025-04-06 18:12:44,750 - INFO - ==== Config file's contents ====
+2025-04-06 18:12:44,750 - INFO - ==== Config file's contents ====
+2025-04-06 18:12:44,750 - INFO - ==== Config file's contents ====
+2025-04-06 18:12:44,752 - INFO - general:
+2025-04-06 18:12:44,752 - INFO - general:
+2025-04-06 18:12:44,752 - INFO - general:
+2025-04-06 18:12:44,752 - INFO - general:
+2025-04-06 18:12:44,752 - INFO - general:
+2025-04-06 18:12:44,752 - INFO - general:
+2025-04-06 18:12:44,752 - INFO - general:
+2025-04-06 18:12:44,752 - INFO - general:
+2025-04-06 18:12:44,754 - INFO -   seed: 2024
+2025-04-06 18:12:44,754 - INFO -   seed: 2024
+2025-04-06 18:12:44,754 - INFO -   seed: 2024
+2025-04-06 18:12:44,754 - INFO -   seed: 2024
+2025-04-06 18:12:44,754 - INFO -   seed: 2024
+2025-04-06 18:12:44,754 - INFO -   seed: 2024
+2025-04-06 18:12:44,754 - INFO -   seed: 2024
+2025-04-06 18:12:44,754 - INFO -   seed: 2024
+2025-04-06 18:12:44,756 - INFO -   train: False
+2025-04-06 18:12:44,756 - INFO -   train: False
+2025-04-06 18:12:44,756 - INFO -   train: False
+2025-04-06 18:12:44,756 - INFO -   train: False
+2025-04-06 18:12:44,756 - INFO -   train: False
+2025-04-06 18:12:44,756 - INFO -   train: False
+2025-04-06 18:12:44,756 - INFO -   train: False
+2025-04-06 18:12:44,756 - INFO -   train: False
+2025-04-06 18:12:44,757 - INFO -   dataset: mnist
+2025-04-06 18:12:44,757 - INFO -   dataset: mnist
+2025-04-06 18:12:44,757 - INFO -   dataset: mnist
+2025-04-06 18:12:44,757 - INFO -   dataset: mnist
+2025-04-06 18:12:44,757 - INFO -   dataset: mnist
+2025-04-06 18:12:44,757 - INFO -   dataset: mnist
+2025-04-06 18:12:44,757 - INFO -   dataset: mnist
+2025-04-06 18:12:44,757 - INFO -   dataset: mnist
+2025-04-06 18:12:44,759 - INFO -   data_path: ./data/
+2025-04-06 18:12:44,759 - INFO -   data_path: ./data/
+2025-04-06 18:12:44,759 - INFO -   data_path: ./data/
+2025-04-06 18:12:44,759 - INFO -   data_path: ./data/
+2025-04-06 18:12:44,759 - INFO -   data_path: ./data/
+2025-04-06 18:12:44,759 - INFO -   data_path: ./data/
+2025-04-06 18:12:44,759 - INFO -   data_path: ./data/
+2025-04-06 18:12:44,759 - INFO -   data_path: ./data/
+2025-04-06 18:12:44,761 - INFO -   save_path: None
+2025-04-06 18:12:44,761 - INFO -   save_path: None
+2025-04-06 18:12:44,761 - INFO -   save_path: None
+2025-04-06 18:12:44,761 - INFO -   save_path: None
+2025-04-06 18:12:44,761 - INFO -   save_path: None
+2025-04-06 18:12:44,761 - INFO -   save_path: None
+2025-04-06 18:12:44,761 - INFO -   save_path: None
+2025-04-06 18:12:44,761 - INFO -   save_path: None
+2025-04-06 18:12:44,762 - INFO - data:
+2025-04-06 18:12:44,762 - INFO - data:
+2025-04-06 18:12:44,762 - INFO - data:
+2025-04-06 18:12:44,762 - INFO - data:
+2025-04-06 18:12:44,762 - INFO - data:
+2025-04-06 18:12:44,762 - INFO - data:
+2025-04-06 18:12:44,762 - INFO - data:
+2025-04-06 18:12:44,762 - INFO - data:
+2025-04-06 18:12:44,764 - INFO -   downsample_factor: 1
+2025-04-06 18:12:44,764 - INFO -   downsample_factor: 1
+2025-04-06 18:12:44,764 - INFO -   downsample_factor: 1
+2025-04-06 18:12:44,764 - INFO -   downsample_factor: 1
+2025-04-06 18:12:44,764 - INFO -   downsample_factor: 1
+2025-04-06 18:12:44,764 - INFO -   downsample_factor: 1
+2025-04-06 18:12:44,764 - INFO -   downsample_factor: 1
+2025-04-06 18:12:44,764 - INFO -   downsample_factor: 1
+2025-04-06 18:12:44,765 - INFO -   resolution: [32, 32]
+2025-04-06 18:12:44,765 - INFO -   resolution: [32, 32]
+2025-04-06 18:12:44,765 - INFO -   resolution: [32, 32]
+2025-04-06 18:12:44,765 - INFO -   resolution: [32, 32]
+2025-04-06 18:12:44,765 - INFO -   resolution: [32, 32]
+2025-04-06 18:12:44,765 - INFO -   resolution: [32, 32]
+2025-04-06 18:12:44,765 - INFO -   resolution: [32, 32]
+2025-04-06 18:12:44,765 - INFO -   resolution: [32, 32]
+2025-04-06 18:12:44,767 - INFO -   traj_length: 1000
+2025-04-06 18:12:44,767 - INFO -   traj_length: 1000
+2025-04-06 18:12:44,767 - INFO -   traj_length: 1000
+2025-04-06 18:12:44,767 - INFO -   traj_length: 1000
+2025-04-06 18:12:44,767 - INFO -   traj_length: 1000
+2025-04-06 18:12:44,767 - INFO -   traj_length: 1000
+2025-04-06 18:12:44,767 - INFO -   traj_length: 1000
+2025-04-06 18:12:44,767 - INFO -   traj_length: 1000
+2025-04-06 18:12:44,768 - INFO - model:
+2025-04-06 18:12:44,768 - INFO - model:
+2025-04-06 18:12:44,768 - INFO - model:
+2025-04-06 18:12:44,768 - INFO - model:
+2025-04-06 18:12:44,768 - INFO - model:
+2025-04-06 18:12:44,768 - INFO - model:
+2025-04-06 18:12:44,768 - INFO - model:
+2025-04-06 18:12:44,768 - INFO - model:
+2025-04-06 18:12:44,769 - INFO -   mlp_width_size: 24
+2025-04-06 18:12:44,769 - INFO -   mlp_width_size: 24
+2025-04-06 18:12:44,769 - INFO -   mlp_width_size: 24
+2025-04-06 18:12:44,769 - INFO -   mlp_width_size: 24
+2025-04-06 18:12:44,769 - INFO -   mlp_width_size: 24
+2025-04-06 18:12:44,769 - INFO -   mlp_width_size: 24
+2025-04-06 18:12:44,769 - INFO -   mlp_width_size: 24
+2025-04-06 18:12:44,769 - INFO -   mlp_width_size: 24
+2025-04-06 18:12:44,770 - INFO -   mlp_depth: 3
+2025-04-06 18:12:44,770 - INFO -   mlp_depth: 3
+2025-04-06 18:12:44,770 - INFO -   mlp_depth: 3
+2025-04-06 18:12:44,770 - INFO -   mlp_depth: 3
+2025-04-06 18:12:44,770 - INFO -   mlp_depth: 3
+2025-04-06 18:12:44,770 - INFO -   mlp_depth: 3
+2025-04-06 18:12:44,770 - INFO -   mlp_depth: 3
+2025-04-06 18:12:44,770 - INFO -   mlp_depth: 3
+2025-04-06 18:12:44,771 - INFO -   activation: relu
+2025-04-06 18:12:44,771 - INFO -   activation: relu
+2025-04-06 18:12:44,771 - INFO -   activation: relu
+2025-04-06 18:12:44,771 - INFO -   activation: relu
+2025-04-06 18:12:44,771 - INFO -   activation: relu
+2025-04-06 18:12:44,771 - INFO -   activation: relu
+2025-04-06 18:12:44,771 - INFO -   activation: relu
+2025-04-06 18:12:44,771 - INFO -   activation: relu
+2025-04-06 18:12:44,772 - INFO -   input_prev_data: False
+2025-04-06 18:12:44,772 - INFO -   input_prev_data: False
+2025-04-06 18:12:44,772 - INFO -   input_prev_data: False
+2025-04-06 18:12:44,772 - INFO -   input_prev_data: False
+2025-04-06 18:12:44,772 - INFO -   input_prev_data: False
+2025-04-06 18:12:44,772 - INFO -   input_prev_data: False
+2025-04-06 18:12:44,772 - INFO -   input_prev_data: False
+2025-04-06 18:12:44,772 - INFO -   input_prev_data: False
+2025-04-06 18:12:44,773 - INFO -   model_type: wsm-rnn
+2025-04-06 18:12:44,773 - INFO -   model_type: wsm-rnn
+2025-04-06 18:12:44,773 - INFO -   model_type: wsm-rnn
+2025-04-06 18:12:44,773 - INFO -   model_type: wsm-rnn
+2025-04-06 18:12:44,773 - INFO -   model_type: wsm-rnn
+2025-04-06 18:12:44,773 - INFO -   model_type: wsm-rnn
+2025-04-06 18:12:44,773 - INFO -   model_type: wsm-rnn
+2025-04-06 18:12:44,773 - INFO -   model_type: wsm-rnn
+2025-04-06 18:12:44,774 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:12:44,774 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:12:44,774 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:12:44,774 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:12:44,774 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:12:44,774 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:12:44,774 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:12:44,774 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:12:44,775 - INFO -   weights_lim: 0.5
+2025-04-06 18:12:44,775 - INFO -   weights_lim: 0.5
+2025-04-06 18:12:44,775 - INFO -   weights_lim: 0.5
+2025-04-06 18:12:44,775 - INFO -   weights_lim: 0.5
+2025-04-06 18:12:44,775 - INFO -   weights_lim: 0.5
+2025-04-06 18:12:44,775 - INFO -   weights_lim: 0.5
+2025-04-06 18:12:44,775 - INFO -   weights_lim: 0.5
+2025-04-06 18:12:44,775 - INFO -   weights_lim: 0.5
+2025-04-06 18:12:44,776 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:12:44,776 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:12:44,776 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:12:44,776 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:12:44,776 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:12:44,776 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:12:44,776 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:12:44,776 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:12:44,777 - INFO -   time_as_channel: False
+2025-04-06 18:12:44,777 - INFO -   time_as_channel: False
+2025-04-06 18:12:44,777 - INFO -   time_as_channel: False
+2025-04-06 18:12:44,777 - INFO -   time_as_channel: False
+2025-04-06 18:12:44,777 - INFO -   time_as_channel: False
+2025-04-06 18:12:44,777 - INFO -   time_as_channel: False
+2025-04-06 18:12:44,777 - INFO -   time_as_channel: False
+2025-04-06 18:12:44,777 - INFO -   time_as_channel: False
+2025-04-06 18:12:44,778 - INFO -   forcing_prob: 0.15
+2025-04-06 18:12:44,778 - INFO -   forcing_prob: 0.15
+2025-04-06 18:12:44,778 - INFO -   forcing_prob: 0.15
+2025-04-06 18:12:44,778 - INFO -   forcing_prob: 0.15
+2025-04-06 18:12:44,778 - INFO -   forcing_prob: 0.15
+2025-04-06 18:12:44,778 - INFO -   forcing_prob: 0.15
+2025-04-06 18:12:44,778 - INFO -   forcing_prob: 0.15
+2025-04-06 18:12:44,778 - INFO -   forcing_prob: 0.15
+2025-04-06 18:12:44,779 - INFO -   noise_theta_init: None
+2025-04-06 18:12:44,779 - INFO -   noise_theta_init: None
+2025-04-06 18:12:44,779 - INFO -   noise_theta_init: None
+2025-04-06 18:12:44,779 - INFO -   noise_theta_init: None
+2025-04-06 18:12:44,779 - INFO -   noise_theta_init: None
+2025-04-06 18:12:44,779 - INFO -   noise_theta_init: None
+2025-04-06 18:12:44,779 - INFO -   noise_theta_init: None
+2025-04-06 18:12:44,779 - INFO -   noise_theta_init: None
+2025-04-06 18:12:44,780 - INFO - optimizer:
+2025-04-06 18:12:44,780 - INFO - optimizer:
+2025-04-06 18:12:44,780 - INFO - optimizer:
+2025-04-06 18:12:44,780 - INFO - optimizer:
+2025-04-06 18:12:44,780 - INFO - optimizer:
+2025-04-06 18:12:44,780 - INFO - optimizer:
+2025-04-06 18:12:44,780 - INFO - optimizer:
+2025-04-06 18:12:44,780 - INFO - optimizer:
+2025-04-06 18:12:44,781 - INFO -   init_lr: 0.0001
+2025-04-06 18:12:44,781 - INFO -   init_lr: 0.0001
+2025-04-06 18:12:44,781 - INFO -   init_lr: 0.0001
+2025-04-06 18:12:44,781 - INFO -   init_lr: 0.0001
+2025-04-06 18:12:44,781 - INFO -   init_lr: 0.0001
+2025-04-06 18:12:44,781 - INFO -   init_lr: 0.0001
+2025-04-06 18:12:44,781 - INFO -   init_lr: 0.0001
+2025-04-06 18:12:44,781 - INFO -   init_lr: 0.0001
+2025-04-06 18:12:44,782 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:12:44,782 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:12:44,782 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:12:44,782 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:12:44,782 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:12:44,782 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:12:44,782 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:12:44,782 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:12:44,783 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:12:44,783 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:12:44,783 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:12:44,783 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:12:44,783 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:12:44,783 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:12:44,783 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:12:44,783 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:12:44,783 - INFO - training:
+2025-04-06 18:12:44,783 - INFO - training:
+2025-04-06 18:12:44,783 - INFO - training:
+2025-04-06 18:12:44,783 - INFO - training:
+2025-04-06 18:12:44,783 - INFO - training:
+2025-04-06 18:12:44,783 - INFO - training:
+2025-04-06 18:12:44,783 - INFO - training:
+2025-04-06 18:12:44,783 - INFO - training:
+2025-04-06 18:12:44,785 - INFO -   nb_epochs: 500
+2025-04-06 18:12:44,785 - INFO -   nb_epochs: 500
+2025-04-06 18:12:44,785 - INFO -   nb_epochs: 500
+2025-04-06 18:12:44,785 - INFO -   nb_epochs: 500
+2025-04-06 18:12:44,785 - INFO -   nb_epochs: 500
+2025-04-06 18:12:44,785 - INFO -   nb_epochs: 500
+2025-04-06 18:12:44,785 - INFO -   nb_epochs: 500
+2025-04-06 18:12:44,785 - INFO -   nb_epochs: 500
+2025-04-06 18:12:44,786 - INFO -   batch_size: 640
+2025-04-06 18:12:44,786 - INFO -   batch_size: 640
+2025-04-06 18:12:44,786 - INFO -   batch_size: 640
+2025-04-06 18:12:44,786 - INFO -   batch_size: 640
+2025-04-06 18:12:44,786 - INFO -   batch_size: 640
+2025-04-06 18:12:44,786 - INFO -   batch_size: 640
+2025-04-06 18:12:44,786 - INFO -   batch_size: 640
+2025-04-06 18:12:44,786 - INFO -   batch_size: 640
+2025-04-06 18:12:44,787 - INFO -   print_every: 10
+2025-04-06 18:12:44,787 - INFO -   print_every: 10
+2025-04-06 18:12:44,787 - INFO -   print_every: 10
+2025-04-06 18:12:44,787 - INFO -   print_every: 10
+2025-04-06 18:12:44,787 - INFO -   print_every: 10
+2025-04-06 18:12:44,787 - INFO -   print_every: 10
+2025-04-06 18:12:44,787 - INFO -   print_every: 10
+2025-04-06 18:12:44,787 - INFO -   print_every: 10
+2025-04-06 18:12:44,787 - INFO -   checkpoint_every: 10
+2025-04-06 18:12:44,787 - INFO -   checkpoint_every: 10
+2025-04-06 18:12:44,787 - INFO -   checkpoint_every: 10
+2025-04-06 18:12:44,787 - INFO -   checkpoint_every: 10
+2025-04-06 18:12:44,787 - INFO -   checkpoint_every: 10
+2025-04-06 18:12:44,787 - INFO -   checkpoint_every: 10
+2025-04-06 18:12:44,787 - INFO -   checkpoint_every: 10
+2025-04-06 18:12:44,787 - INFO -   checkpoint_every: 10
+2025-04-06 18:12:44,789 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:12:44,789 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:12:44,789 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:12:44,789 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:12:44,789 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:12:44,789 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:12:44,789 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:12:44,789 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:12:44,790 - INFO -   use_nll_loss: True
+2025-04-06 18:12:44,790 - INFO -   use_nll_loss: True
+2025-04-06 18:12:44,790 - INFO -   use_nll_loss: True
+2025-04-06 18:12:44,790 - INFO -   use_nll_loss: True
+2025-04-06 18:12:44,790 - INFO -   use_nll_loss: True
+2025-04-06 18:12:44,790 - INFO -   use_nll_loss: True
+2025-04-06 18:12:44,790 - INFO -   use_nll_loss: True
+2025-04-06 18:12:44,790 - INFO -   use_nll_loss: True
+2025-04-06 18:12:44,790 - INFO -   inference_start: 300
+2025-04-06 18:12:44,790 - INFO -   inference_start: 300
+2025-04-06 18:12:44,790 - INFO -   inference_start: 300
+2025-04-06 18:12:44,790 - INFO -   inference_start: 300
+2025-04-06 18:12:44,790 - INFO -   inference_start: 300
+2025-04-06 18:12:44,790 - INFO -   inference_start: 300
+2025-04-06 18:12:44,790 - INFO -   inference_start: 300
+2025-04-06 18:12:44,790 - INFO -   inference_start: 300
+2025-04-06 18:12:47,736 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:12:47,736 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:12:47,736 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:12:47,736 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:12:47,736 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:12:47,736 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:12:47,736 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:12:47,736 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:12:47,737 - INFO - Labels shape: (640,)
+2025-04-06 18:12:47,737 - INFO - Labels shape: (640,)
+2025-04-06 18:12:47,737 - INFO - Labels shape: (640,)
+2025-04-06 18:12:47,737 - INFO - Labels shape: (640,)
+2025-04-06 18:12:47,737 - INFO - Labels shape: (640,)
+2025-04-06 18:12:47,737 - INFO - Labels shape: (640,)
+2025-04-06 18:12:47,737 - INFO - Labels shape: (640,)
+2025-04-06 18:12:47,737 - INFO - Labels shape: (640,)
+2025-04-06 18:12:47,738 - INFO - Seq length: 784
+2025-04-06 18:12:47,738 - INFO - Seq length: 784
+2025-04-06 18:12:47,738 - INFO - Seq length: 784
+2025-04-06 18:12:47,738 - INFO - Seq length: 784
+2025-04-06 18:12:47,738 - INFO - Seq length: 784
+2025-04-06 18:12:47,738 - INFO - Seq length: 784
+2025-04-06 18:12:47,738 - INFO - Seq length: 784
+2025-04-06 18:12:47,738 - INFO - Seq length: 784
+2025-04-06 18:12:47,739 - INFO - Data size: 1
+2025-04-06 18:12:47,739 - INFO - Data size: 1
+2025-04-06 18:12:47,739 - INFO - Data size: 1
+2025-04-06 18:12:47,739 - INFO - Data size: 1
+2025-04-06 18:12:47,739 - INFO - Data size: 1
+2025-04-06 18:12:47,739 - INFO - Data size: 1
+2025-04-06 18:12:47,739 - INFO - Data size: 1
+2025-04-06 18:12:47,739 - INFO - Data size: 1
+2025-04-06 18:12:47,740 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:12:47,740 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:12:47,740 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:12:47,740 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:12:47,740 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:12:47,740 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:12:47,740 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:12:47,740 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:12:47,741 - INFO - Number of batches:
+2025-04-06 18:12:47,741 - INFO - Number of batches:
+2025-04-06 18:12:47,741 - INFO - Number of batches:
+2025-04-06 18:12:47,741 - INFO - Number of batches:
+2025-04-06 18:12:47,741 - INFO - Number of batches:
+2025-04-06 18:12:47,741 - INFO - Number of batches:
+2025-04-06 18:12:47,741 - INFO - Number of batches:
+2025-04-06 18:12:47,741 - INFO - Number of batches:
+2025-04-06 18:12:47,742 - INFO -   - Train: 94
+2025-04-06 18:12:47,742 - INFO -   - Train: 94
+2025-04-06 18:12:47,742 - INFO -   - Train: 94
+2025-04-06 18:12:47,742 - INFO -   - Train: 94
+2025-04-06 18:12:47,742 - INFO -   - Train: 94
+2025-04-06 18:12:47,742 - INFO -   - Train: 94
+2025-04-06 18:12:47,742 - INFO -   - Train: 94
+2025-04-06 18:12:47,742 - INFO -   - Train: 94
+2025-04-06 18:12:47,743 - INFO -   - Test: 16
+2025-04-06 18:12:47,743 - INFO -   - Test: 16
+2025-04-06 18:12:47,743 - INFO -   - Test: 16
+2025-04-06 18:12:47,743 - INFO -   - Test: 16
+2025-04-06 18:12:47,743 - INFO -   - Test: 16
+2025-04-06 18:12:47,743 - INFO -   - Test: 16
+2025-04-06 18:12:47,743 - INFO -   - Test: 16
+2025-04-06 18:12:47,743 - INFO -   - Test: 16
+2025-04-06 18:12:48,708 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:12:48,708 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:12:48,708 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:12:48,708 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:12:48,708 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:12:48,708 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:12:48,708 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:12:48,708 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:12:48,719 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,719 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,719 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,719 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,719 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,719 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,719 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,719 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,721 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,721 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,721 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,721 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,721 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,721 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,721 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,721 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:12:48,722 - INFO - No losses found in the nohup.log file
+2025-04-06 18:12:48,722 - INFO - No losses found in the nohup.log file
+2025-04-06 18:12:48,722 - INFO - No losses found in the nohup.log file
+2025-04-06 18:12:48,722 - INFO - No losses found in the nohup.log file
+2025-04-06 18:12:48,722 - INFO - No losses found in the nohup.log file
+2025-04-06 18:12:48,722 - INFO - No losses found in the nohup.log file
+2025-04-06 18:12:48,722 - INFO - No losses found in the nohup.log file
+2025-04-06 18:12:48,722 - INFO - No losses found in the nohup.log file
+2025-04-06 18:12:55,244 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:12:55,244 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:12:55,244 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:12:55,244 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:12:55,244 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:12:55,244 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:12:55,244 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:12:55,244 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:12:55,247 - INFO -     - Mean : 0.145843
+2025-04-06 18:12:55,247 - INFO -     - Mean : 0.145843
+2025-04-06 18:12:55,247 - INFO -     - Mean : 0.145843
+2025-04-06 18:12:55,247 - INFO -     - Mean : 0.145843
+2025-04-06 18:12:55,247 - INFO -     - Mean : 0.145843
+2025-04-06 18:12:55,247 - INFO -     - Mean : 0.145843
+2025-04-06 18:12:55,247 - INFO -     - Mean : 0.145843
+2025-04-06 18:12:55,247 - INFO -     - Mean : 0.145843
+2025-04-06 18:12:55,249 - INFO -     - Median : 0.145936
+2025-04-06 18:12:55,249 - INFO -     - Median : 0.145936
+2025-04-06 18:12:55,249 - INFO -     - Median : 0.145936
+2025-04-06 18:12:55,249 - INFO -     - Median : 0.145936
+2025-04-06 18:12:55,249 - INFO -     - Median : 0.145936
+2025-04-06 18:12:55,249 - INFO -     - Median : 0.145936
+2025-04-06 18:12:55,249 - INFO -     - Median : 0.145936
+2025-04-06 18:12:55,249 - INFO -     - Median : 0.145936
+2025-04-06 18:12:55,250 - INFO -     - Min : 0.142732
+2025-04-06 18:12:55,250 - INFO -     - Min : 0.142732
+2025-04-06 18:12:55,250 - INFO -     - Min : 0.142732
+2025-04-06 18:12:55,250 - INFO -     - Min : 0.142732
+2025-04-06 18:12:55,250 - INFO -     - Min : 0.142732
+2025-04-06 18:12:55,250 - INFO -     - Min : 0.142732
+2025-04-06 18:12:55,250 - INFO -     - Min : 0.142732
+2025-04-06 18:12:55,250 - INFO -     - Min : 0.142732
+2025-04-06 18:12:55,732 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,732 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,732 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,732 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,732 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,732 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,732 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,732 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,745 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,745 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,745 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,745 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,745 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,745 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,745 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,745 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,758 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,758 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,758 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,758 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,758 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,758 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,758 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,758 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,772 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,772 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,772 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,772 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,772 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,772 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,772 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,772 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,785 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,785 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,785 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,785 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,785 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,785 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,785 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,785 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,798 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,798 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,798 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,798 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,798 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,798 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,798 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,798 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,812 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,812 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,812 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,812 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,812 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,812 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,812 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,812 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,825 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,825 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,825 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,825 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,825 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,825 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,825 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,825 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,839 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,839 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,839 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,839 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,839 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,839 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,839 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,839 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,854 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,854 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,854 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,854 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,854 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,854 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,854 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,854 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,868 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,868 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,868 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,868 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,868 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,868 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,868 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,868 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,886 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,886 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,886 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,886 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,886 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,886 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,886 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,886 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,900 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,900 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,900 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,900 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,900 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,900 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,900 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,900 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,913 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,913 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,913 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,913 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,913 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,913 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,913 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,913 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,927 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,927 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,927 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,927 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,927 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,927 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,927 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,927 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,940 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,940 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,940 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,940 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,940 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,940 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,940 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:12:55,940 - INFO - Min/Max Uncertainty: 0.500, 0.997
+2025-04-06 18:27:56,074 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:27:56,074 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:27:56,074 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:27:56,074 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:27:56,074 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:27:56,074 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:27:56,074 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:27:56,074 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:27:56,074 - INFO - Started logging to ./artefacts/testing.log
+2025-04-06 18:27:56,076 - INFO - Config file: config.yaml
+2025-04-06 18:27:56,076 - INFO - Config file: config.yaml
+2025-04-06 18:27:56,076 - INFO - Config file: config.yaml
+2025-04-06 18:27:56,076 - INFO - Config file: config.yaml
+2025-04-06 18:27:56,076 - INFO - Config file: config.yaml
+2025-04-06 18:27:56,076 - INFO - Config file: config.yaml
+2025-04-06 18:27:56,076 - INFO - Config file: config.yaml
+2025-04-06 18:27:56,076 - INFO - Config file: config.yaml
+2025-04-06 18:27:56,076 - INFO - Config file: config.yaml
+2025-04-06 18:27:56,078 - INFO - ==== Config file's contents ====
+2025-04-06 18:27:56,078 - INFO - ==== Config file's contents ====
+2025-04-06 18:27:56,078 - INFO - ==== Config file's contents ====
+2025-04-06 18:27:56,078 - INFO - ==== Config file's contents ====
+2025-04-06 18:27:56,078 - INFO - ==== Config file's contents ====
+2025-04-06 18:27:56,078 - INFO - ==== Config file's contents ====
+2025-04-06 18:27:56,078 - INFO - ==== Config file's contents ====
+2025-04-06 18:27:56,078 - INFO - ==== Config file's contents ====
+2025-04-06 18:27:56,078 - INFO - ==== Config file's contents ====
+2025-04-06 18:27:56,079 - INFO - general:
+2025-04-06 18:27:56,079 - INFO - general:
+2025-04-06 18:27:56,079 - INFO - general:
+2025-04-06 18:27:56,079 - INFO - general:
+2025-04-06 18:27:56,079 - INFO - general:
+2025-04-06 18:27:56,079 - INFO - general:
+2025-04-06 18:27:56,079 - INFO - general:
+2025-04-06 18:27:56,079 - INFO - general:
+2025-04-06 18:27:56,079 - INFO - general:
+2025-04-06 18:27:56,080 - INFO -   seed: 2024
+2025-04-06 18:27:56,080 - INFO -   seed: 2024
+2025-04-06 18:27:56,080 - INFO -   seed: 2024
+2025-04-06 18:27:56,080 - INFO -   seed: 2024
+2025-04-06 18:27:56,080 - INFO -   seed: 2024
+2025-04-06 18:27:56,080 - INFO -   seed: 2024
+2025-04-06 18:27:56,080 - INFO -   seed: 2024
+2025-04-06 18:27:56,080 - INFO -   seed: 2024
+2025-04-06 18:27:56,080 - INFO -   seed: 2024
+2025-04-06 18:27:56,081 - INFO -   train: False
+2025-04-06 18:27:56,081 - INFO -   train: False
+2025-04-06 18:27:56,081 - INFO -   train: False
+2025-04-06 18:27:56,081 - INFO -   train: False
+2025-04-06 18:27:56,081 - INFO -   train: False
+2025-04-06 18:27:56,081 - INFO -   train: False
+2025-04-06 18:27:56,081 - INFO -   train: False
+2025-04-06 18:27:56,081 - INFO -   train: False
+2025-04-06 18:27:56,081 - INFO -   train: False
+2025-04-06 18:27:56,081 - INFO -   dataset: mnist
+2025-04-06 18:27:56,081 - INFO -   dataset: mnist
+2025-04-06 18:27:56,081 - INFO -   dataset: mnist
+2025-04-06 18:27:56,081 - INFO -   dataset: mnist
+2025-04-06 18:27:56,081 - INFO -   dataset: mnist
+2025-04-06 18:27:56,081 - INFO -   dataset: mnist
+2025-04-06 18:27:56,081 - INFO -   dataset: mnist
+2025-04-06 18:27:56,081 - INFO -   dataset: mnist
+2025-04-06 18:27:56,081 - INFO -   dataset: mnist
+2025-04-06 18:27:56,083 - INFO -   data_path: ./data/
+2025-04-06 18:27:56,083 - INFO -   data_path: ./data/
+2025-04-06 18:27:56,083 - INFO -   data_path: ./data/
+2025-04-06 18:27:56,083 - INFO -   data_path: ./data/
+2025-04-06 18:27:56,083 - INFO -   data_path: ./data/
+2025-04-06 18:27:56,083 - INFO -   data_path: ./data/
+2025-04-06 18:27:56,083 - INFO -   data_path: ./data/
+2025-04-06 18:27:56,083 - INFO -   data_path: ./data/
+2025-04-06 18:27:56,083 - INFO -   data_path: ./data/
+2025-04-06 18:27:56,084 - INFO -   save_path: None
+2025-04-06 18:27:56,084 - INFO -   save_path: None
+2025-04-06 18:27:56,084 - INFO -   save_path: None
+2025-04-06 18:27:56,084 - INFO -   save_path: None
+2025-04-06 18:27:56,084 - INFO -   save_path: None
+2025-04-06 18:27:56,084 - INFO -   save_path: None
+2025-04-06 18:27:56,084 - INFO -   save_path: None
+2025-04-06 18:27:56,084 - INFO -   save_path: None
+2025-04-06 18:27:56,084 - INFO -   save_path: None
+2025-04-06 18:27:56,085 - INFO - data:
+2025-04-06 18:27:56,085 - INFO - data:
+2025-04-06 18:27:56,085 - INFO - data:
+2025-04-06 18:27:56,085 - INFO - data:
+2025-04-06 18:27:56,085 - INFO - data:
+2025-04-06 18:27:56,085 - INFO - data:
+2025-04-06 18:27:56,085 - INFO - data:
+2025-04-06 18:27:56,085 - INFO - data:
+2025-04-06 18:27:56,085 - INFO - data:
+2025-04-06 18:27:56,086 - INFO -   downsample_factor: 1
+2025-04-06 18:27:56,086 - INFO -   downsample_factor: 1
+2025-04-06 18:27:56,086 - INFO -   downsample_factor: 1
+2025-04-06 18:27:56,086 - INFO -   downsample_factor: 1
+2025-04-06 18:27:56,086 - INFO -   downsample_factor: 1
+2025-04-06 18:27:56,086 - INFO -   downsample_factor: 1
+2025-04-06 18:27:56,086 - INFO -   downsample_factor: 1
+2025-04-06 18:27:56,086 - INFO -   downsample_factor: 1
+2025-04-06 18:27:56,086 - INFO -   downsample_factor: 1
+2025-04-06 18:27:56,088 - INFO -   resolution: [32, 32]
+2025-04-06 18:27:56,088 - INFO -   resolution: [32, 32]
+2025-04-06 18:27:56,088 - INFO -   resolution: [32, 32]
+2025-04-06 18:27:56,088 - INFO -   resolution: [32, 32]
+2025-04-06 18:27:56,088 - INFO -   resolution: [32, 32]
+2025-04-06 18:27:56,088 - INFO -   resolution: [32, 32]
+2025-04-06 18:27:56,088 - INFO -   resolution: [32, 32]
+2025-04-06 18:27:56,088 - INFO -   resolution: [32, 32]
+2025-04-06 18:27:56,088 - INFO -   resolution: [32, 32]
+2025-04-06 18:27:56,089 - INFO -   traj_length: 1000
+2025-04-06 18:27:56,089 - INFO -   traj_length: 1000
+2025-04-06 18:27:56,089 - INFO -   traj_length: 1000
+2025-04-06 18:27:56,089 - INFO -   traj_length: 1000
+2025-04-06 18:27:56,089 - INFO -   traj_length: 1000
+2025-04-06 18:27:56,089 - INFO -   traj_length: 1000
+2025-04-06 18:27:56,089 - INFO -   traj_length: 1000
+2025-04-06 18:27:56,089 - INFO -   traj_length: 1000
+2025-04-06 18:27:56,089 - INFO -   traj_length: 1000
+2025-04-06 18:27:56,090 - INFO - model:
+2025-04-06 18:27:56,090 - INFO - model:
+2025-04-06 18:27:56,090 - INFO - model:
+2025-04-06 18:27:56,090 - INFO - model:
+2025-04-06 18:27:56,090 - INFO - model:
+2025-04-06 18:27:56,090 - INFO - model:
+2025-04-06 18:27:56,090 - INFO - model:
+2025-04-06 18:27:56,090 - INFO - model:
+2025-04-06 18:27:56,090 - INFO - model:
+2025-04-06 18:27:56,091 - INFO -   mlp_width_size: 24
+2025-04-06 18:27:56,091 - INFO -   mlp_width_size: 24
+2025-04-06 18:27:56,091 - INFO -   mlp_width_size: 24
+2025-04-06 18:27:56,091 - INFO -   mlp_width_size: 24
+2025-04-06 18:27:56,091 - INFO -   mlp_width_size: 24
+2025-04-06 18:27:56,091 - INFO -   mlp_width_size: 24
+2025-04-06 18:27:56,091 - INFO -   mlp_width_size: 24
+2025-04-06 18:27:56,091 - INFO -   mlp_width_size: 24
+2025-04-06 18:27:56,091 - INFO -   mlp_width_size: 24
+2025-04-06 18:27:56,092 - INFO -   mlp_depth: 3
+2025-04-06 18:27:56,092 - INFO -   mlp_depth: 3
+2025-04-06 18:27:56,092 - INFO -   mlp_depth: 3
+2025-04-06 18:27:56,092 - INFO -   mlp_depth: 3
+2025-04-06 18:27:56,092 - INFO -   mlp_depth: 3
+2025-04-06 18:27:56,092 - INFO -   mlp_depth: 3
+2025-04-06 18:27:56,092 - INFO -   mlp_depth: 3
+2025-04-06 18:27:56,092 - INFO -   mlp_depth: 3
+2025-04-06 18:27:56,092 - INFO -   mlp_depth: 3
+2025-04-06 18:27:56,093 - INFO -   activation: relu
+2025-04-06 18:27:56,093 - INFO -   activation: relu
+2025-04-06 18:27:56,093 - INFO -   activation: relu
+2025-04-06 18:27:56,093 - INFO -   activation: relu
+2025-04-06 18:27:56,093 - INFO -   activation: relu
+2025-04-06 18:27:56,093 - INFO -   activation: relu
+2025-04-06 18:27:56,093 - INFO -   activation: relu
+2025-04-06 18:27:56,093 - INFO -   activation: relu
+2025-04-06 18:27:56,093 - INFO -   activation: relu
+2025-04-06 18:27:56,094 - INFO -   input_prev_data: False
+2025-04-06 18:27:56,094 - INFO -   input_prev_data: False
+2025-04-06 18:27:56,094 - INFO -   input_prev_data: False
+2025-04-06 18:27:56,094 - INFO -   input_prev_data: False
+2025-04-06 18:27:56,094 - INFO -   input_prev_data: False
+2025-04-06 18:27:56,094 - INFO -   input_prev_data: False
+2025-04-06 18:27:56,094 - INFO -   input_prev_data: False
+2025-04-06 18:27:56,094 - INFO -   input_prev_data: False
+2025-04-06 18:27:56,094 - INFO -   input_prev_data: False
+2025-04-06 18:27:56,095 - INFO -   model_type: wsm-rnn
+2025-04-06 18:27:56,095 - INFO -   model_type: wsm-rnn
+2025-04-06 18:27:56,095 - INFO -   model_type: wsm-rnn
+2025-04-06 18:27:56,095 - INFO -   model_type: wsm-rnn
+2025-04-06 18:27:56,095 - INFO -   model_type: wsm-rnn
+2025-04-06 18:27:56,095 - INFO -   model_type: wsm-rnn
+2025-04-06 18:27:56,095 - INFO -   model_type: wsm-rnn
+2025-04-06 18:27:56,095 - INFO -   model_type: wsm-rnn
+2025-04-06 18:27:56,095 - INFO -   model_type: wsm-rnn
+2025-04-06 18:27:56,097 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:27:56,097 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:27:56,097 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:27:56,097 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:27:56,097 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:27:56,097 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:27:56,097 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:27:56,097 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:27:56,097 - INFO -   nb_rnn_layers: 1
+2025-04-06 18:27:56,097 - INFO -   weights_lim: 0.5
+2025-04-06 18:27:56,097 - INFO -   weights_lim: 0.5
+2025-04-06 18:27:56,097 - INFO -   weights_lim: 0.5
+2025-04-06 18:27:56,097 - INFO -   weights_lim: 0.5
+2025-04-06 18:27:56,097 - INFO -   weights_lim: 0.5
+2025-04-06 18:27:56,097 - INFO -   weights_lim: 0.5
+2025-04-06 18:27:56,097 - INFO -   weights_lim: 0.5
+2025-04-06 18:27:56,097 - INFO -   weights_lim: 0.5
+2025-04-06 18:27:56,097 - INFO -   weights_lim: 0.5
+2025-04-06 18:27:56,098 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:27:56,098 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:27:56,098 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:27:56,098 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:27:56,098 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:27:56,098 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:27:56,098 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:27:56,098 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:27:56,098 - INFO -   apply_tanh_uncertainty: False
+2025-04-06 18:27:56,100 - INFO -   time_as_channel: False
+2025-04-06 18:27:56,100 - INFO -   time_as_channel: False
+2025-04-06 18:27:56,100 - INFO -   time_as_channel: False
+2025-04-06 18:27:56,100 - INFO -   time_as_channel: False
+2025-04-06 18:27:56,100 - INFO -   time_as_channel: False
+2025-04-06 18:27:56,100 - INFO -   time_as_channel: False
+2025-04-06 18:27:56,100 - INFO -   time_as_channel: False
+2025-04-06 18:27:56,100 - INFO -   time_as_channel: False
+2025-04-06 18:27:56,100 - INFO -   time_as_channel: False
+2025-04-06 18:27:56,101 - INFO -   forcing_prob: 0.15
+2025-04-06 18:27:56,101 - INFO -   forcing_prob: 0.15
+2025-04-06 18:27:56,101 - INFO -   forcing_prob: 0.15
+2025-04-06 18:27:56,101 - INFO -   forcing_prob: 0.15
+2025-04-06 18:27:56,101 - INFO -   forcing_prob: 0.15
+2025-04-06 18:27:56,101 - INFO -   forcing_prob: 0.15
+2025-04-06 18:27:56,101 - INFO -   forcing_prob: 0.15
+2025-04-06 18:27:56,101 - INFO -   forcing_prob: 0.15
+2025-04-06 18:27:56,101 - INFO -   forcing_prob: 0.15
+2025-04-06 18:27:56,102 - INFO -   noise_theta_init: None
+2025-04-06 18:27:56,102 - INFO -   noise_theta_init: None
+2025-04-06 18:27:56,102 - INFO -   noise_theta_init: None
+2025-04-06 18:27:56,102 - INFO -   noise_theta_init: None
+2025-04-06 18:27:56,102 - INFO -   noise_theta_init: None
+2025-04-06 18:27:56,102 - INFO -   noise_theta_init: None
+2025-04-06 18:27:56,102 - INFO -   noise_theta_init: None
+2025-04-06 18:27:56,102 - INFO -   noise_theta_init: None
+2025-04-06 18:27:56,102 - INFO -   noise_theta_init: None
+2025-04-06 18:27:56,104 - INFO - optimizer:
+2025-04-06 18:27:56,104 - INFO - optimizer:
+2025-04-06 18:27:56,104 - INFO - optimizer:
+2025-04-06 18:27:56,104 - INFO - optimizer:
+2025-04-06 18:27:56,104 - INFO - optimizer:
+2025-04-06 18:27:56,104 - INFO - optimizer:
+2025-04-06 18:27:56,104 - INFO - optimizer:
+2025-04-06 18:27:56,104 - INFO - optimizer:
+2025-04-06 18:27:56,104 - INFO - optimizer:
+2025-04-06 18:27:56,105 - INFO -   init_lr: 0.0001
+2025-04-06 18:27:56,105 - INFO -   init_lr: 0.0001
+2025-04-06 18:27:56,105 - INFO -   init_lr: 0.0001
+2025-04-06 18:27:56,105 - INFO -   init_lr: 0.0001
+2025-04-06 18:27:56,105 - INFO -   init_lr: 0.0001
+2025-04-06 18:27:56,105 - INFO -   init_lr: 0.0001
+2025-04-06 18:27:56,105 - INFO -   init_lr: 0.0001
+2025-04-06 18:27:56,105 - INFO -   init_lr: 0.0001
+2025-04-06 18:27:56,105 - INFO -   init_lr: 0.0001
+2025-04-06 18:27:56,105 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:27:56,105 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:27:56,105 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:27:56,105 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:27:56,105 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:27:56,105 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:27:56,105 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:27:56,105 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:27:56,105 - INFO -   gradients_lim: 1e-07
+2025-04-06 18:27:56,107 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:27:56,107 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:27:56,107 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:27:56,107 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:27:56,107 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:27:56,107 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:27:56,107 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:27:56,107 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:27:56,107 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-06 18:27:56,108 - INFO - training:
+2025-04-06 18:27:56,108 - INFO - training:
+2025-04-06 18:27:56,108 - INFO - training:
+2025-04-06 18:27:56,108 - INFO - training:
+2025-04-06 18:27:56,108 - INFO - training:
+2025-04-06 18:27:56,108 - INFO - training:
+2025-04-06 18:27:56,108 - INFO - training:
+2025-04-06 18:27:56,108 - INFO - training:
+2025-04-06 18:27:56,108 - INFO - training:
+2025-04-06 18:27:56,109 - INFO -   nb_epochs: 500
+2025-04-06 18:27:56,109 - INFO -   nb_epochs: 500
+2025-04-06 18:27:56,109 - INFO -   nb_epochs: 500
+2025-04-06 18:27:56,109 - INFO -   nb_epochs: 500
+2025-04-06 18:27:56,109 - INFO -   nb_epochs: 500
+2025-04-06 18:27:56,109 - INFO -   nb_epochs: 500
+2025-04-06 18:27:56,109 - INFO -   nb_epochs: 500
+2025-04-06 18:27:56,109 - INFO -   nb_epochs: 500
+2025-04-06 18:27:56,109 - INFO -   nb_epochs: 500
+2025-04-06 18:27:56,110 - INFO -   batch_size: 640
+2025-04-06 18:27:56,110 - INFO -   batch_size: 640
+2025-04-06 18:27:56,110 - INFO -   batch_size: 640
+2025-04-06 18:27:56,110 - INFO -   batch_size: 640
+2025-04-06 18:27:56,110 - INFO -   batch_size: 640
+2025-04-06 18:27:56,110 - INFO -   batch_size: 640
+2025-04-06 18:27:56,110 - INFO -   batch_size: 640
+2025-04-06 18:27:56,110 - INFO -   batch_size: 640
+2025-04-06 18:27:56,110 - INFO -   batch_size: 640
+2025-04-06 18:27:56,111 - INFO -   print_every: 10
+2025-04-06 18:27:56,111 - INFO -   print_every: 10
+2025-04-06 18:27:56,111 - INFO -   print_every: 10
+2025-04-06 18:27:56,111 - INFO -   print_every: 10
+2025-04-06 18:27:56,111 - INFO -   print_every: 10
+2025-04-06 18:27:56,111 - INFO -   print_every: 10
+2025-04-06 18:27:56,111 - INFO -   print_every: 10
+2025-04-06 18:27:56,111 - INFO -   print_every: 10
+2025-04-06 18:27:56,111 - INFO -   print_every: 10
+2025-04-06 18:27:56,112 - INFO -   checkpoint_every: 10
+2025-04-06 18:27:56,112 - INFO -   checkpoint_every: 10
+2025-04-06 18:27:56,112 - INFO -   checkpoint_every: 10
+2025-04-06 18:27:56,112 - INFO -   checkpoint_every: 10
+2025-04-06 18:27:56,112 - INFO -   checkpoint_every: 10
+2025-04-06 18:27:56,112 - INFO -   checkpoint_every: 10
+2025-04-06 18:27:56,112 - INFO -   checkpoint_every: 10
+2025-04-06 18:27:56,112 - INFO -   checkpoint_every: 10
+2025-04-06 18:27:56,112 - INFO -   checkpoint_every: 10
+2025-04-06 18:27:56,113 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:27:56,113 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:27:56,113 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:27:56,113 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:27:56,113 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:27:56,113 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:27:56,113 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:27:56,113 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:27:56,113 - INFO -   nb_recons_loss_steps: 400
+2025-04-06 18:27:56,115 - INFO -   use_nll_loss: True
+2025-04-06 18:27:56,115 - INFO -   use_nll_loss: True
+2025-04-06 18:27:56,115 - INFO -   use_nll_loss: True
+2025-04-06 18:27:56,115 - INFO -   use_nll_loss: True
+2025-04-06 18:27:56,115 - INFO -   use_nll_loss: True
+2025-04-06 18:27:56,115 - INFO -   use_nll_loss: True
+2025-04-06 18:27:56,115 - INFO -   use_nll_loss: True
+2025-04-06 18:27:56,115 - INFO -   use_nll_loss: True
+2025-04-06 18:27:56,115 - INFO -   use_nll_loss: True
+2025-04-06 18:27:56,116 - INFO -   inference_start: 300
+2025-04-06 18:27:56,116 - INFO -   inference_start: 300
+2025-04-06 18:27:56,116 - INFO -   inference_start: 300
+2025-04-06 18:27:56,116 - INFO -   inference_start: 300
+2025-04-06 18:27:56,116 - INFO -   inference_start: 300
+2025-04-06 18:27:56,116 - INFO -   inference_start: 300
+2025-04-06 18:27:56,116 - INFO -   inference_start: 300
+2025-04-06 18:27:56,116 - INFO -   inference_start: 300
+2025-04-06 18:27:56,116 - INFO -   inference_start: 300
+2025-04-06 18:27:59,159 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:27:59,159 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:27:59,159 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:27:59,159 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:27:59,159 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:27:59,159 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:27:59,159 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:27:59,159 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:27:59,159 - INFO - Images shape: (640, 784, 1)
+2025-04-06 18:27:59,161 - INFO - Labels shape: (640,)
+2025-04-06 18:27:59,161 - INFO - Labels shape: (640,)
+2025-04-06 18:27:59,161 - INFO - Labels shape: (640,)
+2025-04-06 18:27:59,161 - INFO - Labels shape: (640,)
+2025-04-06 18:27:59,161 - INFO - Labels shape: (640,)
+2025-04-06 18:27:59,161 - INFO - Labels shape: (640,)
+2025-04-06 18:27:59,161 - INFO - Labels shape: (640,)
+2025-04-06 18:27:59,161 - INFO - Labels shape: (640,)
+2025-04-06 18:27:59,161 - INFO - Labels shape: (640,)
+2025-04-06 18:27:59,162 - INFO - Seq length: 784
+2025-04-06 18:27:59,162 - INFO - Seq length: 784
+2025-04-06 18:27:59,162 - INFO - Seq length: 784
+2025-04-06 18:27:59,162 - INFO - Seq length: 784
+2025-04-06 18:27:59,162 - INFO - Seq length: 784
+2025-04-06 18:27:59,162 - INFO - Seq length: 784
+2025-04-06 18:27:59,162 - INFO - Seq length: 784
+2025-04-06 18:27:59,162 - INFO - Seq length: 784
+2025-04-06 18:27:59,162 - INFO - Seq length: 784
+2025-04-06 18:27:59,163 - INFO - Data size: 1
+2025-04-06 18:27:59,163 - INFO - Data size: 1
+2025-04-06 18:27:59,163 - INFO - Data size: 1
+2025-04-06 18:27:59,163 - INFO - Data size: 1
+2025-04-06 18:27:59,163 - INFO - Data size: 1
+2025-04-06 18:27:59,163 - INFO - Data size: 1
+2025-04-06 18:27:59,163 - INFO - Data size: 1
+2025-04-06 18:27:59,163 - INFO - Data size: 1
+2025-04-06 18:27:59,163 - INFO - Data size: 1
+2025-04-06 18:27:59,165 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:27:59,165 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:27:59,165 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:27:59,165 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:27:59,165 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:27:59,165 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:27:59,165 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:27:59,165 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:27:59,165 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-04-06 18:27:59,166 - INFO - Number of batches:
+2025-04-06 18:27:59,166 - INFO - Number of batches:
+2025-04-06 18:27:59,166 - INFO - Number of batches:
+2025-04-06 18:27:59,166 - INFO - Number of batches:
+2025-04-06 18:27:59,166 - INFO - Number of batches:
+2025-04-06 18:27:59,166 - INFO - Number of batches:
+2025-04-06 18:27:59,166 - INFO - Number of batches:
+2025-04-06 18:27:59,166 - INFO - Number of batches:
+2025-04-06 18:27:59,166 - INFO - Number of batches:
+2025-04-06 18:27:59,167 - INFO -   - Train: 94
+2025-04-06 18:27:59,167 - INFO -   - Train: 94
+2025-04-06 18:27:59,167 - INFO -   - Train: 94
+2025-04-06 18:27:59,167 - INFO -   - Train: 94
+2025-04-06 18:27:59,167 - INFO -   - Train: 94
+2025-04-06 18:27:59,167 - INFO -   - Train: 94
+2025-04-06 18:27:59,167 - INFO -   - Train: 94
+2025-04-06 18:27:59,167 - INFO -   - Train: 94
+2025-04-06 18:27:59,167 - INFO -   - Train: 94
+2025-04-06 18:27:59,168 - INFO -   - Test: 16
+2025-04-06 18:27:59,168 - INFO -   - Test: 16
+2025-04-06 18:27:59,168 - INFO -   - Test: 16
+2025-04-06 18:27:59,168 - INFO -   - Test: 16
+2025-04-06 18:27:59,168 - INFO -   - Test: 16
+2025-04-06 18:27:59,168 - INFO -   - Test: 16
+2025-04-06 18:27:59,168 - INFO -   - Test: 16
+2025-04-06 18:27:59,168 - INFO -   - Test: 16
+2025-04-06 18:27:59,168 - INFO -   - Test: 16
+2025-04-06 18:28:00,127 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:28:00,127 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:28:00,127 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:28:00,127 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:28:00,127 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:28:00,127 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:28:00,127 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:28:00,127 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:28:00,127 - INFO - Model loaded from ./model.eqx
+2025-04-06 18:28:00,138 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,138 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,138 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,138 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,138 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,138 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,138 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,138 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,138 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,140 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,140 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,140 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,140 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,140 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,140 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,140 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,140 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,140 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-04-06 18:28:00,141 - INFO - No losses found in the nohup.log file
+2025-04-06 18:28:00,141 - INFO - No losses found in the nohup.log file
+2025-04-06 18:28:00,141 - INFO - No losses found in the nohup.log file
+2025-04-06 18:28:00,141 - INFO - No losses found in the nohup.log file
+2025-04-06 18:28:00,141 - INFO - No losses found in the nohup.log file
+2025-04-06 18:28:00,141 - INFO - No losses found in the nohup.log file
+2025-04-06 18:28:00,141 - INFO - No losses found in the nohup.log file
+2025-04-06 18:28:00,141 - INFO - No losses found in the nohup.log file
+2025-04-06 18:28:00,141 - INFO - No losses found in the nohup.log file
+2025-04-06 18:28:06,775 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:28:06,775 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:28:06,775 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:28:06,775 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:28:06,775 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:28:06,775 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:28:06,775 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:28:06,775 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:28:06,775 - INFO - Evaluation of MSE the test set:
+2025-04-06 18:28:06,778 - INFO -     - Mean : 0.141287
+2025-04-06 18:28:06,778 - INFO -     - Mean : 0.141287
+2025-04-06 18:28:06,778 - INFO -     - Mean : 0.141287
+2025-04-06 18:28:06,778 - INFO -     - Mean : 0.141287
+2025-04-06 18:28:06,778 - INFO -     - Mean : 0.141287
+2025-04-06 18:28:06,778 - INFO -     - Mean : 0.141287
+2025-04-06 18:28:06,778 - INFO -     - Mean : 0.141287
+2025-04-06 18:28:06,778 - INFO -     - Mean : 0.141287
+2025-04-06 18:28:06,778 - INFO -     - Mean : 0.141287
+2025-04-06 18:28:06,780 - INFO -     - Median : 0.141081
+2025-04-06 18:28:06,780 - INFO -     - Median : 0.141081
+2025-04-06 18:28:06,780 - INFO -     - Median : 0.141081
+2025-04-06 18:28:06,780 - INFO -     - Median : 0.141081
+2025-04-06 18:28:06,780 - INFO -     - Median : 0.141081
+2025-04-06 18:28:06,780 - INFO -     - Median : 0.141081
+2025-04-06 18:28:06,780 - INFO -     - Median : 0.141081
+2025-04-06 18:28:06,780 - INFO -     - Median : 0.141081
+2025-04-06 18:28:06,780 - INFO -     - Median : 0.141081
+2025-04-06 18:28:06,781 - INFO -     - Min : 0.138342
+2025-04-06 18:28:06,781 - INFO -     - Min : 0.138342
+2025-04-06 18:28:06,781 - INFO -     - Min : 0.138342
+2025-04-06 18:28:06,781 - INFO -     - Min : 0.138342
+2025-04-06 18:28:06,781 - INFO -     - Min : 0.138342
+2025-04-06 18:28:06,781 - INFO -     - Min : 0.138342
+2025-04-06 18:28:06,781 - INFO -     - Min : 0.138342
+2025-04-06 18:28:06,781 - INFO -     - Min : 0.138342
+2025-04-06 18:28:06,781 - INFO -     - Min : 0.138342
+2025-04-06 18:28:07,281 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,281 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,281 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,281 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,281 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,281 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,281 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,281 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,281 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,294 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,294 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,294 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,294 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,294 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,294 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,294 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,294 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,294 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,308 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,308 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,308 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,308 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,308 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,308 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,308 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,308 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,308 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,323 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,323 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,323 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,323 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,323 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,323 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,323 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,323 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,323 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,337 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,337 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,337 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,337 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,337 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,337 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,337 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,337 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,337 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,352 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,352 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,352 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,352 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,352 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,352 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,352 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,352 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,352 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,373 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,373 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,373 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,373 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,373 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,373 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,373 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,373 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,373 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,386 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,386 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,386 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,386 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,386 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,386 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,386 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,386 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,386 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,399 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,399 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,399 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,399 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,399 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,399 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,399 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,399 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,399 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,413 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,413 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,413 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,413 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,413 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,413 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,413 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,413 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,413 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,426 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,426 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,426 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,426 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,426 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,426 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,426 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,426 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,426 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,439 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,439 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,439 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,439 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,439 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,439 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,439 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,439 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,439 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,453 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,453 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,453 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,453 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,453 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,453 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,453 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,453 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,453 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,466 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,466 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,466 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,466 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,466 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,466 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,466 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,466 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,466 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,478 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,478 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,478 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,478 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,478 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,478 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,478 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,478 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,478 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,492 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,492 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,492 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,492 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,492 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,492 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,492 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,492 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-04-06 18:28:07,492 - INFO - Min/Max Uncertainty: 0.500, 1.006
