@@ -314,7 +314,7 @@ if train:
 
             ## Only save the best model with the lowest mean loss
             med_losses_per_epoch.append(median_epoch)
-            if epoch>0 and median_epoch<=min(med_losses_per_epoch[:-1]):
+            if epoch==0 or median_epoch<=np.min(med_losses_per_epoch[:-1]):
                 eqx.tree_serialise_leaves(artefacts_folder+"model.eqx", model)
                 with open(artefacts_folder+"opt_state.pkl", 'wb') as f:
                     pickle.dump(opt_state, f)

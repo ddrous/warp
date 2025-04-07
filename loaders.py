@@ -507,7 +507,7 @@ def make_dataloaders(data_folder, config):
 
     elif dataset=="celeba":
         print(" #### CelebA Dataset ####")
-        resolution = config["general"]["resolution"]
+        resolution = config["data"]["resolution"]
 
         trainloader = NumpyLoader(CelebADataset(data_folder+"celeba/", data_split="train", num_shots=np.prod(resolution), resolution=resolution, order_pixels=True, unit_normalise=False), 
                                 batch_size=batch_size, 

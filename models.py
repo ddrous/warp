@@ -112,6 +112,8 @@ class WSM_RNN(eqx.Module):
             weights, shapes, treedef = flatten_pytree(params)
             root_utils.append((shapes, treedef, static, root.props))
 
+            # weights = jnp.clip(weights, -0.5, 0.5)
+
             thetas.append(weights)                              ## The latent space of the model
 
             latent_size = weights.shape[0]
@@ -185,7 +187,8 @@ class WSM_RNN(eqx.Module):
             ## Call the scan function
             theta_init = self.thetas[0]
             if self.noise_theta_init is not None:
-                theta_init += jax.random.normal(k_, theta_init.shape)*self.noise_theta_init
+                # theta_init += jax.random.normal(k_, theta_init.shape)*self.noise_theta_init
+                theta_init += jax.random.uniform(k_, shape=theta_init.shape, minval=-self.noise_theta_init, maxval=self.noise_theta_init)
 
             keys = jax.random.split(k_, xs_.shape[0])
 
