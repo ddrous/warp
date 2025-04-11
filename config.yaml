@@ -27,7 +27,7 @@ model:
   apply_tanh_uncertainty: False
   time_as_channel: False
   forcing_prob: 0.15
-  noise_theta_init: 1.0e-2
+  noise_theta_init: null
   std_lower_bound: 1.0e-4
 
 # Optimizer hyperparameters
@@ -45,9 +45,9 @@ optimizer:
 # Training/Inference hyperparameters
 training:
   nb_epochs: 250
-  batch_size: 1024
+  batch_size: 1256
   print_every: 10
   checkpoint_every: 10
   nb_recons_loss_steps: null
   use_nll_loss: True
-  inference_start: 300
+  inference_start: 500

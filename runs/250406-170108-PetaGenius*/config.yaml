@@ -28,6 +28,7 @@ model:
   time_as_channel: False
   forcing_prob: 0.15
   noise_theta_init: null
+  std_lower_bound: 5.0e-1
 
 # Optimizer hyperparameters
 optimizer:
