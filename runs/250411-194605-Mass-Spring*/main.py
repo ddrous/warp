@@ -344,9 +344,9 @@ else:
 
 # %% Visualise the training losses
 
-if not os.path.exists(artefacts_folder+"losses.npy"):
+if not os.path.exists(run_folder+"losses.npy"):
     try:
-        with open(artefacts_folder+"training.log", 'r') as f:
+        with open(run_folder+"training.log", 'r') as f:
             lines = f.readlines()
         losses = []
         search_term = "Train Loss (Mean)"
@@ -356,7 +356,7 @@ if not os.path.exists(artefacts_folder+"losses.npy"):
                 losses.append(loss)
         logger.info("Losses found in the training.log file")
     except:
-        logger.info("No losses found in the training.log file")
+        logger.info("No losses found in the nohup.log file")
 
 
 fig, (ax, ax2) = plt.subplots(1, 2, figsize=(16, 5))
@@ -496,7 +496,7 @@ for i in range(4):
         ## Min/max along dim0, for both x and x_recons
         min_0, max_0 = min(np.min(x[:, dim0]), np.min(x_recons[:, dim0])), max(np.max(x[:, dim0]), np.max(x_recons[:, dim0]))
         min_1, max_1 = min(np.min(x[:, dim1]), np.min(x_recons[:, dim1])), max(np.max(x[:, dim1]), np.max(x_recons[:, dim1]))
-        eps = 0.01
+        eps = 0.04
 
         if dataset in image_datasets:
             to_plot = x.reshape(res)
@@ -506,9 +506,10 @@ for i in range(4):
         elif dataset == "trends":
             axs[i, nb_cols*j].plot(x, color=colors[labels[i*4+j]])
         else:
-            axs[i, nb_cols*j].set_xlim([min_0-eps, max_0+eps])
+            # axs[i, nb_cols*j].set_xlim([min_0-eps, max_0+eps])
             axs[i, nb_cols*j].set_ylim([min_1-eps, max_1+eps])
-            axs[i, nb_cols*j].plot(x[:, dim0], x[:, dim1], color=colors[labels[i*4+j]%len(colors)])
+            axs[i, nb_cols*j].plot(x[:, dim0], color=colors[labels[i*4+j]%len(colors)])
+            axs[i, nb_cols*j].plot(x[:, dim1], color=colors[labels[i*4+j]%len(colors)])
         if i==0:
             axs[i, nb_cols*j].set_title("GT", fontsize=40)
         # axs[i, nb_cols*j].axis('off')
@@ -519,9 +520,10 @@ for i in range(4):
                 to_plot = (to_plot + 1) / 2
             axs[i, nb_cols*j+1].imshow(to_plot, cmap='gray')
         elif dataset in dynamics_datasets:
-            axs[i, nb_cols*j+1].set_xlim([min_0-eps, max_0+eps])
+            # axs[i, nb_cols*j+1].set_xlim([min_0-eps, max_0+eps])
             axs[i, nb_cols*j+1].set_ylim([min_1-eps, max_1+eps])
-            axs[i, nb_cols*j+1].plot(x_recons[:, dim0], x_recons[:, dim1], color=colors[labels[i*4+j]%len(colors)])
+            axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[labels[i*4+j]%len(colors)])
+            axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[labels[i*4+j]%len(colors)])
         else:
             axs[i, nb_cols*j+1].plot(x_recons, color=colors[labels[i*4+j]])
         if i==0:

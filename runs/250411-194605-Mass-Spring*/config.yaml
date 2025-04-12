@@ -3,7 +3,7 @@
 # General settings
 general:
   seed: 2024
-  train: True
+  train: False
   dataset: "lorentz63"  # Options: mnist, cifar, lorentz, dynamics
   data_path: "./data/"
   # save_path: "./runs/250404-175026-Test/"
