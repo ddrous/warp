@@ -505,7 +505,7 @@ def make_dataloaders(data_folder, config):
 
     elif dataset=="cifar":
         print(" #### CIFAR Dataset ####")
-        downsample_factor = config["downsample_factor"]
+        downsample_factor = config["data"]["downsample_factor"]
 
         trainloader = NumpyLoader(CIFARDataset(data_folder, data_split="train", mini_res=downsample_factor, traj_prop=1.0, unit_normalise=False), 
                                 batch_size=batch_size, 
