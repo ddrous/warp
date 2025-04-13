@@ -1,0 +1,299 @@
+2025-04-12 19:37:07,222 - INFO - Started logging to ./runs/250412-193707/artefacts/training.log
+2025-04-12 19:37:07,222 - INFO - Config file: config.yaml
+2025-04-12 19:37:07,222 - INFO - ==== Config file's contents ====
+2025-04-12 19:37:07,222 - INFO - general:
+2025-04-12 19:37:07,222 - INFO -   seed: 2024
+2025-04-12 19:37:07,222 - INFO -   train: True
+2025-04-12 19:37:07,222 - INFO -   dataset: lorentz63
+2025-04-12 19:37:07,222 - INFO -   data_path: ./data/
+2025-04-12 19:37:07,222 - INFO -   save_path: None
+2025-04-12 19:37:07,222 - INFO - data:
+2025-04-12 19:37:07,222 - INFO -   downsample_factor: 1
+2025-04-12 19:37:07,222 - INFO -   resolution: [32, 32]
+2025-04-12 19:37:07,222 - INFO -   traj_length: 1000
+2025-04-12 19:37:07,222 - INFO - model:
+2025-04-12 19:37:07,222 - INFO -   mlp_width_size: 48
+2025-04-12 19:37:07,222 - INFO -   mlp_depth: 3
+2025-04-12 19:37:07,222 - INFO -   activation: swish
+2025-04-12 19:37:07,222 - INFO -   input_prev_data: False
+2025-04-12 19:37:07,222 - INFO -   model_type: wsm-rnn
+2025-04-12 19:37:07,222 - INFO -   nb_rnn_layers: 1
+2025-04-12 19:37:07,223 - INFO -   weights_lim: None
+2025-04-12 19:37:07,223 - INFO -   apply_tanh_uncertainty: False
+2025-04-12 19:37:07,223 - INFO -   time_as_channel: False
+2025-04-12 19:37:07,223 - INFO -   forcing_prob: 0.25
+2025-04-12 19:37:07,223 - INFO -   noise_theta_init: None
+2025-04-12 19:37:07,223 - INFO -   std_lower_bound: 0.0001
+2025-04-12 19:37:07,223 - INFO - optimizer:
+2025-04-12 19:37:07,223 - INFO -   init_lr: 1e-05
+2025-04-12 19:37:07,223 - INFO -   gradients_lim: 1e-07
+2025-04-12 19:37:07,223 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-12 19:37:07,223 - INFO - training:
+2025-04-12 19:37:07,223 - INFO -   nb_epochs: 2500
+2025-04-12 19:37:07,223 - INFO -   batch_size: 1024
+2025-04-12 19:37:07,223 - INFO -   print_every: 10
+2025-04-12 19:37:07,223 - INFO -   checkpoint_every: 10
+2025-04-12 19:37:07,223 - INFO -   nb_recons_loss_steps: None
+2025-04-12 19:37:07,223 - INFO -   use_nll_loss: False
+2025-04-12 19:37:07,223 - INFO -   inference_start: 100
+2025-04-12 19:37:07,732 - INFO - Images shape: (1024, 256, 2)
+2025-04-12 19:37:07,732 - INFO - Labels shape: (1024,)
+2025-04-12 19:37:07,732 - INFO - Seq length: 256
+2025-04-12 19:37:07,732 - INFO - Data size: 2
+2025-04-12 19:37:07,733 - INFO - Min/Max in the dataset: (-0.9856310478619905, 0.9731232709978324)
+2025-04-12 19:37:07,733 - INFO - Number of batches:
+2025-04-12 19:37:07,733 - INFO -   - Train: 20
+2025-04-12 19:37:07,733 - INFO -   - Test: 20
+2025-04-12 19:37:09,000 - INFO - No model found in run folder. Training from scratch.
+2025-04-12 19:37:09,000 - INFO - 
+
+=== Beginning training ... ===
+2025-04-12 19:37:09,000 - INFO -   - Number of epochs: 2500
+2025-04-12 19:37:09,000 - INFO -   - Number of batches: 20
+2025-04-12 19:37:09,000 - INFO -   - Total number of GD steps: 50000
+2025-04-12 19:37:35,018 - INFO - Epoch    0/2500     Train Loss   -Mean: 0.166799,   -Median: 0.169071,   -Latest: 0.021611
+2025-04-12 19:37:35,274 - INFO - Best model saved ...
+2025-04-12 19:38:00,498 - INFO - Epoch    1/2500     Train Loss   -Mean: 0.015916,   -Median: 0.014951,   -Latest: 0.012245
+2025-04-12 19:38:25,726 - INFO - Epoch    2/2500     Train Loss   -Mean: 0.011775,   -Median: 0.011680,   -Latest: 0.011487
+2025-04-12 19:38:50,960 - INFO - Epoch    3/2500     Train Loss   -Mean: 0.011912,   -Median: 0.011958,   -Latest: 0.012706
+2025-04-12 19:41:47,951 - INFO - Epoch   10/2500     Train Loss   -Mean: 0.011318,   -Median: 0.011339,   -Latest: 0.011238
+2025-04-12 19:41:48,238 - INFO - Best model saved ...
+2025-04-12 19:46:01,430 - INFO - Epoch   20/2500     Train Loss   -Mean: 0.009175,   -Median: 0.008849,   -Latest: 0.008926
+2025-04-12 19:46:01,709 - INFO - Best model saved ...
+2025-04-12 19:50:14,881 - INFO - Epoch   30/2500     Train Loss   -Mean: 0.006808,   -Median: 0.006388,   -Latest: 0.006510
+2025-04-12 19:50:15,178 - INFO - Best model saved ...
+2025-04-12 19:54:28,240 - INFO - Epoch   40/2500     Train Loss   -Mean: 0.004540,   -Median: 0.004499,   -Latest: 0.005512
+2025-04-12 19:54:28,510 - INFO - Best model saved ...
+2025-04-12 19:58:41,667 - INFO - Epoch   50/2500     Train Loss   -Mean: 0.003418,   -Median: 0.003201,   -Latest: 0.003047
+2025-04-12 19:58:41,952 - INFO - Best model saved ...
+2025-04-12 20:02:54,908 - INFO - Epoch   60/2500     Train Loss   -Mean: 0.003180,   -Median: 0.002932,   -Latest: 0.002895
+2025-04-12 20:02:55,205 - INFO - Best model saved ...
+2025-04-12 20:07:08,235 - INFO - Epoch   70/2500     Train Loss   -Mean: 0.002009,   -Median: 0.001877,   -Latest: 0.001701
+2025-04-12 20:07:08,506 - INFO - Best model saved ...
+2025-04-12 20:11:21,566 - INFO - Epoch   80/2500     Train Loss   -Mean: 0.001930,   -Median: 0.001771,   -Latest: 0.001143
+2025-04-12 20:11:21,838 - INFO - Best model saved ...
+2025-04-12 20:15:34,959 - INFO - Epoch   90/2500     Train Loss   -Mean: 0.001215,   -Median: 0.001199,   -Latest: 0.001245
+2025-04-12 20:15:35,235 - INFO - Best model saved ...
+2025-04-12 20:19:48,489 - INFO - Epoch  100/2500     Train Loss   -Mean: 0.000909,   -Median: 0.000827,   -Latest: 0.000797
+2025-04-12 20:19:48,893 - INFO - Best model saved ...
+2025-04-12 20:24:02,310 - INFO - Epoch  110/2500     Train Loss   -Mean: 0.000904,   -Median: 0.000887,   -Latest: 0.001230
+2025-04-12 20:28:15,728 - INFO - Epoch  120/2500     Train Loss   -Mean: 0.000885,   -Median: 0.000868,   -Latest: 0.000785
+2025-04-12 20:32:29,222 - INFO - Epoch  130/2500     Train Loss   -Mean: 0.000482,   -Median: 0.000446,   -Latest: 0.000698
+2025-04-12 20:32:29,521 - INFO - Best model saved ...
+2025-04-12 20:36:42,829 - INFO - Epoch  140/2500     Train Loss   -Mean: 0.000535,   -Median: 0.000518,   -Latest: 0.000447
+2025-04-12 20:40:56,282 - INFO - Epoch  150/2500     Train Loss   -Mean: 0.000413,   -Median: 0.000388,   -Latest: 0.000528
+2025-04-12 20:40:56,603 - INFO - Best model saved ...
+2025-04-12 20:45:10,029 - INFO - Epoch  160/2500     Train Loss   -Mean: 0.000375,   -Median: 0.000378,   -Latest: 0.000428
+2025-04-12 20:45:10,335 - INFO - Best model saved ...
+2025-04-12 20:49:23,688 - INFO - Epoch  170/2500     Train Loss   -Mean: 0.000388,   -Median: 0.000400,   -Latest: 0.000457
+2025-04-12 20:53:37,085 - INFO - Epoch  180/2500     Train Loss   -Mean: 0.000370,   -Median: 0.000373,   -Latest: 0.000326
+2025-04-12 20:53:37,366 - INFO - Best model saved ...
+2025-04-12 20:57:50,772 - INFO - Epoch  190/2500     Train Loss   -Mean: 0.000306,   -Median: 0.000266,   -Latest: 0.000599
+2025-04-12 20:57:51,054 - INFO - Best model saved ...
+2025-04-12 21:02:04,445 - INFO - Epoch  200/2500     Train Loss   -Mean: 0.000288,   -Median: 0.000274,   -Latest: 0.000288
+2025-04-12 21:06:17,904 - INFO - Epoch  210/2500     Train Loss   -Mean: 0.000226,   -Median: 0.000218,   -Latest: 0.000266
+2025-04-12 21:06:18,224 - INFO - Best model saved ...
+2025-04-12 21:10:31,565 - INFO - Epoch  220/2500     Train Loss   -Mean: 0.000257,   -Median: 0.000242,   -Latest: 0.000230
+2025-04-12 21:14:45,128 - INFO - Epoch  230/2500     Train Loss   -Mean: 0.000230,   -Median: 0.000220,   -Latest: 0.000230
+2025-04-12 21:18:58,761 - INFO - Epoch  240/2500     Train Loss   -Mean: 0.000312,   -Median: 0.000299,   -Latest: 0.000410
+2025-04-12 21:23:12,241 - INFO - Epoch  250/2500     Train Loss   -Mean: 0.000224,   -Median: 0.000225,   -Latest: 0.000193
+2025-04-12 21:27:25,862 - INFO - Epoch  260/2500     Train Loss   -Mean: 0.000290,   -Median: 0.000275,   -Latest: 0.000553
+2025-04-12 21:31:39,434 - INFO - Epoch  270/2500     Train Loss   -Mean: 0.000216,   -Median: 0.000214,   -Latest: 0.000256
+2025-04-12 21:31:39,737 - INFO - Best model saved ...
+2025-04-12 21:35:53,326 - INFO - Epoch  280/2500     Train Loss   -Mean: 0.000199,   -Median: 0.000199,   -Latest: 0.000269
+2025-04-12 21:35:53,631 - INFO - Best model saved ...
+2025-04-12 21:40:07,155 - INFO - Epoch  290/2500     Train Loss   -Mean: 0.000211,   -Median: 0.000216,   -Latest: 0.000201
+2025-04-12 21:44:20,685 - INFO - Epoch  300/2500     Train Loss   -Mean: 0.000172,   -Median: 0.000170,   -Latest: 0.000161
+2025-04-12 21:44:20,982 - INFO - Best model saved ...
+2025-04-12 21:48:34,486 - INFO - Epoch  310/2500     Train Loss   -Mean: 0.000180,   -Median: 0.000179,   -Latest: 0.000140
+2025-04-12 21:52:47,991 - INFO - Epoch  320/2500     Train Loss   -Mean: 0.000171,   -Median: 0.000168,   -Latest: 0.000169
+2025-04-12 21:52:48,298 - INFO - Best model saved ...
+2025-04-12 21:57:01,780 - INFO - Epoch  330/2500     Train Loss   -Mean: 0.000164,   -Median: 0.000160,   -Latest: 0.000191
+2025-04-12 21:57:02,081 - INFO - Best model saved ...
+2025-04-12 22:01:15,472 - INFO - Epoch  340/2500     Train Loss   -Mean: 0.000147,   -Median: 0.000151,   -Latest: 0.000153
+2025-04-12 22:01:15,774 - INFO - Best model saved ...
+2025-04-12 22:05:30,031 - INFO - Epoch  350/2500     Train Loss   -Mean: 0.000163,   -Median: 0.000161,   -Latest: 0.000157
+2025-04-12 22:09:43,552 - INFO - Epoch  360/2500     Train Loss   -Mean: 0.000207,   -Median: 0.000211,   -Latest: 0.000368
+2025-04-12 22:13:57,005 - INFO - Epoch  370/2500     Train Loss   -Mean: 0.000164,   -Median: 0.000165,   -Latest: 0.000170
+2025-04-12 22:18:10,525 - INFO - Epoch  380/2500     Train Loss   -Mean: 0.000145,   -Median: 0.000141,   -Latest: 0.000171
+2025-04-12 22:18:10,857 - INFO - Best model saved ...
+2025-04-12 22:22:24,396 - INFO - Epoch  390/2500     Train Loss   -Mean: 0.000145,   -Median: 0.000140,   -Latest: 0.000133
+2025-04-12 22:22:24,709 - INFO - Best model saved ...
+2025-04-12 22:26:38,279 - INFO - Epoch  400/2500     Train Loss   -Mean: 0.000143,   -Median: 0.000141,   -Latest: 0.000138
+2025-04-12 22:30:51,951 - INFO - Epoch  410/2500     Train Loss   -Mean: 0.000151,   -Median: 0.000143,   -Latest: 0.000174
+2025-04-12 22:35:05,655 - INFO - Epoch  420/2500     Train Loss   -Mean: 0.000126,   -Median: 0.000123,   -Latest: 0.000128
+2025-04-12 22:35:05,962 - INFO - Best model saved ...
+2025-04-12 22:39:19,605 - INFO - Epoch  430/2500     Train Loss   -Mean: 0.000104,   -Median: 0.000102,   -Latest: 0.000106
+2025-04-12 22:39:19,916 - INFO - Best model saved ...
+2025-04-12 22:43:33,464 - INFO - Epoch  440/2500     Train Loss   -Mean: 0.000105,   -Median: 0.000106,   -Latest: 0.000106
+2025-04-12 22:47:47,255 - INFO - Epoch  450/2500     Train Loss   -Mean: 0.000103,   -Median: 0.000103,   -Latest: 0.000103
+2025-04-12 22:52:00,990 - INFO - Epoch  460/2500     Train Loss   -Mean: 0.000099,   -Median: 0.000098,   -Latest: 0.000101
+2025-04-12 22:52:01,301 - INFO - Best model saved ...
+2025-04-12 22:56:14,829 - INFO - Epoch  470/2500     Train Loss   -Mean: 0.000099,   -Median: 0.000099,   -Latest: 0.000093
+2025-04-12 23:00:28,521 - INFO - Epoch  480/2500     Train Loss   -Mean: 0.000099,   -Median: 0.000098,   -Latest: 0.000095
+2025-04-12 23:04:42,381 - INFO - Epoch  490/2500     Train Loss   -Mean: 0.000098,   -Median: 0.000098,   -Latest: 0.000115
+2025-04-12 23:04:42,723 - INFO - Best model saved ...
+2025-04-12 23:08:56,181 - INFO - Epoch  500/2500     Train Loss   -Mean: 0.000094,   -Median: 0.000094,   -Latest: 0.000085
+2025-04-12 23:08:56,495 - INFO - Best model saved ...
+2025-04-12 23:13:10,087 - INFO - Epoch  510/2500     Train Loss   -Mean: 0.000099,   -Median: 0.000095,   -Latest: 0.000111
+2025-04-12 23:17:23,894 - INFO - Epoch  520/2500     Train Loss   -Mean: 0.000099,   -Median: 0.000098,   -Latest: 0.000093
+2025-04-12 23:21:37,800 - INFO - Epoch  530/2500     Train Loss   -Mean: 0.000095,   -Median: 0.000095,   -Latest: 0.000095
+2025-04-12 23:25:51,590 - INFO - Epoch  540/2500     Train Loss   -Mean: 0.000097,   -Median: 0.000098,   -Latest: 0.000104
+2025-04-12 23:30:05,234 - INFO - Epoch  550/2500     Train Loss   -Mean: 0.000099,   -Median: 0.000098,   -Latest: 0.000095
+2025-04-12 23:34:20,024 - INFO - Epoch  560/2500     Train Loss   -Mean: 0.000088,   -Median: 0.000090,   -Latest: 0.000092
+2025-04-12 23:34:20,354 - INFO - Best model saved ...
+2025-04-12 23:38:34,051 - INFO - Epoch  570/2500     Train Loss   -Mean: 0.000088,   -Median: 0.000087,   -Latest: 0.000082
+2025-04-12 23:38:34,400 - INFO - Best model saved ...
+2025-04-12 23:42:48,153 - INFO - Epoch  580/2500     Train Loss   -Mean: 0.000087,   -Median: 0.000086,   -Latest: 0.000086
+2025-04-12 23:42:48,489 - INFO - Best model saved ...
+2025-04-12 23:47:02,258 - INFO - Epoch  590/2500     Train Loss   -Mean: 0.000085,   -Median: 0.000084,   -Latest: 0.000080
+2025-04-12 23:47:02,598 - INFO - Best model saved ...
+2025-04-12 23:51:16,303 - INFO - Epoch  600/2500     Train Loss   -Mean: 0.000086,   -Median: 0.000085,   -Latest: 0.000101
+2025-04-12 23:55:30,203 - INFO - Epoch  610/2500     Train Loss   -Mean: 0.000085,   -Median: 0.000084,   -Latest: 0.000093
+2025-04-12 23:59:44,119 - INFO - Epoch  620/2500     Train Loss   -Mean: 0.000084,   -Median: 0.000084,   -Latest: 0.000082
+2025-04-12 23:59:44,499 - INFO - Best model saved ...
+2025-04-13 00:03:58,314 - INFO - Epoch  630/2500     Train Loss   -Mean: 0.000085,   -Median: 0.000085,   -Latest: 0.000077
+2025-04-13 00:08:12,491 - INFO - Epoch  640/2500     Train Loss   -Mean: 0.000085,   -Median: 0.000086,   -Latest: 0.000094
+2025-04-13 00:12:26,591 - INFO - Epoch  650/2500     Train Loss   -Mean: 0.000085,   -Median: 0.000086,   -Latest: 0.000082
+2025-04-13 00:16:40,641 - INFO - Epoch  660/2500     Train Loss   -Mean: 0.000081,   -Median: 0.000081,   -Latest: 0.000079
+2025-04-13 00:16:40,984 - INFO - Best model saved ...
+2025-04-13 00:20:54,788 - INFO - Epoch  670/2500     Train Loss   -Mean: 0.000085,   -Median: 0.000083,   -Latest: 0.000082
+2025-04-13 00:25:08,599 - INFO - Epoch  680/2500     Train Loss   -Mean: 0.000083,   -Median: 0.000082,   -Latest: 0.000084
+2025-04-13 00:29:22,742 - INFO - Epoch  690/2500     Train Loss   -Mean: 0.000084,   -Median: 0.000083,   -Latest: 0.000088
+2025-04-13 00:33:36,870 - INFO - Epoch  700/2500     Train Loss   -Mean: 0.000081,   -Median: 0.000081,   -Latest: 0.000082
+2025-04-13 00:37:50,862 - INFO - Epoch  710/2500     Train Loss   -Mean: 0.000083,   -Median: 0.000083,   -Latest: 0.000086
+2025-04-13 00:42:05,180 - INFO - Epoch  720/2500     Train Loss   -Mean: 0.000084,   -Median: 0.000084,   -Latest: 0.000079
+2025-04-13 00:46:19,228 - INFO - Epoch  730/2500     Train Loss   -Mean: 0.000080,   -Median: 0.000080,   -Latest: 0.000080
+2025-04-13 00:46:19,592 - INFO - Best model saved ...
+2025-04-13 00:50:33,674 - INFO - Epoch  740/2500     Train Loss   -Mean: 0.000086,   -Median: 0.000085,   -Latest: 0.000085
+2025-04-13 00:54:47,665 - INFO - Epoch  750/2500     Train Loss   -Mean: 0.000085,   -Median: 0.000086,   -Latest: 0.000095
+2025-04-13 00:59:01,558 - INFO - Epoch  760/2500     Train Loss   -Mean: 0.000080,   -Median: 0.000078,   -Latest: 0.000086
+2025-04-13 00:59:01,913 - INFO - Best model saved ...
+2025-04-13 01:03:15,666 - INFO - Epoch  770/2500     Train Loss   -Mean: 0.000080,   -Median: 0.000079,   -Latest: 0.000076
+2025-04-13 01:07:29,832 - INFO - Epoch  780/2500     Train Loss   -Mean: 0.000079,   -Median: 0.000079,   -Latest: 0.000076
+2025-04-13 01:11:43,866 - INFO - Epoch  790/2500     Train Loss   -Mean: 0.000080,   -Median: 0.000077,   -Latest: 0.000085
+2025-04-13 01:11:44,243 - INFO - Best model saved ...
+2025-04-13 01:15:58,017 - INFO - Epoch  800/2500     Train Loss   -Mean: 0.000077,   -Median: 0.000076,   -Latest: 0.000071
+2025-04-13 01:15:58,394 - INFO - Best model saved ...
+2025-04-13 01:20:12,297 - INFO - Epoch  810/2500     Train Loss   -Mean: 0.000077,   -Median: 0.000076,   -Latest: 0.000075
+2025-04-13 01:20:12,669 - INFO - Best model saved ...
+2025-04-13 01:24:26,632 - INFO - Epoch  820/2500     Train Loss   -Mean: 0.000077,   -Median: 0.000075,   -Latest: 0.000095
+2025-04-13 01:24:27,004 - INFO - Best model saved ...
+2025-04-13 01:28:41,009 - INFO - Epoch  830/2500     Train Loss   -Mean: 0.000076,   -Median: 0.000076,   -Latest: 0.000073
+2025-04-13 01:32:54,828 - INFO - Epoch  840/2500     Train Loss   -Mean: 0.000074,   -Median: 0.000072,   -Latest: 0.000071
+2025-04-13 01:32:55,201 - INFO - Best model saved ...
+2025-04-13 01:37:09,081 - INFO - Epoch  850/2500     Train Loss   -Mean: 0.000074,   -Median: 0.000074,   -Latest: 0.000083
+2025-04-13 01:41:23,199 - INFO - Epoch  860/2500     Train Loss   -Mean: 0.000074,   -Median: 0.000074,   -Latest: 0.000076
+2025-04-13 01:45:37,203 - INFO - Epoch  870/2500     Train Loss   -Mean: 0.000074,   -Median: 0.000073,   -Latest: 0.000079
+2025-04-13 01:49:51,068 - INFO - Epoch  880/2500     Train Loss   -Mean: 0.000076,   -Median: 0.000076,   -Latest: 0.000074
+2025-04-13 01:54:05,160 - INFO - Epoch  890/2500     Train Loss   -Mean: 0.000075,   -Median: 0.000074,   -Latest: 0.000070
+2025-04-13 01:58:19,162 - INFO - Epoch  900/2500     Train Loss   -Mean: 0.000073,   -Median: 0.000073,   -Latest: 0.000073
+2025-04-13 02:02:33,694 - INFO - Epoch  910/2500     Train Loss   -Mean: 0.000072,   -Median: 0.000072,   -Latest: 0.000076
+2025-04-13 02:02:34,170 - INFO - Best model saved ...
+2025-04-13 02:06:48,197 - INFO - Epoch  920/2500     Train Loss   -Mean: 0.000073,   -Median: 0.000073,   -Latest: 0.000080
+2025-04-13 02:11:02,148 - INFO - Epoch  930/2500     Train Loss   -Mean: 0.000075,   -Median: 0.000074,   -Latest: 0.000065
+2025-04-13 02:15:17,331 - INFO - Epoch  940/2500     Train Loss   -Mean: 0.000072,   -Median: 0.000073,   -Latest: 0.000077
+2025-04-13 02:19:31,433 - INFO - Epoch  950/2500     Train Loss   -Mean: 0.000073,   -Median: 0.000071,   -Latest: 0.000067
+2025-04-13 02:19:31,830 - INFO - Best model saved ...
+2025-04-13 02:23:45,614 - INFO - Epoch  960/2500     Train Loss   -Mean: 0.000073,   -Median: 0.000071,   -Latest: 0.000078
+2025-04-13 02:27:59,584 - INFO - Epoch  970/2500     Train Loss   -Mean: 0.000071,   -Median: 0.000070,   -Latest: 0.000066
+2025-04-13 02:27:59,978 - INFO - Best model saved ...
+2025-04-13 02:32:13,979 - INFO - Epoch  980/2500     Train Loss   -Mean: 0.000071,   -Median: 0.000070,   -Latest: 0.000071
+2025-04-13 02:32:14,401 - INFO - Best model saved ...
+2025-04-13 02:36:28,308 - INFO - Epoch  990/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000070,   -Latest: 0.000063
+2025-04-13 02:40:42,315 - INFO - Epoch 1000/2500     Train Loss   -Mean: 0.000073,   -Median: 0.000074,   -Latest: 0.000089
+2025-04-13 02:44:56,646 - INFO - Epoch 1010/2500     Train Loss   -Mean: 0.000072,   -Median: 0.000072,   -Latest: 0.000069
+2025-04-13 02:49:10,742 - INFO - Epoch 1020/2500     Train Loss   -Mean: 0.000073,   -Median: 0.000072,   -Latest: 0.000063
+2025-04-13 02:53:24,990 - INFO - Epoch 1030/2500     Train Loss   -Mean: 0.000071,   -Median: 0.000071,   -Latest: 0.000075
+2025-04-13 02:57:39,007 - INFO - Epoch 1040/2500     Train Loss   -Mean: 0.000071,   -Median: 0.000070,   -Latest: 0.000077
+2025-04-13 03:01:53,014 - INFO - Epoch 1050/2500     Train Loss   -Mean: 0.000071,   -Median: 0.000070,   -Latest: 0.000065
+2025-04-13 03:06:07,100 - INFO - Epoch 1060/2500     Train Loss   -Mean: 0.000072,   -Median: 0.000072,   -Latest: 0.000068
+2025-04-13 03:10:21,217 - INFO - Epoch 1070/2500     Train Loss   -Mean: 0.000072,   -Median: 0.000073,   -Latest: 0.000070
+2025-04-13 03:14:35,487 - INFO - Epoch 1080/2500     Train Loss   -Mean: 0.000071,   -Median: 0.000070,   -Latest: 0.000067
+2025-04-13 03:14:35,893 - INFO - Best model saved ...
+2025-04-13 03:18:49,974 - INFO - Epoch 1090/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000072,   -Latest: 0.000067
+2025-04-13 03:23:04,048 - INFO - Epoch 1100/2500     Train Loss   -Mean: 0.000072,   -Median: 0.000073,   -Latest: 0.000076
+2025-04-13 03:27:18,145 - INFO - Epoch 1110/2500     Train Loss   -Mean: 0.000071,   -Median: 0.000070,   -Latest: 0.000064
+2025-04-13 03:31:32,364 - INFO - Epoch 1120/2500     Train Loss   -Mean: 0.000071,   -Median: 0.000070,   -Latest: 0.000067
+2025-04-13 03:31:32,761 - INFO - Best model saved ...
+2025-04-13 03:35:46,915 - INFO - Epoch 1130/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000070,   -Latest: 0.000070
+2025-04-13 03:40:01,374 - INFO - Epoch 1140/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000069,   -Latest: 0.000066
+2025-04-13 03:40:01,776 - INFO - Best model saved ...
+2025-04-13 03:44:15,733 - INFO - Epoch 1150/2500     Train Loss   -Mean: 0.000071,   -Median: 0.000071,   -Latest: 0.000071
+2025-04-13 03:48:30,032 - INFO - Epoch 1160/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000070,   -Latest: 0.000071
+2025-04-13 03:52:45,684 - INFO - Epoch 1170/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000071,   -Latest: 0.000071
+2025-04-13 03:57:00,260 - INFO - Epoch 1180/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000070,   -Latest: 0.000073
+2025-04-13 04:01:14,757 - INFO - Epoch 1190/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000068,   -Latest: 0.000076
+2025-04-13 04:01:15,184 - INFO - Best model saved ...
+2025-04-13 04:05:29,341 - INFO - Epoch 1200/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000069,   -Latest: 0.000072
+2025-04-13 04:09:43,897 - INFO - Epoch 1210/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000070,   -Latest: 0.000060
+2025-04-13 04:13:58,352 - INFO - Epoch 1220/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000070,   -Latest: 0.000071
+2025-04-13 04:18:12,752 - INFO - Epoch 1230/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000069,   -Latest: 0.000069
+2025-04-13 04:22:27,267 - INFO - Epoch 1240/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000067,   -Latest: 0.000073
+2025-04-13 04:22:27,714 - INFO - Best model saved ...
+2025-04-13 04:26:42,136 - INFO - Epoch 1250/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000069,   -Latest: 0.000073
+2025-04-13 04:30:56,690 - INFO - Epoch 1260/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000071,   -Latest: 0.000066
+2025-04-13 04:35:11,295 - INFO - Epoch 1270/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000068,   -Latest: 0.000066
+2025-04-13 04:39:25,675 - INFO - Epoch 1280/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000069,   -Latest: 0.000059
+2025-04-13 04:43:40,318 - INFO - Epoch 1290/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000069,   -Latest: 0.000078
+2025-04-13 04:47:54,896 - INFO - Epoch 1300/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000069,   -Latest: 0.000072
+2025-04-13 04:52:09,465 - INFO - Epoch 1310/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000069,   -Latest: 0.000069
+2025-04-13 04:56:23,708 - INFO - Epoch 1320/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000069,   -Latest: 0.000068
+2025-04-13 05:00:37,890 - INFO - Epoch 1330/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000067,   -Latest: 0.000064
+2025-04-13 05:00:38,340 - INFO - Best model saved ...
+2025-04-13 05:04:52,849 - INFO - Epoch 1340/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000067,   -Latest: 0.000065
+2025-04-13 05:04:53,284 - INFO - Best model saved ...
+2025-04-13 05:09:07,677 - INFO - Epoch 1350/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000069,   -Latest: 0.000066
+2025-04-13 05:13:22,200 - INFO - Epoch 1360/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000068,   -Latest: 0.000075
+2025-04-13 05:17:36,543 - INFO - Epoch 1370/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000070,   -Latest: 0.000075
+2025-04-13 05:21:50,894 - INFO - Epoch 1380/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000070,   -Latest: 0.000073
+2025-04-13 05:26:05,109 - INFO - Epoch 1390/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000068,   -Latest: 0.000065
+2025-04-13 05:30:19,285 - INFO - Epoch 1400/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000068,   -Latest: 0.000064
+2025-04-13 05:34:34,141 - INFO - Epoch 1410/2500     Train Loss   -Mean: 0.000071,   -Median: 0.000071,   -Latest: 0.000066
+2025-04-13 05:38:49,014 - INFO - Epoch 1420/2500     Train Loss   -Mean: 0.000067,   -Median: 0.000067,   -Latest: 0.000066
+2025-04-13 05:43:03,671 - INFO - Epoch 1430/2500     Train Loss   -Mean: 0.000067,   -Median: 0.000066,   -Latest: 0.000063
+2025-04-13 05:43:04,136 - INFO - Best model saved ...
+2025-04-13 05:47:18,699 - INFO - Epoch 1440/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000069,   -Latest: 0.000070
+2025-04-13 05:51:33,476 - INFO - Epoch 1450/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000069,   -Latest: 0.000069
+2025-04-13 05:55:48,069 - INFO - Epoch 1460/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000068,   -Latest: 0.000068
+2025-04-13 06:00:02,438 - INFO - Epoch 1470/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000068,   -Latest: 0.000072
+2025-04-13 06:04:16,952 - INFO - Epoch 1480/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000068,   -Latest: 0.000076
+2025-04-13 06:08:31,326 - INFO - Epoch 1490/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000068,   -Latest: 0.000070
+2025-04-13 06:12:45,728 - INFO - Epoch 1500/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000069,   -Latest: 0.000074
+2025-04-13 06:17:00,178 - INFO - Epoch 1510/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000068,   -Latest: 0.000074
+2025-04-13 06:21:14,652 - INFO - Epoch 1520/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000069,   -Latest: 0.000071
+2025-04-13 06:25:29,086 - INFO - Epoch 1530/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000068,   -Latest: 0.000070
+2025-04-13 06:29:43,564 - INFO - Epoch 1540/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000067,   -Latest: 0.000078
+2025-04-13 06:33:58,003 - INFO - Epoch 1550/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000069,   -Latest: 0.000069
+2025-04-13 06:38:12,548 - INFO - Epoch 1560/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000069,   -Latest: 0.000076
+2025-04-13 06:42:27,171 - INFO - Epoch 1570/2500     Train Loss   -Mean: 0.000067,   -Median: 0.000066,   -Latest: 0.000067
+2025-04-13 06:46:41,671 - INFO - Epoch 1580/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000067,   -Latest: 0.000067
+2025-04-13 06:50:56,335 - INFO - Epoch 1590/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000067,   -Latest: 0.000071
+2025-04-13 06:55:10,910 - INFO - Epoch 1600/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000068,   -Latest: 0.000064
+2025-04-13 06:59:25,320 - INFO - Epoch 1610/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000068,   -Latest: 0.000068
+2025-04-13 07:03:39,824 - INFO - Epoch 1620/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000068,   -Latest: 0.000069
+2025-04-13 07:07:54,317 - INFO - Epoch 1630/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000068,   -Latest: 0.000065
+2025-04-13 07:12:08,882 - INFO - Epoch 1640/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000066,   -Latest: 0.000065
+2025-04-13 07:16:23,731 - INFO - Epoch 1650/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000067,   -Latest: 0.000072
+2025-04-13 07:20:38,614 - INFO - Epoch 1660/2500     Train Loss   -Mean: 0.000067,   -Median: 0.000066,   -Latest: 0.000062
+2025-04-13 07:20:39,091 - INFO - Best model saved ...
+2025-04-13 07:24:53,653 - INFO - Epoch 1670/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000068,   -Latest: 0.000069
+2025-04-13 07:29:08,371 - INFO - Epoch 1680/2500     Train Loss   -Mean: 0.000070,   -Median: 0.000070,   -Latest: 0.000074
+2025-04-13 07:33:22,858 - INFO - Epoch 1690/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000068,   -Latest: 0.000067
+2025-04-13 07:37:37,285 - INFO - Epoch 1700/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000067,   -Latest: 0.000064
+2025-04-13 07:41:51,834 - INFO - Epoch 1710/2500     Train Loss   -Mean: 0.000067,   -Median: 0.000068,   -Latest: 0.000071
+2025-04-13 07:46:06,403 - INFO - Epoch 1720/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000068,   -Latest: 0.000062
+2025-04-13 07:50:20,869 - INFO - Epoch 1730/2500     Train Loss   -Mean: 0.000067,   -Median: 0.000067,   -Latest: 0.000067
+2025-04-13 07:54:35,380 - INFO - Epoch 1740/2500     Train Loss   -Mean: 0.000067,   -Median: 0.000067,   -Latest: 0.000068
+2025-04-13 07:58:49,911 - INFO - Epoch 1750/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000068,   -Latest: 0.000078
+2025-04-13 08:03:04,598 - INFO - Epoch 1760/2500     Train Loss   -Mean: 0.000067,   -Median: 0.000067,   -Latest: 0.000064
+2025-04-13 08:07:19,149 - INFO - Epoch 1770/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000068,   -Latest: 0.000066
+2025-04-13 08:11:33,673 - INFO - Epoch 1780/2500     Train Loss   -Mean: 0.000066,   -Median: 0.000065,   -Latest: 0.000066
+2025-04-13 08:11:34,160 - INFO - Best model saved ...
+2025-04-13 08:15:48,444 - INFO - Epoch 1790/2500     Train Loss   -Mean: 0.000068,   -Median: 0.000068,   -Latest: 0.000067
+2025-04-13 08:20:03,042 - INFO - Epoch 1800/2500     Train Loss   -Mean: 0.000067,   -Median: 0.000066,   -Latest: 0.000068
+2025-04-13 08:24:17,734 - INFO - Epoch 1810/2500     Train Loss   -Mean: 0.000067,   -Median: 0.000066,   -Latest: 0.000064
+2025-04-13 08:28:32,476 - INFO - Epoch 1820/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000069,   -Latest: 0.000073
+2025-04-13 08:32:47,153 - INFO - Epoch 1830/2500     Train Loss   -Mean: 0.000069,   -Median: 0.000068,   -Latest: 0.000066
+2025-04-13 08:37:01,879 - INFO - Epoch 1840/2500     Train Loss   -Mean: 0.000067,   -Median: 0.000067,   -Latest: 0.000061
+2025-04-13 08:41:16,505 - INFO - Epoch 1850/2500     Train Loss   -Mean: 0.000066,   -Median: 0.000066,   -Latest: 0.000070
