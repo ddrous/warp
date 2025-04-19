@@ -61,7 +61,7 @@ class RootMLP(eqx.Module):
             return jnp.concatenate([mean, std], axis=-1)
 
 
-class WSM_RNN(eqx.Module):
+class WSM(eqx.Module):
     """ Weight Space Seq2Seq Model, with RNN transition function """
     As: jnp.ndarray
     Bs: jnp.ndarray
@@ -211,7 +211,7 @@ def make_model(key, data_size, config):
 
     model_type = config['model']['model_type']
 
-    if model_type == "wsm-rnn":
+    if model_type == "wsm":
         model_args = {
             "data_size": data_size,
             "width_size": config['model']['mlp_width_size'],
@@ -227,7 +227,7 @@ def make_model(key, data_size, config):
             "noise_theta_init": config['model']['noise_theta_init']
         }
 
-        model = WSM_RNN(key=key, **model_args)
+        model = WSM(key=key, **model_args)
         print(f"Number of learnable parameters in the root network: {count_params((model.thetas,))/1000:3.1f} k")
         print(f"Number of learnable parameters for the seqtoseq's transition: {count_params((model.As, model.Bs))/1000:3.1f} k")
     elif model_type == "wsm-lstm":

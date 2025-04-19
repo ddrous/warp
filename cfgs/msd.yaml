@@ -3,9 +3,9 @@
 # General settings
 general:
   seed: 2024
-  train: False
-  dataset: "lorentz63"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/"
+  train: True
+  dataset: "mass_spring_damper"  # Options: mnist, cifar, lorentz, dynamics
+  data_path: "./data/dynamics/mass-spring-damper/"
   # save_path: "./runs/250404-175026-Test/"
   save_path: null
 
@@ -17,11 +17,11 @@ data:
 
 # Model hyperparameters
 model:
-  mlp_width_size: 32
+  mlp_width_size: 48
   mlp_depth: 3
   activation: "swish"
   input_prev_data: False
-  model_type: "wsm-rnn"
+  model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
   apply_tanh_uncertainty: False
@@ -37,7 +37,7 @@ optimizer:
   on_plateau:
     factor: 0.5
     min_scale: 1.0e-2
-    patience: 10
+    patience: 20
     cooldown: 0
     rtol: 1.0e-4
     accum_size: 50
@@ -45,9 +45,9 @@ optimizer:
 # Training/Inference hyperparameters
 training:
   nb_epochs: 2500
-  batch_size: 2048
+  batch_size: 1024
   print_every: 10
-  checkpoint_every: 100
+  checkpoint_every: 10
   nb_recons_loss_steps: null
-  use_nll_loss: True
+  use_nll_loss: False
   inference_start: 100

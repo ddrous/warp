@@ -150,9 +150,56 @@ class LorentzDataset(TimeSeriesDataset):
 
 
 
+
 class DynamicsDataset(TimeSeriesDataset):
     """
-    For all other dyanmics dataset, e.g. from https://arxiv.org/abs/2405.02154
+    For a dynamics dataset
+    """
+
+    def __init__(self, data_dir, traj_length):
+        try:
+            raw_data = np.load(data_dir)
+            raw_t_eval = np.linspace(0, 1., raw_data.shape[1])
+        except:
+            raise ValueError(f"Data not loadable at {data_dir}")
+
+        ## Normalise the dataset between 0 and 1
+        try:
+            raw_data = (raw_data - torch.min(raw_data)) / (torch.max(raw_data) - torch.min(raw_data))
+        except:
+            raw_data = (raw_data - np.min(raw_data)) / (np.max(raw_data) - np.min(raw_data))
+
+        ## Put things between -1 and 1
+        raw_data = (raw_data - 0.5) / 0.5
+
+        ## Tile the data into -1, traj_length, n_dimensions
+        # _, raw_timesteps, _ = raw_data.shape
+        # dataset = []
+        # for e in range(raw_data.shape[0]):
+        # # for e in range(16):
+        #     for i in range(0, raw_timesteps, traj_length):
+        #         dataset.append(raw_data[e:e+1, i:i+traj_length, :])
+        # dataset = np.concatenate(dataset, axis=0)
+        # n_envs, n_timesteps, n_dimensions = dataset.shape
+
+        dataset = raw_data
+        n_envs, n_timesteps, n_dimensions = dataset.shape
+
+        t_eval = np.linspace(0, 1., n_timesteps)
+        labels = np.arange(n_envs)
+
+        self.total_envs = n_envs
+        self.nb_classes = n_envs
+        self.num_steps = n_timesteps
+        self.data_size = n_dimensions
+
+        super().__init__(dataset, labels, t_eval, traj_prop=1.0)
+
+
+
+class OldDynamicsDataset(TimeSeriesDataset):
+    """
+    For all dyanmics dataset as in Gen-Dynamics *TODO: deprecated*
     """
 
     def __init__(self, data_dir, traj_length=1000):
@@ -231,6 +278,101 @@ class MNISTDataset(TimeSeriesDataset):
         # self.total_envs = N
         # self.dataset = self.dataset[:N]
         # self.labels = self.labels[:N]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class TimeSeriesRepeatDataset:
+    """
+    Base class for any time series repeat-copy dataset, from which several others will inherit
+    """
+    def __init__(self, in_dataset, out_dataset, t_eval, traj_prop=1.0):
+
+        self.in_dataset = in_dataset            ## Input sequences
+        self.out_datasets = out_dataset        ## Output sequences
+        n_envs, n_timesteps, n_dimensions = in_dataset.shape
+        self.t_eval = t_eval
+        self.total_envs = n_envs
+
+        if traj_prop < 0 or traj_prop > 1:
+            raise ValueError("The smallest proportion of the trajectory to use must be between 0 and 1")
+        self.traj_prop = traj_prop
+        self.traj_len = int(n_timesteps * traj_prop)
+
+        self.num_steps = n_timesteps
+        self.data_size = n_dimensions
+
+    def __getitem__(self, idx):
+        inputs = self.in_dataset[idx, :, :]
+        outputs = self.out_datasets[idx, :, :]
+        t_eval = self.t_eval
+        traj_len = self.traj_len
+
+        if self.traj_prop == 1.0:
+            ### STRAIGHFORWARD APPROACH ###
+            return (inputs, t_eval), outputs
+        else:
+            ## Select a random subset of traj_len-2 indices, then concatenate the start and end points
+            indices = np.sort(np.random.choice(np.arange(1,self.num_steps-1), traj_len-2, replace=False))
+            indices = np.concatenate(([0], indices, [self.num_steps-1]))
+            ts = t_eval[indices]
+            in_trajs = inputs[indices, :]
+            out_trajs = outputs[indices, :]
+            return (in_trajs, ts), out_trajs
+
+    def __len__(self):
+        return self.total_envs
+
+
+class DynamicsRepeatDataset(TimeSeriesRepeatDataset):
+    """
+    For the a dynamical system dataset for repeat-copy tasks
+    """
+
+    def __init__(self, data_dir, traj_length):
+        try:
+            raw_data = np.load(data_dir)
+            in_raw_data = raw_data["clipped"]
+            out_raw_data = raw_data["full"]
+        except:
+            raise ValueError(f"Data not loadable at {data_dir}")
+
+        ## Normalise the dataset between 0 and 1
+        min_data = np.min(out_raw_data)
+        max_data = np.max(out_raw_data)
+
+        in_raw_data = (in_raw_data - min_data) / (max_data - min_data)
+        out_raw_data = (out_raw_data - min_data) / (max_data - min_data)
+
+        ## Put things between -1 and 1
+        in_raw_data = (in_raw_data - 0.5) / 0.5
+        out_raw_data = (out_raw_data - 0.5) / 0.5
+
+        ## Replace the smallest value in in_raw_data with exactly -1 ?
+        # in_raw_data[in_raw_data == np.min(in_raw_data)] = -1
+
+        n_envs, n_timesteps, n_dimensions = in_raw_data.shape
+
+        # t_eval = raw_t_eval[:traj_length]
+        t_eval = np.linspace(0, 1., n_timesteps)
+
+        self.total_envs = n_envs
+        self.nb_classes = n_envs
+        self.num_steps = n_timesteps
+        self.data_size = n_dimensions
+
+        super().__init__(in_raw_data, out_raw_data, t_eval, traj_prop=1.0)
 
 
 
@@ -533,17 +675,35 @@ def make_dataloaders(data_folder, config):
         nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
         min_res = min(resolution)
 
-    elif dataset in ["lorentz63"]:                  ## TODO: Fix this
-        print(" #### Dynamics Dataset ####")
-        # data_url = "dynamics/lorentz-63/full.pt"
-        data_url = "dynamics/mass-spring/train.npy"
-        traj_len = 1000
 
-        trainloader = NumpyLoader(LorentzDataset(data_folder+data_url, traj_length=traj_len), 
+    elif dataset in ["lorentz63", "mass_spring_damper"]:        ##TODO: preprocess lorentz63
+        print(" #### Dynamics Dataset ####")
+        data_file = "train.npy"
+        traj_len = np.NaN
+
+        trainloader = NumpyLoader(DynamicsDataset(data_folder+data_file, traj_length=traj_len), 
                                 batch_size=batch_size, 
                                 shuffle=True, 
                                 num_workers=24)
-        testloader = NumpyLoader(LorentzDataset(data_folder+data_url, traj_length=traj_len),     ## 5500
+        testloader = NumpyLoader(DynamicsDataset(data_folder+data_file, traj_length=traj_len),     ## 5500
+                                    batch_size=batch_size, 
+                                    shuffle=True, 
+                                    num_workers=24)
+        nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
+        print("Training sequence length:", seq_length)
+        min_res = None
+
+
+    elif dataset in ["lotka"]:
+        print(" #### Dynamics-Repeat Dataset ####")
+        data_url = "train.npz"
+        traj_len = np.NaN
+
+        trainloader = NumpyLoader(DynamicsRepeatDataset(data_folder+data_url, traj_length=traj_len), 
+                                batch_size=batch_size, 
+                                shuffle=True, 
+                                num_workers=24)
+        testloader = NumpyLoader(DynamicsRepeatDataset(data_folder+data_url, traj_length=traj_len),     ## 5500
                                     batch_size=batch_size, 
                                     shuffle=True, 
                                     num_workers=24)

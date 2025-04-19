@@ -141,41 +141,45 @@ trainloader, testloader, data_props = make_dataloaders(data_folder, config)
 nb_classes, seq_length, data_size, width = data_props
 
 batch = next(iter(testloader))
-(images, times), labels = batch
-logger.info(f"Images shape: {images.shape}")
-logger.info(f"Labels shape: {labels.shape}")
+(in_sequence, times), output = batch
+logger.info(f"Input sequence shape: {in_sequence.shape}")
+logger.info(f"Labels/OutputSequence shape: {output.shape}")
 logger.info(f"Seq length: {seq_length}")
 logger.info(f"Data size: {data_size}")
-logger.info(f"Min/Max in the dataset: {np.min(images), np.max(images)}")
+logger.info(f"Min/Max in the dataset: {np.min(in_sequence), np.max(in_sequence)}")
 logger.info("Number of batches:")
 logger.info(f"  - Train: {trainloader.num_batches}")
 logger.info(f"  - Test: {testloader.num_batches}")
 
-## Plot a few samples, along with their labels as title in a 4x4 grid (chose them at random)
+## Plot a few samples in a 4x4 grid (chose them at random)
 fig, axs = plt.subplots(4, 4, figsize=(10, 10), sharex=True)
 colors = ['r', 'g', 'b', 'c', 'm', 'y']
 
 dataset = config['general']['dataset']
 image_datasets = ["mnist", "mnist_fashion", "cifar", "celeba"]
-dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends"]
+dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_damper"]
+repeat_datasets = ["lotka"]
 
 res = (width, width, data_size)
+dim0, dim1 = (0, 1)
 for i in range(4):
     for j in range(4):
-        idx = np.random.randint(0, images.shape[0])
+        idx = np.random.randint(0, in_sequence.shape[0])
         if dataset in image_datasets:
-            to_plot = images[idx].reshape(res)
+            to_plot = in_sequence[idx].reshape(res)
             if dataset=="celeba":
                 to_plot = (to_plot + 1) / 2
             axs[i, j].imshow(to_plot, cmap='gray')
         elif dataset=="trends":
-            axs[i, j].plot(images[idx], color=colors[labels[idx]])
-            dim0, dim1 = (0, 1)
+            axs[i, j].plot(in_sequence[idx], color=colors[output[idx]])
+        elif dataset in repeat_datasets:
+            axs[i, j].plot(in_sequence[idx, :, dim0], in_sequence[idx, :, dim1], color=colors[(i*j)%len(colors)])
+            axs[i, j].plot(output[idx, :, dim0], output[idx, :, dim1], color=colors[(i*j)%len(colors)], linestyle='--')
         else:
-            dim0, dim1 = (0, 1)
-            axs[i, j].plot(images[idx, :, dim0], images[idx, :, dim1], color=colors[labels[idx]%len(colors)])
+            axs[i, j].plot(in_sequence[idx, :, dim0], in_sequence[idx, :, dim1], color=colors[output[idx]%len(colors)])
 
-        axs[i, j].set_title(f"Class: {labels[idx]}", fontsize=12)
+        if dataset not in repeat_datasets:
+            axs[i, j].set_title(f"Class: {output[idx]}", fontsize=12)
         axs[i, j].axis('off')
 
 plt.suptitle(f"{dataset.upper()} Training Samples", fontsize=20)
@@ -198,7 +202,7 @@ def loss_fn(model, batch, key):
     Ts: (batch, time)
     Ys: (batch, num_classes)
     """
-    (X_true, times), _ = batch
+    (X_true, times), X_true_out = batch
 
     X_recons = model(X_true, times, key, inference_start=None)
 
@@ -209,11 +213,18 @@ def loss_fn(model, batch, key):
         indices_1 = jax.random.randint(key, (batch_size, nb_recons_loss_steps), 0, nb_timesteps)
 
         X_recons_ = jnp.stack([X_recons[indices_0, indices_1[:,j]] for j in range(nb_recons_loss_steps)], axis=1)
-        X_true_ = jnp.stack([X_true[indices_0, indices_1[:,j]] for j in range(nb_recons_loss_steps)], axis=1)
+
+        if dataset not in repeat_datasets:
+            X_true_ = jnp.stack([X_true[indices_0, indices_1[:,j]] for j in range(nb_recons_loss_steps)], axis=1)
+        else:
+            X_true_ = jnp.stack([X_true_out[indices_0, indices_1[:,j]] for j in range(nb_recons_loss_steps)], axis=1)
 
     else:
         X_recons_ = X_recons
-        X_true_ = X_true
+        if dataset not in repeat_datasets:
+            X_true_ = X_true
+        else:
+            X_true_ = X_true_out
 
     if use_nll_loss:
         means = X_recons_[:, :, :data_size]
@@ -471,7 +482,7 @@ logger.info(f"    - Min : {np.min(mses):.6f}")
 visloader = NumpyLoader(testloader.dataset, batch_size=16, shuffle=True)
 
 nb_cols = 3 if use_nll_loss else 2
-fig, axs = plt.subplots(4, 4*nb_cols, figsize=(16*3, 16), sharex=False, constrained_layout=True)
+fig, axs = plt.subplots(4, 4*nb_cols, figsize=(16*3, 16), sharex=True, constrained_layout=True)
 
 batch = next(iter(visloader))
 (xs_true, times), labels = batch
@@ -488,6 +499,8 @@ if use_nll_loss:
     xs_recons = xs_recons[:, :, :data_size]
 
 res = (width, width, data_size)
+mpl.rcParams['lines.linewidth'] = 3
+
 for i in range(4):
     for j in range(4):
         x = xs_true[i*4+j]
@@ -505,11 +518,15 @@ for i in range(4):
             axs[i, nb_cols*j].imshow(to_plot, cmap='gray')
         elif dataset == "trends":
             axs[i, nb_cols*j].plot(x, color=colors[labels[i*4+j]])
+        elif dataset in repeat_datasets:
+            axs[i, nb_cols*j].set_ylim([min_1-eps, max_1+eps])
+            axs[i, nb_cols*j].plot(x[:, dim0], color=colors[(i*4+j)%len(colors)])
+            axs[i, nb_cols*j].plot(x[:, dim1], color=colors[(i*4+j)%len(colors)], linestyle='-.')
         else:
             # axs[i, nb_cols*j].set_xlim([min_0-eps, max_0+eps])
             axs[i, nb_cols*j].set_ylim([min_1-eps, max_1+eps])
             axs[i, nb_cols*j].plot(x[:, dim0], color=colors[labels[i*4+j]%len(colors)])
-            axs[i, nb_cols*j].plot(x[:, dim1], color=colors[labels[i*4+j]%len(colors)])
+            axs[i, nb_cols*j].plot(x[:, dim1], color=colors[labels[i*4+j]%len(colors)], linestyle='-.')
         if i==0:
             axs[i, nb_cols*j].set_title("GT", fontsize=40)
         # axs[i, nb_cols*j].axis('off')
@@ -519,11 +536,15 @@ for i in range(4):
             if dataset=="celeba":
                 to_plot = (to_plot + 1) / 2
             axs[i, nb_cols*j+1].imshow(to_plot, cmap='gray')
-        elif dataset in dynamics_datasets:
+        elif dataset in dynamics_datasets and dataset not in repeat_datasets:
             # axs[i, nb_cols*j+1].set_xlim([min_0-eps, max_0+eps])
             axs[i, nb_cols*j+1].set_ylim([min_1-eps, max_1+eps])
             axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[labels[i*4+j]%len(colors)])
-            axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[labels[i*4+j]%len(colors)])
+            axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[labels[i*4+j]%len(colors)], linestyle='-.')
+        elif dataset in repeat_datasets:
+            axs[i, nb_cols*j+1].set_ylim([min_1-eps, max_1+eps])
+            axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[(i*4+j)%len(colors)])
+            axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[(i*4+j)%len(colors)], linestyle='-.')
         else:
             axs[i, nb_cols*j+1].plot(x_recons, color=colors[labels[i*4+j]])
         if i==0:

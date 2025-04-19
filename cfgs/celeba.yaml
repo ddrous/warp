@@ -4,7 +4,7 @@
 general:
   seed: 2024
   train: True
-  dataset: "lorentz63"  # Options: mnist, cifar, lorentz, dynamics
+  dataset: "celeba"  # Options: mnist, cifar, lorentz, dynamics
   data_path: "./data/"
   # save_path: "./runs/250404-175026-Test/"
   save_path: null
@@ -17,16 +17,16 @@ data:
 
 # Model hyperparameters
 model:
-  mlp_width_size: 32
+  mlp_width_size: 24
   mlp_depth: 3
-  activation: "swish"
+  activation: "relu"
   input_prev_data: False
-  model_type: "wsm-rnn"
+  model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
   apply_tanh_uncertainty: False
   time_as_channel: False
-  forcing_prob: 0.25
+  forcing_prob: 0.15
   noise_theta_init: null
   std_lower_bound: 1.0e-4
 
@@ -37,17 +37,17 @@ optimizer:
   on_plateau:
     factor: 0.5
     min_scale: 1.0e-2
-    patience: 10
+    patience: 20
     cooldown: 0
     rtol: 1.0e-4
     accum_size: 50
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 500
-  batch_size: 2048
+  nb_epochs: 250
+  batch_size: 1256
   print_every: 10
   checkpoint_every: 10
   nb_recons_loss_steps: null
-  use_nll_loss: False
-  inference_start: 100
+  use_nll_loss: True
+  inference_start: 500
