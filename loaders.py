@@ -156,18 +156,26 @@ class DynamicsDataset(TimeSeriesDataset):
     For a dynamics dataset
     """
 
-    def __init__(self, data_dir, traj_length):
+    def __init__(self, data_dir, traj_length, min_max=None):
         try:
             raw_data = np.load(data_dir)
             raw_t_eval = np.linspace(0, 1., raw_data.shape[1])
         except:
             raise ValueError(f"Data not loadable at {data_dir}")
 
+        if min_max is not None:
+            self.min_data = min_max[0]
+            self.max_data = min_max[1]
+        else:
+            try:
+                self.min_data = torch.min(raw_data)
+                self.max_data = torch.max(raw_data)
+            except:
+                self.min_data = np.min(raw_data)
+                self.max_data = np.max(raw_data)
+
         ## Normalise the dataset between 0 and 1
-        try:
-            raw_data = (raw_data - torch.min(raw_data)) / (torch.max(raw_data) - torch.min(raw_data))
-        except:
-            raw_data = (raw_data - np.min(raw_data)) / (np.max(raw_data) - np.min(raw_data))
+        raw_data = (raw_data - self.min_data) / (self.max_data - self.min_data)
 
         ## Put things between -1 and 1
         raw_data = (raw_data - 0.5) / 0.5
@@ -185,7 +193,7 @@ class DynamicsDataset(TimeSeriesDataset):
         dataset = raw_data
         n_envs, n_timesteps, n_dimensions = dataset.shape
 
-        t_eval = np.linspace(0, 1., n_timesteps)
+        t_eval = np.linspace(0., 1., n_timesteps)
         labels = np.arange(n_envs)
 
         self.total_envs = n_envs
@@ -340,7 +348,7 @@ class DynamicsRepeatDataset(TimeSeriesRepeatDataset):
     For the a dynamical system dataset for repeat-copy tasks
     """
 
-    def __init__(self, data_dir, traj_length):
+    def __init__(self, data_dir, traj_length, min_max=None):
         try:
             raw_data = np.load(data_dir)
             in_raw_data = raw_data["clipped"]
@@ -349,11 +357,15 @@ class DynamicsRepeatDataset(TimeSeriesRepeatDataset):
             raise ValueError(f"Data not loadable at {data_dir}")
 
         ## Normalise the dataset between 0 and 1
-        min_data = np.min(out_raw_data)
-        max_data = np.max(out_raw_data)
+        if min_max is not None:
+            self.min_data = min_max[0]
+            self.max_data = min_max[1]
+        else:
+            self.min_data = np.min(out_raw_data)
+            self.max_data = np.max(out_raw_data)
 
-        in_raw_data = (in_raw_data - min_data) / (max_data - min_data)
-        out_raw_data = (out_raw_data - min_data) / (max_data - min_data)
+        in_raw_data = (in_raw_data - self.min_data) / (self.max_data - self.min_data)
+        out_raw_data = (out_raw_data - self.min_data) / (self.max_data - self.min_data)
 
         ## Put things between -1 and 1
         in_raw_data = (in_raw_data - 0.5) / 0.5
@@ -541,7 +553,6 @@ class CelebADataset(torch.utils.data.Dataset):
 
         return (pixels, self.t_eval), self.labels[idx]
 
-
     def __len__(self):
         return self.total_envs
 
@@ -678,14 +689,14 @@ def make_dataloaders(data_folder, config):
 
     elif dataset in ["lorentz63", "mass_spring_damper"]:        ##TODO: preprocess lorentz63
         print(" #### Dynamics Dataset ####")
-        data_file = "train.npy"
         traj_len = np.NaN
 
-        trainloader = NumpyLoader(DynamicsDataset(data_folder+data_file, traj_length=traj_len), 
+        trainloader = NumpyLoader(DynamicsDataset(data_folder+"train.npy", traj_length=traj_len, min_max=None), 
                                 batch_size=batch_size, 
                                 shuffle=True, 
                                 num_workers=24)
-        testloader = NumpyLoader(DynamicsDataset(data_folder+data_file, traj_length=traj_len),     ## 5500
+        min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
+        testloader = NumpyLoader(DynamicsDataset(data_folder+"test.npy", traj_length=traj_len, min_max=min_max),
                                     batch_size=batch_size, 
                                     shuffle=True, 
                                     num_workers=24)
@@ -696,14 +707,14 @@ def make_dataloaders(data_folder, config):
 
     elif dataset in ["lotka"]:
         print(" #### Dynamics-Repeat Dataset ####")
-        data_url = "train.npz"
         traj_len = np.NaN
 
-        trainloader = NumpyLoader(DynamicsRepeatDataset(data_folder+data_url, traj_length=traj_len), 
+        trainloader = NumpyLoader(DynamicsRepeatDataset(data_folder+"train.npz", traj_length=traj_len, min_max=None), 
                                 batch_size=batch_size, 
                                 shuffle=True, 
                                 num_workers=24)
-        testloader = NumpyLoader(DynamicsRepeatDataset(data_folder+data_url, traj_length=traj_len),     ## 5500
+        min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
+        testloader = NumpyLoader(DynamicsRepeatDataset(data_folder+"test.npz", traj_length=traj_len, min_max=min_max),
                                     batch_size=batch_size, 
                                     shuffle=True, 
                                     num_workers=24)

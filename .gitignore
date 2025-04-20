@@ -11,6 +11,7 @@ pintode.egg-info/*
 *vtk
 quadqs_statistics.json
 
+
 # For tensorboard logs
 *v2
 *ubyte.gz
@@ -43,9 +44,21 @@ examples/runs/cprofile/*
 runs/*
 data/*
 
+!data/dynamics/
+!data/dynamics/lotka/
+!data/dynamics/lotka/datagen.py
+!data/dynamics/mass-spring-damper/
+!data/dynamics/mass-spring-damper/datagen.py
+data/dynamics/mass-spring-damper/test.npy
+data/dynamics/mass-spring-damper/train.npy
+data/dynamics/lorentz-63/full.pt
+data/dynamics/lorentz-63/noisy.pt
+
 !data/README.md
 !runs/README.md
 
 !runs/250406-170108-PetaGenius*
 !runs/250407-093730-CelebAGenius*
 !runs/250412-193707-MSD-MegaGenius*
+# !runs/250420-083132-Lotka-Genius*
+

@@ -173,10 +173,17 @@ for i in range(4):
         elif dataset=="trends":
             axs[i, j].plot(in_sequence[idx], color=colors[output[idx]])
         elif dataset in repeat_datasets:
-            axs[i, j].plot(in_sequence[idx, :, dim0], in_sequence[idx, :, dim1], color=colors[(i*j)%len(colors)])
-            axs[i, j].plot(output[idx, :, dim0], output[idx, :, dim1], color=colors[(i*j)%len(colors)], linestyle='--')
+            # axs[i, j].plot(in_sequence[idx, :, dim0], in_sequence[idx, :, dim1], color=colors[(i*j)%len(colors)])
+            # axs[i, j].plot(output[idx, :, dim0], output[idx, :, dim1], color=colors[(i*j)%len(colors)], linestyle='--')
+            ## Make 4 plots against time steps instead
+            axs[i, j].plot(output[idx, :, dim0], color=colors[(i*j)%len(colors)], linestyle='-', lw=1, alpha=0.5)
+            axs[i, j].plot(output[idx, :, dim1], color=colors[(i*j)%len(colors)], linestyle='--', lw=1, alpha=0.5)
+            axs[i, j].plot(in_sequence[idx, :, dim0], color=colors[(i*j)%len(colors)], lw=3)
+            axs[i, j].plot(in_sequence[idx, :, dim1], color=colors[(i*j)%len(colors)], linestyle='--', lw=3)
         else:
-            axs[i, j].plot(in_sequence[idx, :, dim0], in_sequence[idx, :, dim1], color=colors[output[idx]%len(colors)])
+            # axs[i, j].plot(in_sequence[idx, :, dim0], in_sequence[idx, :, dim1], color=colors[output[idx]%len(colors)])
+            axs[i, j].plot(in_sequence[idx, :, dim0], color=colors[output[idx]%len(colors)], lw=3)
+            axs[i, j].plot(in_sequence[idx, :, dim1], color=colors[output[idx]%len(colors)], linestyle='--', lw=3)
 
         if dataset not in repeat_datasets:
             axs[i, j].set_title(f"Class: {output[idx]}", fontsize=12)
@@ -332,6 +339,9 @@ if train:
                     pickle.dump(opt_state, f)
                 logger.info("Best model saved ...")
 
+        if epoch==3:     ## Print the output of nvidia-smi to check VRAM usage
+            os.system("nvidia-smi")
+
     wall_time = time.time() - start_time
     logger.info("\nTraining complete. Total time: %d hours %d mins %d secs" %seconds_to_hours(wall_time))
 
@@ -454,27 +464,74 @@ def eval_step(model, X, times, key, inference_start=None):
     X_recons = model(X, times, key, inference_start)
     return X_recons
 
-mses = []
+def eval_on_test_set(model, key):
+    mses = []
+    new_key, _ = jax.random.split(key)
+    for i, batch in enumerate(testloader):
+        new_key, _ = jax.random.split(new_key)
+        (X_true, times), X_labs_outs = batch
+
+        X_recons = eval_step(model, X_true, times, new_key, inference_start=None)
+        if use_nll_loss:
+            X_recons = X_recons[:, :, :data_size]
+        if dataset in repeat_datasets:
+            mse = jnp.mean((X_recons - X_labs_outs)**2)
+        else:
+            mse = jnp.mean((X_recons - X_true)**2)
+        mses.append(mse)
+
+    return np.mean(mses), np.median(mses), np.min(mses)
+
 test_key, _ = jax.random.split(train_key)
-for i, batch in enumerate(testloader):
-    test_key, _ = jax.random.split(test_key)
-    (X_true, times), X_labels = batch
+mean_mse, median_mse, min_mse = eval_on_test_set(model, test_key)
 
-    X_recons = eval_step(model, X_true, times, test_key, inference_start=None)
-    if use_nll_loss:
-        X_recons = X_recons[:, :, :data_size]
-    mse = jnp.mean((X_recons - X_true)**2)
-    mses.append(mse)
+logger.info("Evaluation of MSE on the test set, at the end of the training (Current Best Model):")
+logger.info(f"    - Mean : {mean_mse:.6f}")
+logger.info(f"    - Median : {median_mse:.6f}")
+logger.info(f"    - Min : {min_mse:.6f}")
 
-logger.info("Evaluation of MSE the test set:")
-logger.info(f"    - Mean : {np.mean(mses):.6f}")
-logger.info(f"    - Median : {np.median(mses):.6f}")
-logger.info(f"    - Min : {np.min(mses):.6f}")
+nb_epochs = config['training']['nb_epochs']
+checkpoint_every = config['training']['checkpoint_every']
+
+best_model = model
+best_mse = mean_mse
+best_mse_epoch = nb_epochs-1        ## TODO: model might not have been trained for all epochs
+
+mses_chekpoints = [] 
+id_checkpoints = []
+
+## Lead the model at each checkpoint and evaluate it
+for i in list(range(0, nb_epochs, checkpoint_every))+[nb_epochs-1]:
+    try:
+        model = eqx.tree_deserialise_leaves(checkpoints_folder+f"model_{i}.eqx", model)
+    except:
+        logger.info(f"Checkpoint {i} not found. Skipping.")
+        continue
+
+    mean, med, min_ = eval_on_test_set(model, test_key)
+    mses_chekpoints.append(mean)
+    id_checkpoints.append(i)
+
+    if mean<best_mse:
+        best_model = model
+        best_mse = mean
+        best_mse_epoch = i
+        logger.info(f"New best model found at epoch {i} with MSE: {best_mse:.6f}")
+    # logger.info(f"Checkpoint {i} MSE: {mean:.6f} (Mean), {med:.6f} (Median), {min_:.6f} (Min)")
 
 
+## Plot the MSE of the checkpoints
+fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+ax = sbplot(id_checkpoints, mses_chekpoints, title="MSE on Test Set at Various Checkpoints", x_label='Epoch', y_label='MSE', ax=ax, y_scale="log", linewidth=3);
+# plt.axhline(y=best_mse, color='r', linestyle='--', label=f"Best MSE: {best_mse:.6f} at epoch {best_mse_epoch}")
+plt.axvline(x=best_mse_epoch, color='r', linestyle='--', linewidth=3, label=f"Best MSE: {best_mse:.6f} at epoch {best_mse_epoch}")
+plt.legend(fontsize=16)
+plt.draw();
+plt.savefig(plots_folder+"checkpoints_mse.png", dpi=100, bbox_inches='tight')
+logger.info(f"Best model found at epoch {best_mse_epoch} with MSE: {best_mse:.6f}")
 
-
-
+## Set the model as the best model, for later
+model = best_model
 
 # %% Visualising a few reconstruction samples
 
@@ -505,6 +562,7 @@ for i in range(4):
     for j in range(4):
         x = xs_true[i*4+j]
         x_recons = xs_recons[i*4+j]
+        x_full = labels[i*4+j]
 
         ## Min/max along dim0, for both x and x_recons
         min_0, max_0 = min(np.min(x[:, dim0]), np.min(x_recons[:, dim0])), max(np.max(x[:, dim0]), np.max(x_recons[:, dim0]))
@@ -520,8 +578,8 @@ for i in range(4):
             axs[i, nb_cols*j].plot(x, color=colors[labels[i*4+j]])
         elif dataset in repeat_datasets:
             axs[i, nb_cols*j].set_ylim([min_1-eps, max_1+eps])
-            axs[i, nb_cols*j].plot(x[:, dim0], color=colors[(i*4+j)%len(colors)])
-            axs[i, nb_cols*j].plot(x[:, dim1], color=colors[(i*4+j)%len(colors)], linestyle='-.')
+            axs[i, nb_cols*j].plot(x_full[:, dim0], color=colors[(i*4+j)%len(colors)])
+            axs[i, nb_cols*j].plot(x_full[:, dim1], color=colors[(i*4+j)%len(colors)], linestyle='-.')
         else:
             # axs[i, nb_cols*j].set_xlim([min_0-eps, max_0+eps])
             axs[i, nb_cols*j].set_ylim([min_1-eps, max_1+eps])
