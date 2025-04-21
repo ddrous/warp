@@ -14,6 +14,7 @@ class RootMLP(eqx.Module):
     network: eqx.Module
     props: any              ## Properties of the root network
     predict_uncertainty: bool
+    apply_tanh_uncertainty: bool
 
     def __init__(self, 
                  data_size, 
@@ -22,6 +23,7 @@ class RootMLP(eqx.Module):
                  activation=jax.nn.relu,
                  input_prev_data=False,              ## Whether to inlude as input the previous data point
                  predict_uncertainty=True,           ## Predict the std in addition to the mean
+                 apply_tanh_uncertainty=True,        ## Apply the tanh activation to the std, before the softplus
                  key=None):
 
         input_dim = 1+data_size if input_prev_data else 1
@@ -30,25 +32,27 @@ class RootMLP(eqx.Module):
         self.network = eqx.nn.MLP(input_dim, output_dim, width_size, depth, activation, key=key)
         self.props = (input_dim, output_dim, width_size, depth, activation)
         self.predict_uncertainty = predict_uncertainty
+        self.apply_tanh_uncertainty = apply_tanh_uncertainty
 
-    def __call__(self, tx, std_lb=None, dtanh=None):
+    def __call__(self, tx, std_lb=None):
         out = self.network(tx)
 
         if not self.predict_uncertainty:
-            if dtanh is not None:
-                a, b, alpha, beta = dtanh
-                out = alpha*jnp.tanh((out - b) / a) + beta
-            else:
-                out = jnp.tanh(out)
-            return out
+            return jnp.tanh(out)
         else:
             mean, std = jnp.split(out, 2, axis=-1)
+            mean = jnp.tanh(mean)
+            if self.apply_tanh_uncertainty:
+                std = jnp.tanh(std)
+            # return jnp.concatenate([mean, jax.nn.softplus(std)], axis=-1)
+            # return jnp.concatenate([mean, jnp.clip(jax.nn.softplus(std), 1e-4, None)], axis=-1)
+            # return jnp.concatenate([mean, jnp.clip(jnp.exp(std), None, 10.)], axis=-1)
+            # return jnp.concatenate([mean, jnp.clip(std, -8, 8)], axis=-1)
 
-            if dtanh is not None:
-                a, b, alpha, beta = dtanh
-                mean = alpha*jnp.tanh((mean - b) / a) + beta
-            else:
-                mean = jnp.tanh(mean)
+            # if dtanh is not None:
+            #     a, b, alpha, beta = dtanh
+            #     std = alpha*jnp.tanh((std - b) / a) + beta
+
 
             std = jax.nn.softplus(std)
             if std_lb is not None:
@@ -73,8 +77,6 @@ class WSM(eqx.Module):
 
     std_lower_bound: float
 
-    dtanh_params: jnp.ndarray
-
     def __init__(self, 
                  data_size, 
                  width_size, 
@@ -82,7 +84,7 @@ class WSM(eqx.Module):
                  activation="relu",
                  input_prev_data=False,
                  predict_uncertainty=True,
-                 apply_dynamic_tanh=False,
+                 apply_tanh_uncertainty=True,
                  time_as_channel=True,
                  forcing_prob=1.0,
                  std_lower_bound=None,
@@ -104,6 +106,7 @@ class WSM(eqx.Module):
                            builtin_fns[activation], 
                            input_prev_data=input_prev_data, 
                            predict_uncertainty=predict_uncertainty,
+                           apply_tanh_uncertainty=apply_tanh_uncertainty,
                            key=keys[i])
             params, static = eqx.partition(root, eqx.is_array)
             weights, shapes, treedef = flatten_pytree(params)
@@ -134,7 +137,6 @@ class WSM(eqx.Module):
         self.noise_theta_init = noise_theta_init
 
         self.std_lower_bound = std_lower_bound
-        self.dtanh_params = jnp.array([1., 0., 1., 0.]) if apply_dynamic_tanh else None
 
     def __call__(self, xs, ts, k, inference_start=None):
         """ Forward pass of the model on batch of sequences
@@ -174,11 +176,13 @@ class WSM(eqx.Module):
                 params = unflatten_pytree(thet_next, shapes, treedef)
                 root_fun = eqx.combine(params, static)
                 root_in = t_curr+delta_t
+                # root_in = jnp.array([0.])
                 if self.input_prev_data:
                     root_in = jnp.concatenate([root_in, x_prev], axis=-1)
-                x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                  ## Evaluated at the next time step
+                x_next = root_fun(root_in, self.std_lower_bound)                                  ## Evaluated at the next time step
 
                 x_next_mean = x_next[:x_true.shape[0]]
+                # x_next_mean = x_prev[1:] + x_next[:x_true.shape[0]]
 
                 return (thet_next, x_next_mean, x_hat, t_curr), (x_next, )
 
@@ -215,7 +219,7 @@ def make_model(key, data_size, config):
             "activation": config['model']['activation'],
             "input_prev_data": config['model']['input_prev_data'],
             "predict_uncertainty": config['training']['use_nll_loss'],
-            "apply_dynamic_tanh": config['model']['apply_dynamic_tanh'],
+            "apply_tanh_uncertainty": config['model']['apply_tanh_uncertainty'],
             "time_as_channel": config['model']['time_as_channel'],
             "forcing_prob": config['model']['forcing_prob'],
             "std_lower_bound": config['model']['std_lower_bound'],
@@ -264,7 +268,7 @@ if __name__ == "__main__":
         "activation": "relu",
         "input_prev_data": False,
         "predict_uncertainty": True,
-        "apply_dynamic_tanh": False,
+        "apply_tanh_uncertainty": True,
         "time_as_channel": True,
         "forcing_prob": 1.0,
         "weights_lim": 0.1,

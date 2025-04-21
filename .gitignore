@@ -4,7 +4,7 @@
 \.pytest_cache
 .vscode
 .mypy_cache
-*.npz
+# *.npz
 .cache
 .DS_Store
 pintode.egg-info/*
@@ -47,6 +47,8 @@ data/*
 !data/dynamics/
 !data/dynamics/lotka/
 !data/dynamics/lotka/datagen.py
+data/dynamics/lotka/test.npz
+data/dynamics/lotka/train.npz
 !data/dynamics/mass-spring-damper/
 !data/dynamics/mass-spring-damper/datagen.py
 data/dynamics/mass-spring-damper/test.npy
@@ -60,5 +62,5 @@ data/dynamics/lorentz-63/noisy.pt
 !runs/250406-170108-PetaGenius*
 !runs/250407-093730-CelebAGenius*
 !runs/250412-193707-MSD-MegaGenius*
-# !runs/250420-083132-Lotka-Genius*
+!runs/250420-173207-Lotka-MegaGenius*
 

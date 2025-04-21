@@ -169,15 +169,15 @@ def visualize_trajectory(trajectory, t, save_gif=False, filename="mass_spring_da
 def main():
     # Set random seed for reproducibility
     np.random.seed(42)
-    train = False
+    train = True
 
     # Generate trajectories
     if train:
-        trajectories, t = generate_trajectories(batch_size=20480, time_steps=256, t_span=[0., 1.], x_0=1., y_0=1.,
+        trajectories, t = generate_trajectories(batch_size=15000, time_steps=256, t_span=[0., 1.], x_0=1., y_0=1.,
                                                 a_range=(20, 50), b_range=(80, 120), 
                                                 c_range=(80, 120), d_range=(20, 50))
     else:
-        trajectories, t = generate_trajectories(batch_size=2048*2, time_steps=256, t_span=[0., 1.], x_0=1., y_0=1.,
+        trajectories, t = generate_trajectories(batch_size=1500*2, time_steps=256, t_span=[0., 1.], x_0=1., y_0=1.,
                                                 a_range=(10, 60), b_range=(70, 130), 
                                                 c_range=(70, 130), d_range=(10, 60))
 

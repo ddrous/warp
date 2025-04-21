@@ -41,11 +41,11 @@ plt.rcParams['font.family'] = 'serif'
 plt.rcParams['mathtext.fontset'] = 'dejavuserif'
 plt.rcParams['savefig.bbox'] = 'tight'
 
-from IPython.display import display, Math
 import yaml
 import argparse
 import os
 import time
+from pprint import pprint
 import sys
 import pickle
 
@@ -113,16 +113,7 @@ else:
     data_folder = f"../../{data_path}"
 
 print("Using run folder:", run_folder)
-## Copy the module files to the run folder
 logger, checkpoints_folder, plots_folder, artefacts_folder = setup_run_folder(run_folder, training=train)
-
-## Copy the config file to the run folder, renaming it as config.yaml
-if not os.path.exists(run_folder+"config.yaml"):
-    # os.system(f"cp {args.config_file} {run_folder}config.yaml")
-    test_config = config.copy()
-    test_config['general']['train'] = False             ## Set the train flag to False
-    with open(run_folder+"config.yaml", 'w') as file:
-        yaml.dump(test_config, file)
 
 ## Print the config file using the logger and pprint
 logger.info(f"Config file: {args.config_file}")
@@ -350,7 +341,6 @@ if train:
 
         if epoch==3:     ## Print the output of nvidia-smi to check VRAM usage
             os.system("nvidia-smi")
-            os.system("nvidia-smi >> "+artefacts_folder+"training.log")
 
     wall_time = time.time() - start_time
     logger.info("\nTraining complete. Total time: %d hours %d mins %d secs" %seconds_to_hours(wall_time))
@@ -422,68 +412,48 @@ if os.path.exists(artefacts_folder+"lr_scales.npy"):
 
 # %% Other visualisation of the model
 
-if config["model"]["model_type"] == "wsm":
+## Let's visualise the distribution of values along the main diagonal of A and theta
+fig, axs = plt.subplots(1, 2, figsize=(20, 10))
+axs[0].hist(jnp.diag(model.As[0], k=0), bins=100)
 
-    ## Let's visualise the distribution of values along the main diagonal of A and theta
-    fig, axs = plt.subplots(1, 2, figsize=(20, 10))
-    axs[0].hist(jnp.diag(model.As[0], k=0), bins=100)
+axs[0].set_title("Histogram of diagonal values of A (first layer)")
 
-    axs[0].set_title("Histogram of diagonal values of A (first layer)")
+axs[1].hist(model.thetas[0], bins=100, label="After Training")
+axs[1].hist(untrained_model.thetas[0], bins=100, alpha=0.5, label="Before Training", color='r')
+axs[1].set_title(r"Histogram of $\theta_0$ values")
+plt.legend();
+plt.draw();
+plt.savefig(plots_folder+"A_theta_histograms.png", dpi=100, bbox_inches='tight')
 
-    axs[1].hist(model.thetas[0], bins=100, label="After Training")
-    axs[1].hist(untrained_model.thetas[0], bins=100, alpha=0.5, label="Before Training", color='r')
-    axs[1].set_title(r"Histogram of $\theta_0$ values")
-    plt.legend();
+## PLot all values of B in a lineplot (all dimensions)
+if not isinstance(model.Bs[0], eqx.nn.Linear):
+    fig, ax = plt.subplots(1, 1, figsize=(10, 4))
+    ax.plot(model.Bs[0], label="Values of B")
+    ax.set_title("Values of B")
+    ax.set_xlabel("Dimension")
     plt.draw();
-    plt.savefig(plots_folder+"A_theta_histograms.png", dpi=100, bbox_inches='tight')
+    plt.savefig(plots_folder+"B_values.png", dpi=100, bbox_inches='tight')
 
-    ## PLot all values of B in a lineplot (all dimensions)
-    if not isinstance(model.Bs[0], eqx.nn.Linear):
-        fig, ax = plt.subplots(1, 1, figsize=(10, 4))
-        ax.plot(model.Bs[0], label="Values of B")
-        ax.set_title("Values of B")
-        ax.set_xlabel("Dimension")
-        plt.draw();
-        plt.savefig(plots_folder+"B_values.png", dpi=100, bbox_inches='tight')
+## Print the untrained and trained matrices A as imshows with same range
+fig, axs = plt.subplots(1, 2, figsize=(20, 10))
+min_val = -0.00
+max_val = 0.0003
 
-    ## Print the untrained and trained matrices A as imshows with same range
-    fig, axs = plt.subplots(1, 2, figsize=(20, 10))
-    min_val = -0.00
-    max_val = 0.0003
+img = axs[0].imshow(untrained_model.As[0], cmap='viridis', vmin=min_val, vmax=max_val)
+axs[0].set_title("Untrained A")
+plt.colorbar(img, ax=axs[0], shrink=0.7)
 
-    img = axs[0].imshow(untrained_model.As[0], cmap='viridis', vmin=min_val, vmax=max_val)
-    axs[0].set_title("Untrained A")
-    plt.colorbar(img, ax=axs[0], shrink=0.7)
-
-    img = axs[1].imshow(model.As[0], cmap='viridis', vmin=min_val, vmax=max_val)
-    axs[1].set_title("Trained A")
-    plt.colorbar(img, ax=axs[1], shrink=0.7)
-    plt.draw();
-    plt.savefig(plots_folder+"A_matrices.png", dpi=100, bbox_inches='tight')
+img = axs[1].imshow(model.As[0], cmap='viridis', vmin=min_val, vmax=max_val)
+axs[1].set_title("Trained A")
+plt.colorbar(img, ax=axs[1], shrink=0.7)
+plt.draw();
+plt.savefig(plots_folder+"A_matrices.png", dpi=100, bbox_inches='tight')
 
 
-    ## Print the dynamic tanh_params attribute
-    if config['model']['apply_dynamic_tanh']:
-        latex_string = r"y = \alpha \cdot \text{tanh} \left( \frac{x-b}{a} \right) + \beta"
-        logger.info(f"Dynamic tanh params (final root network activation) : ${latex_string}$ ")
 
-        display(Math(latex_string))
-        logger.info(f"a, b, alpha, beta: {model.dtanh_params}")
 
-        ## Plot this against a normal tanh
-        fig, ax = plt.subplots(1, 1, figsize=(10, 4))
-        x = np.linspace(-3.5, 3.5, 500)
-        y = np.tanh(x)
-        a, b, alpha, beta = model.dtanh_params
-        y2 = alpha * np.tanh((x-b)/a) + beta
-        ax.plot(x, y, label="tanh")
-        ax.plot(x, y2, label="Dynamic tanh")
-        ax.set_title("Dynamic tanh vs tanh after training")
-        ax.set_xlabel("x")
-        ax.set_ylabel("y")
-        ax.legend()
-        plt.draw();
-        plt.savefig(plots_folder+"dynamic_tanh.png", dpi=100, bbox_inches='tight')
+
+
 
 
 # %% Evaluate the model on the test set
@@ -606,11 +576,10 @@ for i in range(4):
         x_recons = xs_recons[i*4+j]
         x_full = labels[i*4+j]
 
-        if dataset in dynamics_datasets+repeat_datasets:
-            ## Min/max along dim0, for both x and x_recons
-            min_0, max_0 = min(np.min(x[:, dim0]), np.min(x_recons[:, dim0])), max(np.max(x[:, dim0]), np.max(x_recons[:, dim0]))
-            min_1, max_1 = min(np.min(x[:, dim1]), np.min(x_recons[:, dim1])), max(np.max(x[:, dim1]), np.max(x_recons[:, dim1]))
-            eps = 0.04
+        ## Min/max along dim0, for both x and x_recons
+        min_0, max_0 = min(np.min(x[:, dim0]), np.min(x_recons[:, dim0])), max(np.max(x[:, dim0]), np.max(x_recons[:, dim0]))
+        min_1, max_1 = min(np.min(x[:, dim1]), np.min(x_recons[:, dim1])), max(np.max(x[:, dim1]), np.max(x_recons[:, dim1]))
+        eps = 0.04
 
         if dataset in image_datasets:
             to_plot = x.reshape(res)

@@ -1,0 +1,290 @@
+2025-04-20 21:55:13,914 - INFO - Started logging to ./artefacts/testing.log
+2025-04-20 21:55:13,915 - INFO - Config file: config.yaml
+2025-04-20 21:55:13,915 - INFO - ==== Config file's contents ====
+2025-04-20 21:55:13,915 - INFO - general:
+2025-04-20 21:55:13,916 - INFO -   seed: 2024
+2025-04-20 21:55:13,916 - INFO -   train: False
+2025-04-20 21:55:13,916 - INFO -   dataset: lotka
+2025-04-20 21:55:13,916 - INFO -   data_path: ./data/dynamics/lotka/
+2025-04-20 21:55:13,916 - INFO -   save_path: None
+2025-04-20 21:55:13,916 - INFO - data:
+2025-04-20 21:55:13,916 - INFO -   downsample_factor: 1
+2025-04-20 21:55:13,917 - INFO -   resolution: [32, 32]
+2025-04-20 21:55:13,917 - INFO -   traj_length: 1000
+2025-04-20 21:55:13,917 - INFO - model:
+2025-04-20 21:55:13,917 - INFO -   mlp_width_size: 48
+2025-04-20 21:55:13,917 - INFO -   mlp_depth: 3
+2025-04-20 21:55:13,917 - INFO -   activation: swish
+2025-04-20 21:55:13,918 - INFO -   input_prev_data: False
+2025-04-20 21:55:13,918 - INFO -   model_type: wsm
+2025-04-20 21:55:13,918 - INFO -   nb_rnn_layers: 1
+2025-04-20 21:55:13,918 - INFO -   weights_lim: None
+2025-04-20 21:55:13,918 - INFO -   apply_tanh_uncertainty: False
+2025-04-20 21:55:13,918 - INFO -   time_as_channel: False
+2025-04-20 21:55:13,918 - INFO -   forcing_prob: 1.0
+2025-04-20 21:55:13,918 - INFO -   noise_theta_init: None
+2025-04-20 21:55:13,919 - INFO -   std_lower_bound: 0.0001
+2025-04-20 21:55:13,919 - INFO - optimizer:
+2025-04-20 21:55:13,919 - INFO -   init_lr: 1e-05
+2025-04-20 21:55:13,919 - INFO -   gradients_lim: 1e-07
+2025-04-20 21:55:13,919 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-20 21:55:13,919 - INFO - training:
+2025-04-20 21:55:13,920 - INFO -   nb_epochs: 1500
+2025-04-20 21:55:13,920 - INFO -   batch_size: 1024
+2025-04-20 21:55:13,920 - INFO -   print_every: 10
+2025-04-20 21:55:13,920 - INFO -   checkpoint_every: 10
+2025-04-20 21:55:13,920 - INFO -   nb_recons_loss_steps: None
+2025-04-20 21:55:13,920 - INFO -   use_nll_loss: False
+2025-04-20 21:55:13,921 - INFO -   inference_start: 256
+2025-04-20 21:55:14,571 - INFO - Input sequence shape: (1024, 256, 2)
+2025-04-20 21:55:14,572 - INFO - Labels/OutputSequence shape: (1024, 256, 2)
+2025-04-20 21:55:14,572 - INFO - Seq length: 256
+2025-04-20 21:55:14,572 - INFO - Data size: 2
+2025-04-20 21:55:14,573 - INFO - Min/Max in the dataset: (-1.0, 1.378643503171046)
+2025-04-20 21:55:14,573 - INFO - Number of batches:
+2025-04-20 21:55:14,574 - INFO -   - Train: 15
+2025-04-20 21:55:14,574 - INFO -   - Test: 3
+2025-04-20 21:55:16,257 - INFO - Model loaded from ./model.eqx
+2025-04-20 21:55:27,137 - INFO - Evaluation of MSE on the test set, at the end of the training (Current Best Model):
+2025-04-20 21:55:27,137 - INFO -     - Mean : 0.066057
+2025-04-20 21:55:27,137 - INFO -     - Median : 0.065263
+2025-04-20 21:55:27,137 - INFO -     - Min : 0.062086
+2025-04-20 21:55:48,160 - INFO - New best model found at epoch 70 with MSE: 0.065910
+2025-04-20 21:55:53,399 - INFO - New best model found at epoch 90 with MSE: 0.062690
+2025-04-20 21:55:58,661 - INFO - New best model found at epoch 110 with MSE: 0.060583
+2025-04-20 21:56:03,715 - INFO - New best model found at epoch 130 with MSE: 0.060397
+2025-04-20 21:56:06,340 - INFO - New best model found at epoch 140 with MSE: 0.057708
+2025-04-20 21:56:19,473 - INFO - New best model found at epoch 190 with MSE: 0.052056
+2025-04-20 21:56:34,717 - INFO - New best model found at epoch 250 with MSE: 0.049596
+2025-04-20 21:56:45,302 - INFO - New best model found at epoch 290 with MSE: 0.047145
+2025-04-20 21:59:08,892 - INFO - Checkpoint 850 not found. Skipping.
+2025-04-20 21:59:08,892 - INFO - Checkpoint 860 not found. Skipping.
+2025-04-20 21:59:08,892 - INFO - Checkpoint 870 not found. Skipping.
+2025-04-20 21:59:08,892 - INFO - Checkpoint 880 not found. Skipping.
+2025-04-20 21:59:08,893 - INFO - Checkpoint 890 not found. Skipping.
+2025-04-20 21:59:08,893 - INFO - Checkpoint 900 not found. Skipping.
+2025-04-20 21:59:08,893 - INFO - Checkpoint 910 not found. Skipping.
+2025-04-20 21:59:08,893 - INFO - Checkpoint 920 not found. Skipping.
+2025-04-20 21:59:08,893 - INFO - Checkpoint 930 not found. Skipping.
+2025-04-20 21:59:08,893 - INFO - Checkpoint 940 not found. Skipping.
+2025-04-20 21:59:08,894 - INFO - Checkpoint 950 not found. Skipping.
+2025-04-20 21:59:08,894 - INFO - Checkpoint 960 not found. Skipping.
+2025-04-20 21:59:08,894 - INFO - Checkpoint 970 not found. Skipping.
+2025-04-20 21:59:08,894 - INFO - Checkpoint 980 not found. Skipping.
+2025-04-20 21:59:08,894 - INFO - Checkpoint 990 not found. Skipping.
+2025-04-20 21:59:08,894 - INFO - Checkpoint 1000 not found. Skipping.
+2025-04-20 21:59:08,894 - INFO - Checkpoint 1010 not found. Skipping.
+2025-04-20 21:59:08,895 - INFO - Checkpoint 1020 not found. Skipping.
+2025-04-20 21:59:08,895 - INFO - Checkpoint 1030 not found. Skipping.
+2025-04-20 21:59:08,895 - INFO - Checkpoint 1040 not found. Skipping.
+2025-04-20 21:59:08,895 - INFO - Checkpoint 1050 not found. Skipping.
+2025-04-20 21:59:08,895 - INFO - Checkpoint 1060 not found. Skipping.
+2025-04-20 21:59:08,896 - INFO - Checkpoint 1070 not found. Skipping.
+2025-04-20 21:59:08,896 - INFO - Checkpoint 1080 not found. Skipping.
+2025-04-20 21:59:08,896 - INFO - Checkpoint 1090 not found. Skipping.
+2025-04-20 21:59:08,896 - INFO - Checkpoint 1100 not found. Skipping.
+2025-04-20 21:59:08,896 - INFO - Checkpoint 1110 not found. Skipping.
+2025-04-20 21:59:08,897 - INFO - Checkpoint 1120 not found. Skipping.
+2025-04-20 21:59:08,897 - INFO - Checkpoint 1130 not found. Skipping.
+2025-04-20 21:59:08,897 - INFO - Checkpoint 1140 not found. Skipping.
+2025-04-20 21:59:08,897 - INFO - Checkpoint 1150 not found. Skipping.
+2025-04-20 21:59:08,897 - INFO - Checkpoint 1160 not found. Skipping.
+2025-04-20 21:59:08,897 - INFO - Checkpoint 1170 not found. Skipping.
+2025-04-20 21:59:08,897 - INFO - Checkpoint 1180 not found. Skipping.
+2025-04-20 21:59:08,898 - INFO - Checkpoint 1190 not found. Skipping.
+2025-04-20 21:59:08,898 - INFO - Checkpoint 1200 not found. Skipping.
+2025-04-20 21:59:08,898 - INFO - Checkpoint 1210 not found. Skipping.
+2025-04-20 21:59:08,898 - INFO - Checkpoint 1220 not found. Skipping.
+2025-04-20 21:59:08,898 - INFO - Checkpoint 1230 not found. Skipping.
+2025-04-20 21:59:08,898 - INFO - Checkpoint 1240 not found. Skipping.
+2025-04-20 21:59:08,898 - INFO - Checkpoint 1250 not found. Skipping.
+2025-04-20 21:59:08,899 - INFO - Checkpoint 1260 not found. Skipping.
+2025-04-20 21:59:08,899 - INFO - Checkpoint 1270 not found. Skipping.
+2025-04-20 21:59:08,899 - INFO - Checkpoint 1280 not found. Skipping.
+2025-04-20 21:59:08,899 - INFO - Checkpoint 1290 not found. Skipping.
+2025-04-20 21:59:08,899 - INFO - Checkpoint 1300 not found. Skipping.
+2025-04-20 21:59:08,900 - INFO - Checkpoint 1310 not found. Skipping.
+2025-04-20 21:59:08,900 - INFO - Checkpoint 1320 not found. Skipping.
+2025-04-20 21:59:08,900 - INFO - Checkpoint 1330 not found. Skipping.
+2025-04-20 21:59:08,900 - INFO - Checkpoint 1340 not found. Skipping.
+2025-04-20 21:59:08,900 - INFO - Checkpoint 1350 not found. Skipping.
+2025-04-20 21:59:08,901 - INFO - Checkpoint 1360 not found. Skipping.
+2025-04-20 21:59:08,901 - INFO - Checkpoint 1370 not found. Skipping.
+2025-04-20 21:59:08,901 - INFO - Checkpoint 1380 not found. Skipping.
+2025-04-20 21:59:08,901 - INFO - Checkpoint 1390 not found. Skipping.
+2025-04-20 21:59:08,901 - INFO - Checkpoint 1400 not found. Skipping.
+2025-04-20 21:59:08,901 - INFO - Checkpoint 1410 not found. Skipping.
+2025-04-20 21:59:08,902 - INFO - Checkpoint 1420 not found. Skipping.
+2025-04-20 21:59:08,902 - INFO - Checkpoint 1430 not found. Skipping.
+2025-04-20 21:59:08,902 - INFO - Checkpoint 1440 not found. Skipping.
+2025-04-20 21:59:08,902 - INFO - Checkpoint 1450 not found. Skipping.
+2025-04-20 21:59:08,902 - INFO - Checkpoint 1460 not found. Skipping.
+2025-04-20 21:59:08,902 - INFO - Checkpoint 1470 not found. Skipping.
+2025-04-20 21:59:08,903 - INFO - Checkpoint 1480 not found. Skipping.
+2025-04-20 21:59:08,903 - INFO - Checkpoint 1490 not found. Skipping.
+2025-04-20 21:59:08,903 - INFO - Checkpoint 1499 not found. Skipping.
+2025-04-20 21:59:09,083 - INFO - Best model found at epoch 290 with MSE: 0.047145
+2025-04-21 09:37:28,942 - INFO - Started logging to ./artefacts/testing.log
+2025-04-21 09:37:28,943 - INFO - Config file: config.yaml
+2025-04-21 09:37:28,943 - INFO - ==== Config file's contents ====
+2025-04-21 09:37:28,944 - INFO - general:
+2025-04-21 09:37:28,944 - INFO -   seed: 2024
+2025-04-21 09:37:28,944 - INFO -   train: False
+2025-04-21 09:37:28,944 - INFO -   dataset: lotka
+2025-04-21 09:37:28,944 - INFO -   data_path: ./data/dynamics/lotka/
+2025-04-21 09:37:28,944 - INFO -   save_path: None
+2025-04-21 09:37:28,944 - INFO - data:
+2025-04-21 09:37:28,944 - INFO -   downsample_factor: 1
+2025-04-21 09:37:28,945 - INFO -   resolution: [32, 32]
+2025-04-21 09:37:28,945 - INFO -   traj_length: 1000
+2025-04-21 09:37:28,945 - INFO - model:
+2025-04-21 09:37:28,945 - INFO -   mlp_width_size: 48
+2025-04-21 09:37:28,945 - INFO -   mlp_depth: 3
+2025-04-21 09:37:28,945 - INFO -   activation: swish
+2025-04-21 09:37:28,945 - INFO -   input_prev_data: False
+2025-04-21 09:37:28,945 - INFO -   model_type: wsm
+2025-04-21 09:37:28,946 - INFO -   nb_rnn_layers: 1
+2025-04-21 09:37:28,946 - INFO -   weights_lim: None
+2025-04-21 09:37:28,946 - INFO -   apply_tanh_uncertainty: False
+2025-04-21 09:37:28,946 - INFO -   time_as_channel: False
+2025-04-21 09:37:28,946 - INFO -   forcing_prob: 1.0
+2025-04-21 09:37:28,946 - INFO -   noise_theta_init: None
+2025-04-21 09:37:28,946 - INFO -   std_lower_bound: 0.0001
+2025-04-21 09:37:28,946 - INFO - optimizer:
+2025-04-21 09:37:28,946 - INFO -   init_lr: 1e-05
+2025-04-21 09:37:28,947 - INFO -   gradients_lim: 1e-07
+2025-04-21 09:37:28,947 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-21 09:37:28,947 - INFO - training:
+2025-04-21 09:37:28,947 - INFO -   nb_epochs: 1500
+2025-04-21 09:37:28,947 - INFO -   batch_size: 1024
+2025-04-21 09:37:28,947 - INFO -   print_every: 10
+2025-04-21 09:37:28,947 - INFO -   checkpoint_every: 10
+2025-04-21 09:37:28,947 - INFO -   nb_recons_loss_steps: None
+2025-04-21 09:37:28,947 - INFO -   use_nll_loss: False
+2025-04-21 09:37:28,947 - INFO -   inference_start: 256
+2025-04-21 09:37:29,507 - INFO - Input sequence shape: (1024, 256, 2)
+2025-04-21 09:37:29,507 - INFO - Labels/OutputSequence shape: (1024, 256, 2)
+2025-04-21 09:37:29,508 - INFO - Seq length: 256
+2025-04-21 09:37:29,508 - INFO - Data size: 2
+2025-04-21 09:37:29,509 - INFO - Min/Max in the dataset: (-1.0, 1.378643503171046)
+2025-04-21 09:37:29,509 - INFO - Number of batches:
+2025-04-21 09:37:29,509 - INFO -   - Train: 15
+2025-04-21 09:37:29,509 - INFO -   - Test: 3
+2025-04-21 09:37:30,897 - INFO - Model loaded from ./model.eqx
+2025-04-21 09:37:42,852 - INFO - Evaluation of MSE on the test set, at the end of the training (Current Best Model):
+2025-04-21 09:37:42,853 - INFO -     - Mean : 0.062439
+2025-04-21 09:37:42,853 - INFO -     - Median : 0.061460
+2025-04-21 09:37:42,853 - INFO -     - Min : 0.058543
+2025-04-21 09:37:42,854 - INFO - Checkpoints MSE artefact file found. Loading it.
+2025-04-21 09:37:43,033 - INFO - Best model found at epoch 290 with MSE: 0.047145
+2025-04-21 09:43:13,878 - INFO - Started logging to ./artefacts/testing.log
+2025-04-21 09:43:13,878 - INFO - Config file: config.yaml
+2025-04-21 09:43:13,878 - INFO - ==== Config file's contents ====
+2025-04-21 09:43:13,879 - INFO - general:
+2025-04-21 09:43:13,879 - INFO -   seed: 2024
+2025-04-21 09:43:13,879 - INFO -   train: False
+2025-04-21 09:43:13,879 - INFO -   dataset: lotka
+2025-04-21 09:43:13,879 - INFO -   data_path: ./data/dynamics/lotka/
+2025-04-21 09:43:13,879 - INFO -   save_path: None
+2025-04-21 09:43:13,880 - INFO - data:
+2025-04-21 09:43:13,880 - INFO -   downsample_factor: 1
+2025-04-21 09:43:13,880 - INFO -   resolution: [32, 32]
+2025-04-21 09:43:13,880 - INFO -   traj_length: 1000
+2025-04-21 09:43:13,881 - INFO - model:
+2025-04-21 09:43:13,881 - INFO -   mlp_width_size: 48
+2025-04-21 09:43:13,882 - INFO -   mlp_depth: 3
+2025-04-21 09:43:13,882 - INFO -   activation: swish
+2025-04-21 09:43:13,882 - INFO -   input_prev_data: False
+2025-04-21 09:43:13,882 - INFO -   model_type: wsm
+2025-04-21 09:43:13,882 - INFO -   nb_rnn_layers: 1
+2025-04-21 09:43:13,883 - INFO -   weights_lim: None
+2025-04-21 09:43:13,883 - INFO -   apply_tanh_uncertainty: False
+2025-04-21 09:43:13,883 - INFO -   time_as_channel: False
+2025-04-21 09:43:13,883 - INFO -   forcing_prob: 1.0
+2025-04-21 09:43:13,883 - INFO -   noise_theta_init: None
+2025-04-21 09:43:13,884 - INFO -   std_lower_bound: 0.0001
+2025-04-21 09:43:13,884 - INFO - optimizer:
+2025-04-21 09:43:13,884 - INFO -   init_lr: 1e-05
+2025-04-21 09:43:13,884 - INFO -   gradients_lim: 1e-07
+2025-04-21 09:43:13,885 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-21 09:43:13,885 - INFO - training:
+2025-04-21 09:43:13,885 - INFO -   nb_epochs: 1500
+2025-04-21 09:43:13,885 - INFO -   batch_size: 1024
+2025-04-21 09:43:13,885 - INFO -   print_every: 10
+2025-04-21 09:43:13,885 - INFO -   checkpoint_every: 10
+2025-04-21 09:43:13,885 - INFO -   nb_recons_loss_steps: None
+2025-04-21 09:43:13,885 - INFO -   use_nll_loss: False
+2025-04-21 09:43:13,886 - INFO -   inference_start: 256
+2025-04-21 09:43:14,516 - INFO - Input sequence shape: (1024, 256, 2)
+2025-04-21 09:43:14,516 - INFO - Labels/OutputSequence shape: (1024, 256, 2)
+2025-04-21 09:43:14,517 - INFO - Seq length: 256
+2025-04-21 09:43:14,517 - INFO - Data size: 2
+2025-04-21 09:43:14,519 - INFO - Min/Max in the dataset: (-1.0, 1.378643503171046)
+2025-04-21 09:43:14,519 - INFO - Number of batches:
+2025-04-21 09:43:14,519 - INFO -   - Train: 15
+2025-04-21 09:43:14,520 - INFO -   - Test: 3
+2025-04-21 09:43:16,114 - INFO - Model loaded from ./model.eqx
+2025-04-21 09:43:25,932 - INFO - Evaluation of MSE on the test set, at the end of the training (Current Best Model):
+2025-04-21 09:43:25,932 - INFO -     - Mean : 0.062439
+2025-04-21 09:43:25,932 - INFO -     - Median : 0.061460
+2025-04-21 09:43:25,933 - INFO -     - Min : 0.058543
+2025-04-21 09:43:27,618 - INFO - Checkpoints MSE artefact file found. Loading it.
+2025-04-21 09:43:27,789 - INFO - Best model found at epoch 290 with MSE: 0.047145
+2025-04-21 09:45:33,866 - INFO - Started logging to ./artefacts/testing.log
+2025-04-21 09:45:33,866 - INFO - Config file: config.yaml
+2025-04-21 09:45:33,867 - INFO - ==== Config file's contents ====
+2025-04-21 09:45:33,867 - INFO - general:
+2025-04-21 09:45:33,867 - INFO -   seed: 2024
+2025-04-21 09:45:33,867 - INFO -   train: False
+2025-04-21 09:45:33,868 - INFO -   dataset: lotka
+2025-04-21 09:45:33,868 - INFO -   data_path: ./data/dynamics/lotka/
+2025-04-21 09:45:33,868 - INFO -   save_path: None
+2025-04-21 09:45:33,868 - INFO - data:
+2025-04-21 09:45:33,868 - INFO -   downsample_factor: 1
+2025-04-21 09:45:33,869 - INFO -   resolution: [32, 32]
+2025-04-21 09:45:33,869 - INFO -   traj_length: 1000
+2025-04-21 09:45:33,869 - INFO - model:
+2025-04-21 09:45:33,869 - INFO -   mlp_width_size: 48
+2025-04-21 09:45:33,869 - INFO -   mlp_depth: 3
+2025-04-21 09:45:33,870 - INFO -   activation: swish
+2025-04-21 09:45:33,870 - INFO -   input_prev_data: False
+2025-04-21 09:45:33,870 - INFO -   model_type: wsm
+2025-04-21 09:45:33,870 - INFO -   nb_rnn_layers: 1
+2025-04-21 09:45:33,870 - INFO -   weights_lim: None
+2025-04-21 09:45:33,870 - INFO -   apply_tanh_uncertainty: False
+2025-04-21 09:45:33,871 - INFO -   time_as_channel: False
+2025-04-21 09:45:33,871 - INFO -   forcing_prob: 1.0
+2025-04-21 09:45:33,871 - INFO -   noise_theta_init: None
+2025-04-21 09:45:33,871 - INFO -   std_lower_bound: 0.0001
+2025-04-21 09:45:33,871 - INFO - optimizer:
+2025-04-21 09:45:33,872 - INFO -   init_lr: 1e-05
+2025-04-21 09:45:33,872 - INFO -   gradients_lim: 1e-07
+2025-04-21 09:45:33,872 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-04-21 09:45:33,872 - INFO - training:
+2025-04-21 09:45:33,872 - INFO -   nb_epochs: 1500
+2025-04-21 09:45:33,873 - INFO -   batch_size: 1024
+2025-04-21 09:45:33,873 - INFO -   print_every: 10
+2025-04-21 09:45:33,873 - INFO -   checkpoint_every: 10
+2025-04-21 09:45:33,873 - INFO -   nb_recons_loss_steps: None
+2025-04-21 09:45:33,873 - INFO -   use_nll_loss: False
+2025-04-21 09:45:33,874 - INFO -   inference_start: 256
+2025-04-21 09:45:34,391 - INFO - Input sequence shape: (1024, 256, 2)
+2025-04-21 09:45:34,392 - INFO - Labels/OutputSequence shape: (1024, 256, 2)
+2025-04-21 09:45:34,392 - INFO - Seq length: 256
+2025-04-21 09:45:34,392 - INFO - Data size: 2
+2025-04-21 09:45:34,393 - INFO - Min/Max in the dataset: (-1.0, 1.378643503171046)
+2025-04-21 09:45:34,393 - INFO - Number of batches:
+2025-04-21 09:45:34,393 - INFO -   - Train: 15
+2025-04-21 09:45:34,394 - INFO -   - Test: 3
+2025-04-21 09:45:35,870 - INFO - Model loaded from ./model.eqx
+2025-04-21 09:45:45,670 - INFO - Evaluation of MSE on the test set, at the end of the training (Current Best Model):
+2025-04-21 09:45:45,671 - INFO -     - Mean : 0.062439
+2025-04-21 09:45:45,671 - INFO -     - Median : 0.061460
+2025-04-21 09:45:45,671 - INFO -     - Min : 0.058543
+2025-04-21 09:46:15,710 - INFO - New best model found at epoch 110 with MSE: 0.060583
+2025-04-21 09:46:20,820 - INFO - New best model found at epoch 130 with MSE: 0.060397
+2025-04-21 09:46:23,338 - INFO - New best model found at epoch 140 with MSE: 0.057708
+2025-04-21 09:46:36,146 - INFO - New best model found at epoch 190 with MSE: 0.052056
+2025-04-21 09:46:51,109 - INFO - New best model found at epoch 250 with MSE: 0.049596
+2025-04-21 09:47:01,403 - INFO - New best model found at epoch 290 with MSE: 0.047145
+2025-04-21 09:52:14,703 - INFO - Best model found at epoch 290 with MSE: 0.047145

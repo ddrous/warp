@@ -109,6 +109,7 @@ def setup_run_folder(folder_path, training=True):
     os.system(f"cp utils.py {folder_path}")
     os.system(f"cp loaders.py {folder_path}")
     os.system(f"cp models.py {folder_path}")
+    os.system(f"cp config.yaml {folder_path}")
 
     ## Create a folder for the chcekpoints results
     checkpoints_folder = folder_path+"checkpoints/"

@@ -24,7 +24,7 @@ model:
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
-  apply_tanh_uncertainty: False
+  apply_dynamic_tanh: False
   time_as_channel: False
   forcing_prob: 0.15
   noise_theta_init: null
