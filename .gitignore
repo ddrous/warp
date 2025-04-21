@@ -59,8 +59,8 @@ data/dynamics/lorentz-63/noisy.pt
 !data/README.md
 !runs/README.md
 
-!runs/250406-170108-PetaGenius*
+# !runs/250406-170108-PetaGenius*
 !runs/250407-093730-CelebAGenius*
 !runs/250412-193707-MSD-MegaGenius*
 !runs/250420-173207-Lotka-MegaGenius*
-
+!runs/250421-075708-MNIST-SuperGenius*

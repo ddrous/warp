@@ -428,7 +428,7 @@ if config["model"]["model_type"] == "wsm":
     fig, axs = plt.subplots(1, 2, figsize=(20, 10))
     axs[0].hist(jnp.diag(model.As[0], k=0), bins=100)
 
-    axs[0].set_title("Histogram of diagonal values of A")
+    axs[0].set_title("Histogram of diagonal values of A (first layer)")
 
     axs[1].hist(model.thetas[0], bins=100, label="After Training")
     axs[1].hist(untrained_model.thetas[0], bins=100, alpha=0.5, label="Before Training", color='r')

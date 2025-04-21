@@ -3,8 +3,8 @@
 # General settings
 general:
   seed: 2024
-  train: True
-  dataset: "celeba"  # Options: mnist, cifar, lorentz, dynamics
+  train: False
+  dataset: "mnist"  # Options: mnist, cifar, lorentz, dynamics
   data_path: "./data/"
   # save_path: "./runs/250404-175026-Test/"
   save_path: null
@@ -23,16 +23,16 @@ model:
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
-  weights_lim: null
+  weights_lim: 5.0e-1
   apply_dynamic_tanh: True
   time_as_channel: False
   forcing_prob: 0.15
   noise_theta_init: null
-  std_lower_bound: 1.0e-4
+  std_lower_bound: 5.0e-1
 
 # Optimizer hyperparameters
 optimizer:
-  init_lr: 1.0e-5
+  init_lr: 1.0e-4
   gradients_lim: 1.0e-7
   on_plateau:
     factor: 0.5
@@ -44,10 +44,10 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 250
-  batch_size: 1256
+  nb_epochs: 500
+  batch_size: 640
   print_every: 10
   checkpoint_every: 10
-  nb_recons_loss_steps: null
+  nb_recons_loss_steps: 400
   use_nll_loss: True
-  inference_start: 500
+  inference_start: 300
