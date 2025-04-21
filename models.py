@@ -202,6 +202,89 @@ class WSM(eqx.Module):
 
 
 
+class GRU(eqx.Module):
+    """ Gated Recurrent Unit """
+    cell: eqx.Module
+    decoder: eqx.Module
+
+    data_size: int
+    time_as_channel: bool
+    forcing_prob: float
+    time_as_channel: bool
+
+    predict_uncertainty: bool
+    std_lower_bound: float
+
+    def __init__(self, 
+                 data_size, 
+                 hidden_size, 
+                 predict_uncertainty=True,
+                 time_as_channel=True,
+                 forcing_prob=1.0,
+                 std_lower_bound=None,
+                 key=None):
+
+        self.time_as_channel = time_as_channel
+        input_dim = 1+data_size if time_as_channel else data_size
+
+        self.cell = eqx.nn.GRUCell(input_dim, hidden_size, use_bias=True, key=key)
+        self.decoder = eqx.nn.Linear(hidden_size, 2*data_size if predict_uncertainty else data_size, use_bias=True, key=key)
+
+        self.data_size = data_size
+        self.time_as_channel = time_as_channel
+        self.forcing_prob = forcing_prob
+
+        self.predict_uncertainty = predict_uncertainty
+        self.std_lower_bound = std_lower_bound
+
+    def __call__(self, xs, ts, k, inference_start=None):
+        """ Forward pass of the model on batch of sequences
+            xs: (batch, time, data_size)
+            ts: (batch, time)
+            k:  (key_dim)
+            inference_start: whether/when to use the model in autoregressive mode
+            """
+
+        def forward(xs_, ts_, k_):
+            """ Forward pass on a single sequence """
+
+            def f(carry, input_signal):
+                h, x_hat, x_prev, t_prev = carry
+                x_true, t_curr, key = input_signal
+
+                if inference_start is not None:
+                    x_t = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
+                else:
+                    x_t = jnp.where(jax.random.bernoulli(key, self.forcing_prob), x_true, x_hat)
+
+                if self.time_as_channel:
+                    x_t = jnp.concatenate([t_curr, x_t], axis=-1)
+                    x_prev = jnp.concatenate([t_prev, x_prev], axis=-1)
+
+                h_next = self.cell(x_t, h)
+                x_next = self.decoder(h_next)
+
+                x_next_mean = x_next[:x_true.shape[0]]
+                if self.predict_uncertainty:
+                    x_next_std = jnp.clip(x_next[x_true.shape[0]:], self.std_lower_bound, None)
+                    x_next = jnp.concatenate([x_next_mean, x_next_std], axis=-1)
+
+                return (h_next, x_next_mean, x_hat, t_curr), (x_next, )
+
+            keys = jax.random.split(k_, xs_.shape[0])
+
+            _, (xs_hat, ) = jax.lax.scan(f, (jnp.zeros(self.cell.hidden_size), xs_[0], xs_[0], ts_[0:1]), (xs_, ts_[:, None], keys))
+
+            return xs_hat
+
+        ## Batched version of the forward pass
+        ks = jax.random.split(k, xs.shape[0])
+        return eqx.filter_vmap(forward)(xs, ts, ks)
+
+
+
+
+
 def make_model(key, data_size, config):
     """ Make a model using the given key and kwargs """
 
@@ -222,7 +305,6 @@ def make_model(key, data_size, config):
             "weights_lim": config['model']['weights_lim'],
             "noise_theta_init": config['model']['noise_theta_init']
         }
-
         model = WSM(key=key, **model_args)
         print(f"Number of learnable parameters in the root network: {count_params((model.thetas,))/1000:3.1f} k")
         print(f"Number of learnable parameters for the seqtoseq's transition: {count_params((model.As, model.Bs))/1000:3.1f} k")
@@ -235,7 +317,15 @@ def make_model(key, data_size, config):
     elif model_type == "lstm":
         raise NotImplementedError("Standard LSTM not implemented yet")
     elif model_type == "gru":
-        raise NotImplementedError("Standard GRU not implemented yet")
+        model_args = {
+            "data_size": data_size,
+            "predict_uncertainty": config['training']['use_nll_loss'],
+            "time_as_channel": config['model']['time_as_channel'],
+            "forcing_prob": config['model']['forcing_prob'],
+            "std_lower_bound": config['model']['std_lower_bound'],
+            "rnn_hidden_size": config['model']['rnn_hidden_size'],
+        }
+        model = GRU(key=key, **model_args)
     elif model_type == "s4":
         raise NotImplementedError("S4 not implemented yet")     ## from https://github.com/ddrous/annotated-s4
     elif model_type == "mamba":
