@@ -12,8 +12,7 @@ from loaders import *
 from models import *
 
 import jax
-print("\n+=+=+=+=+ Training Weight Space Model +=+=+=+=+")
-print("Available devices:", jax.devices())
+print("\n\nAvailable devices:", jax.devices())
 
 from jax import config
 # config.update("jax_debug_nans", True)
@@ -86,6 +85,17 @@ else:
 with open(args.config_file, 'r') as file:
     config = yaml.safe_load(file)
 
+model_type = config['model']['model_type']
+if model_type == "wsm":
+    print("\n\n+=+=+=+=+ Training Weight Space Model +=+=+=+=+\n")
+elif model_type == "gru":
+    print("\n\n+=+=+=+=+ Training Gated Recurrent Unit Model +=+=+=+=+\n")
+elif model_type == "lstm":
+    print("\n\n+=+=+=+=+ Training Long Short Term Memory Model +=+=+=+=+\n")
+else:
+    print("\n\n+=+=+=+=+ Training Unknown Model +=+=+=+=+\n")
+    raise ValueError(f"Unknown model type: {model_type}")
+
 seed = config['general']['seed']
 main_key = jax.random.PRNGKey(seed)
 np.random.seed(seed)
@@ -149,7 +159,7 @@ for key, value in config.items():
 trainloader, testloader, data_props = make_dataloaders(data_folder, config)
 nb_classes, seq_length, data_size, width = data_props
 
-batch = next(iter(testloader))
+batch = next(iter(trainloader))
 (in_sequence, times), output = batch
 logger.info(f"Input sequence shape: {in_sequence.shape}")
 logger.info(f"Labels/OutputSequence shape: {output.shape}")
@@ -460,7 +470,6 @@ if config["model"]["model_type"] == "wsm":
     plt.colorbar(img, ax=axs[1], shrink=0.7)
     plt.draw();
     plt.savefig(plots_folder+"A_matrices.png", dpi=100, bbox_inches='tight')
-
 
     ## Print the dynamic tanh_params attribute
     if config['model']['apply_dynamic_tanh']:

@@ -21,7 +21,7 @@ model:
   mlp_depth: 3
   activation: "swish"
   input_prev_data: False
-  model_type: "gru"
+  model_type: "lstm"
   nb_rnn_layers: 1
   weights_lim: null
   apply_dynamic_tanh: False
@@ -29,7 +29,7 @@ model:
   forcing_prob: 1.0
   noise_theta_init: null
   std_lower_bound: 1.0e-4
-  rnn_hidden_size: 2850          # For GRUs and LSTMs
+  rnn_hidden_size: 2450          # For GRUs and LSTMs
 
 # Optimizer hyperparameters
 optimizer:
@@ -45,7 +45,7 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 750
+  nb_epochs: 1500
   batch_size: 380
   print_every: 10
   checkpoint_every: 10

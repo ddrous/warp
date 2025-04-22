@@ -4,8 +4,8 @@
 general:
   seed: 2024
   train: True
-  dataset: "lotka"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/dynamics/lotka/"
+  dataset: "mass_spring_damper"  # Options: mnist, cifar, lorentz, dynamics
+  data_path: "./data/dynamics/mass-spring-damper/"
   # save_path: "./runs/250404-175026-Test/"
   save_path: null
 
@@ -21,15 +21,15 @@ model:
   mlp_depth: 3
   activation: "swish"
   input_prev_data: False
-  model_type: "gru"
+  model_type: "lstm"
   nb_rnn_layers: 1
   weights_lim: null
   apply_dynamic_tanh: False
   time_as_channel: False
-  forcing_prob: 1.0
+  forcing_prob: 0.15
   noise_theta_init: null
   std_lower_bound: 1.0e-4
-  rnn_hidden_size: 2850          # For GRUs and LSTMs
+  rnn_hidden_size: 2450          # For GRUs and LSTMs
 
 # Optimizer hyperparameters
 optimizer:
@@ -45,10 +45,10 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 750
+  nb_epochs: 1500
   batch_size: 380
   print_every: 10
   checkpoint_every: 10
   nb_recons_loss_steps: null
   use_nll_loss: False
-  inference_start: 256
+  inference_start: 100
