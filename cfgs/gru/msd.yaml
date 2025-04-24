@@ -24,9 +24,9 @@ model:
   model_type: "gru"
   nb_rnn_layers: 1
   weights_lim: null
-  apply_dynamic_tanh: False
+  apply_dynamic_tanh: True
   time_as_channel: False
-  forcing_prob: 0.15
+  forcing_prob: 0.25
   noise_theta_init: null
   std_lower_bound: 1.0e-4
   rnn_hidden_size: 2850          # For GRUs and LSTMs
@@ -45,7 +45,7 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 1500
+  nb_epochs: 750
   batch_size: 380
   print_every: 10
   checkpoint_every: 10
