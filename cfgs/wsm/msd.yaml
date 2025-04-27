@@ -2,7 +2,7 @@
 
 # General settings
 general:
-  seed: 2024
+  seed: 2028
   train: True
   dataset: "mass_spring_damper"  # Options: mnist, cifar, lorentz, dynamics
   data_path: "./data/dynamics/mass-spring-damper/"
