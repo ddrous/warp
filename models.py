@@ -118,7 +118,7 @@ class WSM(eqx.Module):
 
             B_out_dim = data_size+1 if time_as_channel else data_size
             B = jnp.zeros((latent_size, B_out_dim))
-            # B += jax.random.normal(keys[i], B.shape)*1e-3       ## Initial perturbation to avoid getting stuck TODO
+            # B += jax.random.normal(keys[i], B.shape)*1e-3         ## Initial perturbation to avoid getting stuck TODO
             Bs.append(B)
 
         self.root_utils = root_utils
@@ -135,6 +135,7 @@ class WSM(eqx.Module):
 
         self.std_lower_bound = std_lower_bound
         self.dtanh_params = jnp.array([1., 0., 1., 0.]) if apply_dynamic_tanh else None
+        # self.dtanh_params = jnp.array([5., 0., 20., 0.]) if apply_dynamic_tanh else None
 
     def __call__(self, xs, ts, k, inference_start=None):
         """ Forward pass of the model on batch of sequences

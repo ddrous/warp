@@ -156,7 +156,7 @@ class DynamicsDataset(TimeSeriesDataset):
     For a dynamics dataset
     """
 
-    def __init__(self, data_dir, traj_length, min_max=None):
+    def __init__(self, data_dir, traj_length, normalize=True, min_max=None):
         try:
             raw_data = np.load(data_dir)
             raw_t_eval = np.linspace(0, 1., raw_data.shape[1])
@@ -175,10 +175,11 @@ class DynamicsDataset(TimeSeriesDataset):
                 self.max_data = np.max(raw_data)
 
         ## Normalise the dataset between 0 and 1
-        raw_data = (raw_data - self.min_data) / (self.max_data - self.min_data)
+        if normalize:
+            raw_data = (raw_data - self.min_data) / (self.max_data - self.min_data)
 
-        ## Put things between -1 and 1
-        raw_data = (raw_data - 0.5) / 0.5
+            ## Put things between -1 and 1
+            raw_data = (raw_data - 0.5) / 0.5
 
         ## Tile the data into -1, traj_length, n_dimensions
         # _, raw_timesteps, _ = raw_data.shape
@@ -687,16 +688,17 @@ def make_dataloaders(data_folder, config):
         min_res = min(resolution)
 
 
-    elif dataset in ["lorentz63", "mass_spring_damper"]:        ##TODO: preprocess lorentz63
+    elif dataset in ["lorentz63", "mass_spring_damper", "cheetah"]:        ##TODO: preprocess lorentz63
         print(" #### Dynamics Dataset ####")
         traj_len = np.NaN
+        normalize = False if dataset=="cheetah" else True       ## Cheetah dataset from https://github.com/raminmh/liquid_time_constant_networks
 
-        trainloader = NumpyLoader(DynamicsDataset(data_folder+"train.npy", traj_length=traj_len, min_max=None), 
+        trainloader = NumpyLoader(DynamicsDataset(data_folder+"train.npy", traj_length=traj_len, normalize=normalize, min_max=None), 
                                 batch_size=batch_size, 
                                 shuffle=True, 
                                 num_workers=24)
         min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
-        testloader = NumpyLoader(DynamicsDataset(data_folder+"test.npy", traj_length=traj_len, min_max=min_max),
+        testloader = NumpyLoader(DynamicsDataset(data_folder+"test.npy", traj_length=traj_len, normalize=normalize, min_max=min_max),
                                     batch_size=batch_size, 
                                     shuffle=True, 
                                     num_workers=24)

@@ -176,7 +176,7 @@ colors = ['r', 'g', 'b', 'c', 'm', 'y']
 
 dataset = config['general']['dataset']
 image_datasets = ["mnist", "mnist_fashion", "cifar", "celeba"]
-dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_damper"]
+dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_damper", "cheetah"]
 repeat_datasets = ["lotka"]
 
 res = (width, width, data_size)
@@ -481,7 +481,7 @@ if config["model"]["model_type"] == "wsm":
 
         ## Plot this against a normal tanh
         fig, ax = plt.subplots(1, 1, figsize=(10, 4))
-        x = np.linspace(-3.5, 3.5, 500)
+        x = np.linspace(-35, 35, 500)
         y = np.tanh(x)
         a, b, alpha, beta = model.dtanh_params
         y2 = alpha * np.tanh((x-b)/a) + beta
@@ -588,6 +588,7 @@ logger.info(f"Best model found at epoch {best_mse_epoch} with MSE: {best_mse:.6f
 
 ## Set inference mode to True
 visloader = NumpyLoader(testloader.dataset, batch_size=16, shuffle=True)
+nb_examples = len(visloader.dataset)    ## Actualy number of examples in the dataset
 
 nb_cols = 3 if use_nll_loss else 2
 fig, axs = plt.subplots(4, 4*nb_cols, figsize=(16*3, 16), sharex=True, constrained_layout=True)
@@ -611,9 +612,9 @@ mpl.rcParams['lines.linewidth'] = 3
 
 for i in range(4):
     for j in range(4):
-        x = xs_true[i*4+j]
-        x_recons = xs_recons[i*4+j]
-        x_full = labels[i*4+j]
+        x = xs_true[(i*4+j)%nb_examples]
+        x_recons = xs_recons[(i*4+j)%nb_examples]
+        x_full = labels[(i*4+j)%nb_examples]
 
         if dataset in dynamics_datasets+repeat_datasets:
             ## Min/max along dim0, for both x and x_recons
@@ -635,8 +636,8 @@ for i in range(4):
         else:
             # axs[i, nb_cols*j].set_xlim([min_0-eps, max_0+eps])
             axs[i, nb_cols*j].set_ylim([min_1-eps, max_1+eps])
-            axs[i, nb_cols*j].plot(x[:, dim0], color=colors[labels[i*4+j]%len(colors)])
-            axs[i, nb_cols*j].plot(x[:, dim1], color=colors[labels[i*4+j]%len(colors)], linestyle='-.')
+            axs[i, nb_cols*j].plot(x[:, dim0], color=colors[labels[(i*4+j)%nb_examples]%len(colors)])
+            axs[i, nb_cols*j].plot(x[:, dim1], color=colors[labels[(i*4+j)%nb_examples]%len(colors)], linestyle='-.')
         if i==0:
             axs[i, nb_cols*j].set_title("GT", fontsize=40)
         # axs[i, nb_cols*j].axis('off')
@@ -649,8 +650,8 @@ for i in range(4):
         elif dataset in dynamics_datasets and dataset not in repeat_datasets:
             # axs[i, nb_cols*j+1].set_xlim([min_0-eps, max_0+eps])
             axs[i, nb_cols*j+1].set_ylim([min_1-eps, max_1+eps])
-            axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[labels[i*4+j]%len(colors)])
-            axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[labels[i*4+j]%len(colors)], linestyle='-.')
+            axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[labels[(i*4+j)%nb_examples]%len(colors)])
+            axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[labels[(i*4+j)%nb_examples]%len(colors)], linestyle='-.')
         elif dataset in repeat_datasets:
             axs[i, nb_cols*j+1].set_ylim([min_1-eps, max_1+eps])
             axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[(i*4+j)%len(colors)])
