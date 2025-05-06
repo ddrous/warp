@@ -41,6 +41,7 @@ class RootMLP(eqx.Module):
             else:
                 out = jnp.tanh(out)
             return out
+
         else:
             mean, std = jnp.split(out, 2, axis=-1)
 
@@ -57,11 +58,188 @@ class RootMLP(eqx.Module):
             return jnp.concatenate([mean, std], axis=-1)
 
 
+
+
+
+
+# class WSM(eqx.Module):
+#     """ Weight Space Seq2Seq Model, with RNN transition function """
+#     As: jnp.ndarray
+#     Bs: jnp.ndarray
+#     thetas: jnp.ndarray
+#     root_utils: list
+
+#     data_size: int
+#     input_prev_data: bool
+#     time_as_channel: bool
+#     forcing_prob: float
+#     weights_lim: float
+#     noise_theta_init: float
+
+#     std_lower_bound: float
+
+#     dtanh_params: jnp.ndarray
+
+#     def __init__(self, 
+#                  data_size, 
+#                  width_size, 
+#                  depth, 
+#                  activation="relu",
+#                  input_prev_data=False,
+#                  predict_uncertainty=True,
+#                  dynamic_tanh_init=False,
+#                  time_as_channel=True,
+#                  forcing_prob=1.0,
+#                  std_lower_bound=None,
+#                  weights_lim=None,
+#                  noise_theta_init=None,             ## Noise to be added to the initial theta 
+#                  nb_wsm_layers=1,                  ## TODO, to be implemented as in Fig 2. of https://arxiv.org/abs/2202.07022
+#                  key=None):
+
+#         keys = jax.random.split(key, num=nb_wsm_layers)
+#         builtin_fns = {"relu":jax.nn.relu, "tanh":jax.nn.tanh, 'softplus':jax.nn.softplus, 'swish':jax.nn.swish}
+#         thetas = []
+#         root_utils = []
+#         As = []
+#         Bs = []
+#         for i in range(nb_wsm_layers):
+#             root = RootMLP(data_size, 
+#                            width_size, 
+#                            depth, 
+#                            builtin_fns[activation], 
+#                            input_prev_data=input_prev_data, 
+#                            predict_uncertainty=predict_uncertainty,
+#                            key=keys[i])
+#             params, static = eqx.partition(root, eqx.is_array)
+#             weights, shapes, treedef = flatten_pytree(params)
+#             root_utils.append((shapes, treedef, static, root.props))
+
+#             # weights = jnp.clip(weights, -0.5, 0.5)
+
+#             thetas.append(weights)                              ## The latent space of the model
+
+#             latent_size = weights.shape[0]
+#             As.append(jnp.eye(latent_size))                     ## The most stable matrix: identity
+
+#             B_out_dim = data_size+1 if time_as_channel else data_size
+#             B = jnp.zeros((latent_size, B_out_dim))
+#             # B += jax.random.normal(keys[i], B.shape)*1e-3         ## Initial perturbation to avoid getting stuck TODO
+#             Bs.append(B)
+
+#         self.root_utils = root_utils
+#         self.thetas = thetas
+#         self.As = As
+#         self.Bs = Bs
+
+#         self.data_size = data_size
+#         self.input_prev_data = input_prev_data
+#         self.time_as_channel = time_as_channel
+#         self.forcing_prob = forcing_prob
+#         self.weights_lim = weights_lim
+#         self.noise_theta_init = noise_theta_init
+
+#         self.std_lower_bound = std_lower_bound
+#         self.dtanh_params = jnp.array(dynamic_tanh_init) if dynamic_tanh_init else None
+
+#     # @jax.tree_util.Partial(jax.jit, static_argnames=["inference_start", "forcing_prob"])
+#     # def __call__(self, xs, ts, k, inference_start=None, forcing_prob=0.5):
+#     def __call__(self, xs, ts, k, inference_start=None):
+#         """ Forward pass of the model on batch of sequences
+#             xs: (batch, time, data_size)
+#             ts: (batch, time)
+#             k:  (key_dim)
+#             inference_start: whether/when to use the model in autoregressive mode
+#             forcing_prob: probability of using the true value instead of the predicted value
+#             """
+
+#         def forward(xs_, ts_, k_):
+#             """ Forward pass on a single sequence """
+
+#             def f(carry, input_signal):
+#                 thet, x_hat, x_prev, t_prev = carry
+#                 x_true, t_curr, key = input_signal
+#                 delta_t = t_curr - t_prev
+
+#                 A = self.As[0]
+#                 B = self.Bs[0]
+#                 root_utils = self.root_utils[0]
+
+#                 if inference_start is not None:
+#                     x_t = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
+#                 else:
+#                     x_t = jnp.where(jax.random.bernoulli(key, self.forcing_prob), x_true, x_hat)
+
+#                 if self.time_as_channel:
+#                     x_t = jnp.concatenate([t_curr, x_t], axis=-1)
+#                     x_prev = jnp.concatenate([t_prev, x_prev], axis=-1)
+
+#                 thet_next = A@thet + B@(x_t - x_prev)     ## Key step
+
+#                 if self.weights_lim is not None:
+#                     thet_next = jnp.clip(thet_next, -self.weights_lim, self.weights_lim)
+
+#                 shapes, treedef, static, _ = root_utils
+#                 params = unflatten_pytree(thet_next, shapes, treedef)
+#                 root_fun = eqx.combine(params, static)
+#                 root_in = t_curr+delta_t
+#                 if self.input_prev_data:
+#                     root_in = jnp.concatenate([root_in, x_prev], axis=-1)
+#                 x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                  ## Evaluated at the next time step
+
+#                 x_next_mean = x_next[:x_true.shape[0]]
+
+#                 return (thet_next, x_next_mean, x_hat, t_curr), (x_next, )
+
+#             ## Call the scan function
+#             theta_init = self.thetas[0]
+#             if self.noise_theta_init is not None:
+#                 theta_init += jax.random.normal(k_, theta_init.shape)*self.noise_theta_init
+#                 # theta_init += jax.random.uniform(k_, shape=theta_init.shape, minval=-self.noise_theta_init, maxval=self.noise_theta_init)
+
+#             keys = jax.random.split(k_, xs_.shape[0])
+
+#             # _, (xs_hat, ) = jax.lax.scan(f, (theta_init, xs_[0], xs_[0], -ts_[1:2]), (xs_, ts_[:, None], keys))
+#             _, (xs_hat, ) = jax.lax.scan(f, (theta_init, xs_[0], xs_[0], ts_[0:1]), (xs_, ts_[:, None], keys))
+
+#             return xs_hat
+
+#         ## Batched version of the forward pass
+#         ks = jax.random.split(k, xs.shape[0])
+#         return eqx.filter_vmap(forward)(xs, ts, ks)
+
+
+
+
+
+class GradualMLP(eqx.Module):
+    layers: list
+
+    def __init__(self, input_dim, output_dim, activation=jax.nn.tanh, key=None):
+        key = key if key is not None else jax.random.PRNGKey(0)
+        keys = jax.random.split(key, 3)
+
+        ## We want two intermediate layers: with input neurons gradually decreasing to output_dim
+        hidden_size1 = int(2/3*input_dim + 1/3*output_dim)
+        hidden_size2 = int(1/3*input_dim + 2/3*output_dim)
+        in_layer = eqx.nn.Linear(input_dim, hidden_size1, key=keys[0])
+        hidden_layer = eqx.nn.Linear(hidden_size1, hidden_size2, key=keys[1])
+        out_layer = eqx.nn.Linear(hidden_size2, output_dim, key=keys[2])
+
+        self.layers = [in_layer, activation, hidden_layer, activation, out_layer]
+
+    def __call__(self, x):
+        y = x
+        for layer in self.layers:
+            y = layer(y)
+        return y
+
+
+
 class WSM(eqx.Module):
     """ Weight Space Seq2Seq Model, with RNN transition function """
     As: jnp.ndarray
     Bs: jnp.ndarray
-    thetas: jnp.ndarray
+    thetas_init: eqx.Module
     root_utils: list
 
     data_size: int
@@ -82,7 +260,7 @@ class WSM(eqx.Module):
                  activation="relu",
                  input_prev_data=False,
                  predict_uncertainty=True,
-                 apply_dynamic_tanh=False,
+                 dynamic_tanh_init=False,
                  time_as_channel=True,
                  forcing_prob=1.0,
                  std_lower_bound=None,
@@ -93,7 +271,7 @@ class WSM(eqx.Module):
 
         keys = jax.random.split(key, num=nb_wsm_layers)
         builtin_fns = {"relu":jax.nn.relu, "tanh":jax.nn.tanh, 'softplus':jax.nn.softplus, 'swish':jax.nn.swish}
-        thetas = []
+        thetas_init = []
         root_utils = []
         As = []
         Bs = []
@@ -111,7 +289,9 @@ class WSM(eqx.Module):
 
             # weights = jnp.clip(weights, -0.5, 0.5)
 
-            thetas.append(weights)                              ## The latent space of the model
+            # thetas.append(weights)                              ## The latent space of the model
+            # thetas_init.append(eqx.nn.MLP(data_size, weights.shape, 128, 3, jax.nn.softplus, key=keys[0]))
+            thetas_init.append(GradualMLP(data_size, weights.shape[0], builtin_fns[activation], key=keys[0]))
 
             latent_size = weights.shape[0]
             As.append(jnp.eye(latent_size))                     ## The most stable matrix: identity
@@ -122,7 +302,7 @@ class WSM(eqx.Module):
             Bs.append(B)
 
         self.root_utils = root_utils
-        self.thetas = thetas
+        self.thetas_init = thetas_init
         self.As = As
         self.Bs = Bs
 
@@ -134,8 +314,7 @@ class WSM(eqx.Module):
         self.noise_theta_init = noise_theta_init
 
         self.std_lower_bound = std_lower_bound
-        self.dtanh_params = jnp.array([1., 0., 1., 0.]) if apply_dynamic_tanh else None
-        # self.dtanh_params = jnp.array([5., 0., 20., 0.]) if apply_dynamic_tanh else None
+        self.dtanh_params = jnp.array(dynamic_tanh_init) if dynamic_tanh_init else None
 
     def __call__(self, xs, ts, k, inference_start=None):
         """ Forward pass of the model on batch of sequences
@@ -184,7 +363,7 @@ class WSM(eqx.Module):
                 return (thet_next, x_next_mean, x_hat, t_curr), (x_next, )
 
             ## Call the scan function
-            theta_init = self.thetas[0]
+            theta_init = self.thetas_init[0](xs_[0])
             if self.noise_theta_init is not None:
                 theta_init += jax.random.normal(k_, theta_init.shape)*self.noise_theta_init
                 # theta_init += jax.random.uniform(k_, shape=theta_init.shape, minval=-self.noise_theta_init, maxval=self.noise_theta_init)
@@ -199,6 +378,9 @@ class WSM(eqx.Module):
         ## Batched version of the forward pass
         ks = jax.random.split(k, xs.shape[0])
         return eqx.filter_vmap(forward)(xs, ts, ks)
+
+
+
 
 
 
@@ -382,7 +564,7 @@ def make_model(key, data_size, config):
             "activation": config['model']['activation'],
             "input_prev_data": config['model']['input_prev_data'],
             "predict_uncertainty": config['training']['use_nll_loss'],
-            "apply_dynamic_tanh": config['model']['apply_dynamic_tanh'],
+            "dynamic_tanh_init": config['model']['dynamic_tanh_init'],
             "time_as_channel": config['model']['time_as_channel'],
             "forcing_prob": config['model']['forcing_prob'],
             "std_lower_bound": config['model']['std_lower_bound'],
@@ -390,7 +572,10 @@ def make_model(key, data_size, config):
             "noise_theta_init": config['model']['noise_theta_init']
         }
         model = WSM(key=key, **model_args)
-        print(f"Number of learnable parameters in the root network: {count_params((model.thetas,))/1000:3.1f} k")
+        if hasattr(model, "thetas"):
+            print(f"Number of learnable parameters in the root network: {count_params((model.thetas,))/1000:3.1f} k")
+        elif hasattr(model, "thetas_init"):
+            print(f"Number of learnable parameters in the root network: {count_params((model.thetas_init,))/1000:3.1f} k")
         print(f"Number of learnable parameters for the seqtoseq's transition: {count_params((model.As, model.Bs))/1000:3.1f} k")
     elif model_type == "wsm-lstm":
         raise NotImplementedError("LSTM transition model not implemented yet")
@@ -446,7 +631,7 @@ if __name__ == "__main__":
         "activation": "relu",
         "input_prev_data": False,
         "predict_uncertainty": True,
-        "apply_dynamic_tanh": False,
+        "dynamic_tanh_init": False,
         "time_as_channel": True,
         "forcing_prob": 1.0,
         "weights_lim": 0.1,

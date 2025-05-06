@@ -176,7 +176,7 @@ colors = ['r', 'g', 'b', 'c', 'm', 'y']
 
 dataset = config['general']['dataset']
 image_datasets = ["mnist", "mnist_fashion", "cifar", "celeba"]
-dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_damper", "cheetah"]
+dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_damper", "cheetah", "electricity"]
 repeat_datasets = ["lotka"]
 
 res = (width, width, data_size)
@@ -440,9 +440,11 @@ if config["model"]["model_type"] == "wsm":
 
     axs[0].set_title("Histogram of diagonal values of A")
 
-    axs[1].hist(model.thetas[0], bins=100, label="After Training")
-    axs[1].hist(untrained_model.thetas[0], bins=100, alpha=0.5, label="Before Training", color='r')
-    axs[1].set_title(r"Histogram of $\theta_0$ values")
+    if hasattr(model, "thetas"):
+        axs[1].hist(model.thetas[0], bins=100, label="After Training")
+        axs[1].hist(untrained_model.thetas[0], bins=100, alpha=0.5, label="Before Training", color='r')
+        axs[1].set_title(r"Histogram of $\theta_0$ values")
+
     plt.legend();
     plt.draw();
     plt.savefig(plots_folder+"A_theta_histograms.png", dpi=100, bbox_inches='tight')
@@ -472,7 +474,7 @@ if config["model"]["model_type"] == "wsm":
     plt.savefig(plots_folder+"A_matrices.png", dpi=100, bbox_inches='tight')
 
     ## Print the dynamic tanh_params attribute
-    if config['model']['apply_dynamic_tanh']:
+    if config['model']['dynamic_tanh_init']:
         latex_string = r"y = \alpha \cdot \text{tanh} \left( \frac{x-b}{a} \right) + \beta"
         logger.info(f"Dynamic tanh params (final root network activation) : ${latex_string}$ ")
 
@@ -486,7 +488,7 @@ if config["model"]["model_type"] == "wsm":
         a, b, alpha, beta = model.dtanh_params
         y2 = alpha * np.tanh((x-b)/a) + beta
         ax.plot(x, y, label="tanh")
-        ax.plot(x, y2, label="Dynamic tanh")
+        ax.plot(x, y2, label="dynamic tanh")
         ax.set_title("Dynamic tanh vs tanh after training")
         ax.set_xlabel("x")
         ax.set_ylabel("y")
@@ -678,3 +680,37 @@ for i in range(4):
 plt.suptitle(f"Reconstruction using {inference_start} initial steps", fontsize=65)
 plt.draw();
 plt.savefig(plots_folder+"samples_generated.png", dpi=100, bbox_inches='tight')
+
+
+
+#%% Get the MSE on the entire test set
+
+eval_loader = NumpyLoader(testloader.dataset, batch_size=len(testloader.dataset), shuffle=False)
+
+batch = next(iter(visloader))
+(xs_true, times), labels = batch
+
+xs_recons = eval_step(model=best_model, 
+                      X=xs_true, 
+                      times=times, 
+                      key=test_key, 
+                      inference_start=inference_start)
+
+xs_true = xs_true[:, inference_start:, :]
+xs_recons = xs_recons[:, inference_start:, :data_size]
+
+def metric(pred, true):
+    mse = jnp.mean((pred - true)**2)
+    rmse = jnp.sqrt(mse)
+    mae = jnp.mean(jnp.abs(pred - true))
+    mape = jnp.mean(jnp.abs(pred - true)/jnp.abs(true))
+    mspe = jnp.mean(jnp.abs(pred - true)/jnp.abs(true)**2)
+    return mse, rmse, mae, mape, mspe
+
+mse, rmse, mae, mape, mspe = metric(xs_recons, xs_true)
+logger.info("Evaluation of forecast MSE on the full test set in inference mode:")
+logger.info(f"    - MSE : {mse:.6f}")
+logger.info(f"    - RMSE : {rmse:.6f}")
+logger.info(f"    - MAE : {mae:.6f}")
+logger.info(f"    - MAPE : {mape:.6f}")
+logger.info(f"    - MSPE : {mspe:.6f}")

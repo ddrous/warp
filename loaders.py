@@ -389,6 +389,51 @@ class DynamicsRepeatDataset(TimeSeriesRepeatDataset):
 
 
 
+# class CheetahDataset(TimeSeriesRepeatDataset):
+#     """
+#     For the a dynamical system dataset for repeat-copy tasks
+#     """
+
+#     def __init__(self, data_dir, traj_length, min_max=None):
+#         try:
+#             raw_data = np.load(data_dir)
+#             in_raw_data = raw_data["clipped"]
+#             out_raw_data = raw_data["full"]
+#         except:
+#             raise ValueError(f"Data not loadable at {data_dir}")
+
+#         ## Normalise the dataset between 0 and 1
+#         if min_max is not None:
+#             self.min_data = min_max[0]
+#             self.max_data = min_max[1]
+#         else:
+#             self.min_data = np.min(out_raw_data)
+#             self.max_data = np.max(out_raw_data)
+
+#         in_raw_data = (in_raw_data - self.min_data) / (self.max_data - self.min_data)
+#         out_raw_data = (out_raw_data - self.min_data) / (self.max_data - self.min_data)
+
+#         ## Put things between -1 and 1
+#         in_raw_data = (in_raw_data - 0.5) / 0.5
+#         out_raw_data = (out_raw_data - 0.5) / 0.5
+
+#         ## Replace the smallest value in in_raw_data with exactly -1 ?
+#         # in_raw_data[in_raw_data == np.min(in_raw_data)] = -1
+
+#         n_envs, n_timesteps, n_dimensions = in_raw_data.shape
+
+#         # t_eval = raw_t_eval[:traj_length]
+#         t_eval = np.linspace(0, 1., n_timesteps)
+
+#         self.total_envs = n_envs
+#         self.nb_classes = n_envs
+#         self.num_steps = n_timesteps
+#         self.data_size = n_dimensions
+
+#         super().__init__(in_raw_data, out_raw_data, t_eval, traj_prop=1.0)
+
+
+
 
 
 class CIFARDataset(TimeSeriesDataset):
@@ -688,10 +733,10 @@ def make_dataloaders(data_folder, config):
         min_res = min(resolution)
 
 
-    elif dataset in ["lorentz63", "mass_spring_damper", "cheetah"]:        ##TODO: preprocess lorentz63
+    elif dataset in ["lorentz63", "mass_spring_damper", "cheetah", "electricity"]:        ##TODO: preprocess lorentz63
         print(" #### Dynamics Dataset ####")
         traj_len = np.NaN
-        normalize = False if dataset=="cheetah" else True       ## Cheetah dataset from https://github.com/raminmh/liquid_time_constant_networks
+        normalize = False if dataset in ["cheetah", "electricity"] else True       ## Cheetah dataset from https://github.com/raminmh/liquid_time_constant_networks
 
         trainloader = NumpyLoader(DynamicsDataset(data_folder+"train.npy", traj_length=traj_len, normalize=normalize, min_max=None), 
                                 batch_size=batch_size, 

@@ -56,8 +56,18 @@ data/dynamics/mass-spring-damper/train.npy
 data/dynamics/lorentz-63/full.pt
 data/dynamics/lorentz-63/noisy.pt
 
+## Ignore all electricity files
+**/h1/*.npy
+**/h1/old/*.npy
+**/h1/normalized/*.npy
+**/h2/*.npy
+**/m1/*.npy
+**/m2/*.npy
+
 ## Ignore all cheetah files
 **/cheetah/*.npy
+**/cheetah/raw
+**/cheetah/old
 
 !data/README.md
 !runs/README.md
