@@ -184,7 +184,7 @@ class WSM_RNN(eqx.Module):
                 x_next_mean = x_next[:x_true.shape[0]]
                 # x_next_mean = x_prev[1:] + x_next[:x_true.shape[0]]
 
-                return (thet_next, x_next_mean, x_hat, t_curr), (x_next, )
+                return (thet_next, x_next_mean, x_hat, t_curr), (x_next, thet_next)
 
             ## Call the scan function
             theta_init = self.thetas[0]
@@ -195,9 +195,9 @@ class WSM_RNN(eqx.Module):
             keys = jax.random.split(k_, xs_.shape[0])
 
             # _, (xs_hat, ) = jax.lax.scan(f, (theta_init, xs_[0], xs_[0], -ts_[1:2]), (xs_, ts_[:, None], keys))
-            _, (xs_hat, ) = jax.lax.scan(f, (theta_init, xs_[0], xs_[0], ts_[0:1]), (xs_, ts_[:, None], keys))
+            _, (xs_hat, theta_outs) = jax.lax.scan(f, (theta_init, xs_[0], xs_[0], ts_[0:1]), (xs_, ts_[:, None], keys))
 
-            return xs_hat
+            return xs_hat, theta_outs
 
         ## Batched version of the forward pass
         ks = jax.random.split(k, xs.shape[0])

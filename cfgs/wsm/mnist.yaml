@@ -3,6 +3,7 @@
 # General settings
 general:
   seed: 2028
+  classification: False
   train: True
   dataset: "mnist"  # Options: mnist, cifar, lorentz, dynamics
   data_path: "./data/"
@@ -11,7 +12,7 @@ general:
 
 # Data hyperparameters (dependent on the dataset)
 data:
-  downsample_factor: 1
+  downsample_factor: 2
   resolution: [32, 32]         # For celebA
   traj_length: 1000
 
@@ -20,11 +21,12 @@ model:
   mlp_width_size: 24
   mlp_depth: 3
   activation: "relu"
+  init_state_layers: null          ## null to directly learn the initial state
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: 5.0e-1
-  apply_dynamic_tanh: True
+  dynamic_tanh_init: null
   time_as_channel: False
   forcing_prob: 0.15
   noise_theta_init: null
@@ -44,8 +46,9 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 500
+  nb_epochs: 200
   batch_size: 640
+  autoregressive: True
   print_every: 10
   checkpoint_every: 10
   nb_recons_loss_steps: 400

@@ -15,7 +15,7 @@ import jax
 print("\n\nAvailable devices:", jax.devices())
 
 from jax import config
-# config.update("jax_debug_nans", True)
+config.update("jax_debug_nans", True)
 # config.update("jax_disable_jit", True)
 # config.update("jax_enable_x64", True)
 # from jax.experimental import checkify
@@ -108,6 +108,7 @@ torch.manual_seed(seed)
 
 #%%
 train = config['general']['train']
+classification = config['general']['classification']
 data_path = config['general']['data_path']
 save_path = config['general']['save_path']
 
@@ -201,8 +202,8 @@ for i in range(4):
             axs[i, j].plot(in_sequence[idx, :, dim1], color=colors[(i*j)%len(colors)], linestyle='--', lw=3)
         else:
             # axs[i, j].plot(in_sequence[idx, :, dim0], in_sequence[idx, :, dim1], color=colors[output[idx]%len(colors)])
-            axs[i, j].plot(in_sequence[idx, :, dim0], color=colors[output[idx]%len(colors)], lw=3)
-            axs[i, j].plot(in_sequence[idx, :, dim1], color=colors[output[idx]%len(colors)], linestyle='--', lw=3)
+            axs[i, j].plot(in_sequence[idx, :, dim0], color=colors[int(output[idx])%len(colors)], lw=3)
+            axs[i, j].plot(in_sequence[idx, :, dim1], color=colors[int(output[idx])%len(colors)], linestyle='--', lw=3)
 
         if dataset not in repeat_datasets:
             axs[i, j].set_title(f"Class: {output[idx]}", fontsize=12)
@@ -216,7 +217,9 @@ plt.savefig(plots_folder+"samples_train.png", dpi=100, bbox_inches='tight')
 # %% Define the model and loss function
 
 model_key, train_key = jax.random.split(main_key, num=2)
-model = make_model(model_key, data_size, config)
+if not classification:
+    nb_classes = None
+model = make_model(model_key, data_size, nb_classes, config)
 untrained_model = model
 
 nb_recons_loss_steps = config['training']['nb_recons_loss_steps']
@@ -228,39 +231,60 @@ def loss_fn(model, batch, key):
     Ts: (batch, time)
     Ys: (batch, num_classes)
     """
-    (X_true, times), X_true_out = batch
 
-    X_recons = model(X_true, times, key, inference_start=None)
+    if not classification:
+        (X_true, times), X_true_out = batch
 
-    if nb_recons_loss_steps is not None:  ## Use all the steps
-        ## Randomly sample some steps in the sequence for the loss
-        batch_size, nb_timesteps = X_true.shape[0], X_true.shape[1]
-        indices_0 = jnp.arange(batch_size)
-        indices_1 = jax.random.randint(key, (batch_size, nb_recons_loss_steps), 0, nb_timesteps)
+        X_recons = model(X_true, times, key, inference_start=None)
 
-        X_recons_ = jnp.stack([X_recons[indices_0, indices_1[:,j]] for j in range(nb_recons_loss_steps)], axis=1)
+        if nb_recons_loss_steps is not None:  ## Use all the steps
+            ## Randomly sample some steps in the sequence for the loss
+            batch_size, nb_timesteps = X_true.shape[0], X_true.shape[1]
+            indices_0 = jnp.arange(batch_size)
+            indices_1 = jax.random.randint(key, (batch_size, nb_recons_loss_steps), 0, nb_timesteps)
 
-        if dataset not in repeat_datasets:
-            X_true_ = jnp.stack([X_true[indices_0, indices_1[:,j]] for j in range(nb_recons_loss_steps)], axis=1)
+            X_recons_ = jnp.stack([X_recons[indices_0, indices_1[:,j]] for j in range(nb_recons_loss_steps)], axis=1)
+
+            if dataset not in repeat_datasets:
+                X_true_ = jnp.stack([X_true[indices_0, indices_1[:,j]] for j in range(nb_recons_loss_steps)], axis=1)
+            else:
+                X_true_ = jnp.stack([X_true_out[indices_0, indices_1[:,j]] for j in range(nb_recons_loss_steps)], axis=1)
+
         else:
-            X_true_ = jnp.stack([X_true_out[indices_0, indices_1[:,j]] for j in range(nb_recons_loss_steps)], axis=1)
+            X_recons_ = X_recons
+            if dataset not in repeat_datasets:
+                X_true_ = X_true
+            else:
+                X_true_ = X_true_out
 
-    else:
-        X_recons_ = X_recons
-        if dataset not in repeat_datasets:
-            X_true_ = X_true
+        if use_nll_loss:
+            means = X_recons_[:, :, :data_size]
+            stds = X_recons_[:, :, data_size:]
+            loss_r = jnp.log(stds) + 0.5*((X_true_ - means)/stds)**2
         else:
-            X_true_ = X_true_out
+            loss_r = optax.l2_loss(X_recons_, X_true_)
 
-    if use_nll_loss:
-        means = X_recons_[:, :, :data_size]
-        stds = X_recons_[:, :, data_size:]
-        loss_r = jnp.log(stds) + 0.5*((X_true_ - means)/stds)**2
-    else:
-        loss_r = optax.l2_loss(X_recons_, X_true_)
+        loss = jnp.mean(loss_r)
+        return loss, (loss,)
+    
+    else:           ## Classification task
+        (X_true, times), Ys = batch
 
-    loss = jnp.mean(loss_r)
-    return loss, (loss,)
+        Y_hat = model(X_true, times, key, inference_start=None)
+
+        # Compute the cross entropy loss using Optax
+        loss = optax.softmax_cross_entropy_with_integer_labels(logits=Y_hat[:, -1], labels=Ys)
+
+        # ## Manual cross entropy loss
+        # Y_hat = jax.nn.softmax(Y_hat[:, -1], axis=-1)
+        # Y_onehot = jax.nn.one_hot(Ys, num_classes=nb_classes)
+        # loss = -jnp.sum(Y_onehot * jnp.log(Y_hat + 1e-10), axis=-1)
+
+        loss = jnp.mean(loss)
+
+        acc = jnp.mean(jnp.argmax(Y_hat[:, -1], axis=-1) == Ys)
+
+        return loss, (acc,)
 
 
 @eqx.filter_jit
@@ -327,7 +351,9 @@ if train:
 
     for epoch in range(nb_epochs):
 
+        epoch_start_time = time.time()
         losses_epoch = []
+        aux_epoch = []
 
         for i, batch in enumerate(trainloader):
             train_key, _ = jax.random.split(train_key)
@@ -335,15 +361,20 @@ if train:
 
             losses_epoch.append(loss)
             losses.append(loss)
+            aux_epoch.append(aux)
 
             lr_scales.append(optax.tree_utils.tree_get(opt_state, "scale"))
 
         mean_epoch, median_epoch = np.mean(losses_epoch), np.median(losses_epoch)
+        epoch_end_time = time.time() - epoch_start_time
 
         if epoch%print_every==0 or epoch<=3 or epoch==nb_epochs-1:
             logger.info(
-                f"Epoch {epoch:-4d}/{nb_epochs:-4d}     Train Loss   -Mean: {mean_epoch:.6f},   -Median: {median_epoch:.6f},   -Latest: {loss:.6f}"
+                f"Epoch {epoch:-4d}/{nb_epochs:-4d}     Train Loss   -Mean: {mean_epoch:.6f},   -Median: {median_epoch:.6f},   -Latest: {loss:.6f},     -Time: {epoch_end_time:.2f} secs"
             )
+
+            if classification:
+                logger.info(f"Average classification accuracy: {np.mean(aux_epoch)*100:.2f}%")
 
         if epoch%checkpoint_every==0 or epoch==nb_epochs-1:
             eqx.tree_serialise_leaves(checkpoints_folder+f"model_{epoch}.eqx", model)
@@ -474,7 +505,7 @@ if config["model"]["model_type"] == "wsm":
     plt.savefig(plots_folder+"A_matrices.png", dpi=100, bbox_inches='tight')
 
     ## Print the dynamic tanh_params attribute
-    if config['model']['dynamic_tanh_init']:
+    if config['model']['dynamic_tanh_init'] and not classification:
         latex_string = r"y = \alpha \cdot \text{tanh} \left( \frac{x-b}{a} \right) + \beta"
         logger.info(f"Dynamic tanh params (final root network activation) : ${latex_string}$ ")
 
@@ -498,89 +529,95 @@ if config["model"]["model_type"] == "wsm":
 
 
 # %% Evaluate the model on the test set
+if not classification:
+    @eqx.filter_jit
+    def eval_step(model, X, times, key, inference_start=None):
+        """ Evaluate the model on a batch of data. """
+        X_recons = model(X, times, key, inference_start)
+        return X_recons
 
-@eqx.filter_jit
-def eval_step(model, X, times, key, inference_start=None):
-    """ Evaluate the model on a batch of data. """
-    X_recons = model(X, times, key, inference_start)
-    return X_recons
+    def eval_on_test_set(model, key):
+        mses = []
+        new_key, _ = jax.random.split(key)
+        for i, batch in enumerate(testloader):
+            new_key, _ = jax.random.split(new_key)
+            (X_true, times), X_labs_outs = batch
 
-def eval_on_test_set(model, key):
-    mses = []
-    new_key, _ = jax.random.split(key)
-    for i, batch in enumerate(testloader):
-        new_key, _ = jax.random.split(new_key)
-        (X_true, times), X_labs_outs = batch
+            if not classification:
+                X_recons = eval_step(model, X_true, times, new_key, inference_start=None)
+                if use_nll_loss:
+                    X_recons = X_recons[:, :, :data_size]
+                if dataset in repeat_datasets:
+                    mse = jnp.mean((X_recons - X_labs_outs)**2)
+                else:
+                    mse = jnp.mean((X_recons - X_true)**2)
 
-        X_recons = eval_step(model, X_true, times, new_key, inference_start=None)
-        if use_nll_loss:
-            X_recons = X_recons[:, :, :data_size]
-        if dataset in repeat_datasets:
-            mse = jnp.mean((X_recons - X_labs_outs)**2)
-        else:
-            mse = jnp.mean((X_recons - X_true)**2)
-        mses.append(mse)
+            else:
+                Y_hat = model(X_true, times, new_key, inference_start=None)
+                mse = jnp.mean((jnp.argmax(Y_hat[:, -1], axis=-1) - X_labs_outs)**2)
 
-    return np.mean(mses), np.median(mses), np.min(mses)
+            mses.append(mse)
 
-test_key, _ = jax.random.split(train_key)
-mean_mse, median_mse, min_mse = eval_on_test_set(model, test_key)
+        return np.mean(mses), np.median(mses), np.min(mses)
 
-logger.info("Evaluation of MSE on the test set, at the end of the training (Current Best Model):")
-logger.info(f"    - Mean : {mean_mse:.6f}")
-logger.info(f"    - Median : {median_mse:.6f}")
-logger.info(f"    - Min : {min_mse:.6f}")
+    test_key, _ = jax.random.split(train_key)
+    mean_mse, median_mse, min_mse = eval_on_test_set(model, test_key)
 
-nb_epochs = config['training']['nb_epochs']
-checkpoint_every = config['training']['checkpoint_every']
+    logger.info("Evaluation of MSE on the test set, at the end of the training (Current Best Model):")
+    logger.info(f"    - Mean : {mean_mse:.6f}")
+    logger.info(f"    - Median : {median_mse:.6f}")
+    logger.info(f"    - Min : {min_mse:.6f}")
 
-best_model = model
-best_mse = mean_mse
-best_mse_epoch = nb_epochs-1        ## TODO: model might not have been trained for all epochs
+    nb_epochs = config['training']['nb_epochs']
+    checkpoint_every = config['training']['checkpoint_every']
 
-if os.path.exists(artefacts_folder+"test_mses.npz"):
-    checkpoints_data = np.load(artefacts_folder+"test_mses.npz")
-    mses_chekpoints = checkpoints_data['data']
-    best_mse_epoch = checkpoints_data['best_epoch'].item()
-    best_mse = checkpoints_data['best_mse'].item()
-    best_model = eqx.tree_deserialise_leaves(checkpoints_folder+f"model_{best_mse_epoch}.eqx", model)
-    id_checkpoints = (np.arange(0, nb_epochs, checkpoint_every).tolist() + [nb_epochs-1])[:len(mses_chekpoints)]
-    logger.info("Checkpoints MSE artefact file found. Loading it.")
+    best_model = model
+    best_mse = mean_mse
+    best_mse_epoch = nb_epochs-1        ## TODO: model might not have been trained for all epochs
 
-else:
-    mses_chekpoints = [] 
-    id_checkpoints = []
+    if os.path.exists(artefacts_folder+"test_mses.npz"):
+        checkpoints_data = np.load(artefacts_folder+"test_mses.npz")
+        mses_chekpoints = checkpoints_data['data']
+        best_mse_epoch = checkpoints_data['best_epoch'].item()
+        best_mse = checkpoints_data['best_mse'].item()
+        best_model = eqx.tree_deserialise_leaves(checkpoints_folder+f"model_{best_mse_epoch}.eqx", model)
+        id_checkpoints = (np.arange(0, nb_epochs, checkpoint_every).tolist() + [nb_epochs-1])[:len(mses_chekpoints)]
+        logger.info("Checkpoints MSE artefact file found. Loading it.")
 
-    ## Lead the model at each checkpoint and evaluate it
-    for i in list(range(0, nb_epochs, checkpoint_every))+[nb_epochs-1]:
-        try:
-            model = eqx.tree_deserialise_leaves(checkpoints_folder+f"model_{i}.eqx", model)
-        except:
-            logger.info(f"Checkpoint {i} not found. Skipping.")
-            continue
+    else:
+        mses_chekpoints = [] 
+        id_checkpoints = []
 
-        mean, med, min_ = eval_on_test_set(model, test_key)
-        mses_chekpoints.append(mean)
-        id_checkpoints.append(i)
+        ## Lead the model at each checkpoint and evaluate it
+        for i in list(range(0, nb_epochs, checkpoint_every))+[nb_epochs-1]:
+            try:
+                model = eqx.tree_deserialise_leaves(checkpoints_folder+f"model_{i}.eqx", model)
+            except:
+                logger.info(f"Checkpoint {i} not found. Skipping.")
+                continue
 
-        if mean<best_mse:
-            best_model = model
-            best_mse = mean
-            best_mse_epoch = i
-            logger.info(f"New best model found at epoch {i} with MSE: {best_mse:.6f}")
-        # logger.info(f"Checkpoint {i} MSE: {mean:.6f} (Mean), {med:.6f} (Median), {min_:.6f} (Min)")
+            mean, med, min_ = eval_on_test_set(model, test_key)
+            mses_chekpoints.append(mean)
+            id_checkpoints.append(i)
 
-    ## Save the checkpoints MSEs artefacts
-    np.savez(artefacts_folder+"test_mses.npz", data=np.array(mses_chekpoints), best_epoch=best_mse_epoch, best_mse=best_mse)
+            if mean<best_mse:
+                best_model = model
+                best_mse = mean
+                best_mse_epoch = i
+                logger.info(f"New best model found at epoch {i} with MSE: {best_mse:.6f}")
+            # logger.info(f"Checkpoint {i} MSE: {mean:.6f} (Mean), {med:.6f} (Median), {min_:.6f} (Min)")
 
-## Plot the MSE of the checkpoints
-fig, ax = plt.subplots(1, 1, figsize=(10, 6))
-ax = sbplot(id_checkpoints, mses_chekpoints, title="MSE on Test Set at Various Checkpoints", x_label='Epoch', y_label='MSE', ax=ax, y_scale="log", linewidth=3);
-plt.axvline(x=best_mse_epoch, color='r', linestyle='--', linewidth=3, label=f"Best MSE: {best_mse:.6f} at Epoch {best_mse_epoch}")
-plt.legend(fontsize=16)
-plt.draw();
-plt.savefig(plots_folder+"checkpoints_mse.png", dpi=100, bbox_inches='tight')
-logger.info(f"Best model found at epoch {best_mse_epoch} with MSE: {best_mse:.6f}")
+        ## Save the checkpoints MSEs artefacts
+        np.savez(artefacts_folder+"test_mses.npz", data=np.array(mses_chekpoints), best_epoch=best_mse_epoch, best_mse=best_mse)
+
+    ## Plot the MSE of the checkpoints
+    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+    ax = sbplot(id_checkpoints, mses_chekpoints, title="MSE on Test Set at Various Checkpoints", x_label='Epoch', y_label='MSE', ax=ax, y_scale="log", linewidth=3);
+    plt.axvline(x=best_mse_epoch, color='r', linestyle='--', linewidth=3, label=f"Best MSE: {best_mse:.6f} at Epoch {best_mse_epoch}")
+    plt.legend(fontsize=16)
+    plt.draw();
+    plt.savefig(plots_folder+"checkpoints_mse.png", dpi=100, bbox_inches='tight')
+    logger.info(f"Best model found at epoch {best_mse_epoch} with MSE: {best_mse:.6f}")
 
 
 ### ===== Very importtant: Set the best model on test set as the model for visualisation ? ==== TODO
@@ -588,129 +625,205 @@ logger.info(f"Best model found at epoch {best_mse_epoch} with MSE: {best_mse:.6f
 
 # %% Visualising a few reconstruction samples
 
-## Set inference mode to True
-visloader = NumpyLoader(testloader.dataset, batch_size=16, shuffle=True)
-nb_examples = len(visloader.dataset)    ## Actualy number of examples in the dataset
+if not classification:
+    ## Set inference mode to True
+    visloader = NumpyLoader(testloader.dataset, batch_size=16, shuffle=True)
+    nb_examples = len(visloader.dataset)    ## Actualy number of examples in the dataset
 
-nb_cols = 3 if use_nll_loss else 2
-fig, axs = plt.subplots(4, 4*nb_cols, figsize=(16*3, 16), sharex=True, constrained_layout=True)
+    nb_cols = 3 if use_nll_loss else 2
+    fig, axs = plt.subplots(4, 4*nb_cols, figsize=(16*3, 16), sharex=True, constrained_layout=True)
 
-batch = next(iter(visloader))
-(xs_true, times), labels = batch
+    batch = next(iter(visloader))
+    (xs_true, times), labels = batch
 
-inference_start = config['training']['inference_start']
-xs_recons = eval_step(model=model, 
-                      X=xs_true, 
-                      times=times, 
-                      key=test_key, 
-                      inference_start=inference_start)
+    inference_start = config['training']['inference_start']
+    xs_recons = eval_step(model=model, 
+                        X=xs_true, 
+                        times=times, 
+                        key=test_key, 
+                        inference_start=inference_start)
 
-if use_nll_loss:
-    xs_uncert = xs_recons[:, :, data_size:]
-    xs_recons = xs_recons[:, :, :data_size]
+    if use_nll_loss:
+        xs_uncert = xs_recons[:, :, data_size:]
+        xs_recons = xs_recons[:, :, :data_size]
 
-res = (width, width, data_size)
-mpl.rcParams['lines.linewidth'] = 3
+    res = (width, width, data_size)
+    mpl.rcParams['lines.linewidth'] = 3
 
-for i in range(4):
-    for j in range(4):
-        x = xs_true[(i*4+j)%nb_examples]
-        x_recons = xs_recons[(i*4+j)%nb_examples]
-        x_full = labels[(i*4+j)%nb_examples]
+    for i in range(4):
+        for j in range(4):
+            x = xs_true[(i*4+j)%nb_examples]
+            x_recons = xs_recons[(i*4+j)%nb_examples]
+            x_full = labels[(i*4+j)%nb_examples]
 
-        if dataset in dynamics_datasets+repeat_datasets:
-            ## Min/max along dim0, for both x and x_recons
-            min_0, max_0 = min(np.min(x[:, dim0]), np.min(x_recons[:, dim0])), max(np.max(x[:, dim0]), np.max(x_recons[:, dim0]))
-            min_1, max_1 = min(np.min(x[:, dim1]), np.min(x_recons[:, dim1])), max(np.max(x[:, dim1]), np.max(x_recons[:, dim1]))
-            eps = 0.04
+            if dataset in dynamics_datasets+repeat_datasets:
+                ## Min/max along dim0, for both x and x_recons
+                min_0, max_0 = min(np.min(x[:, dim0]), np.min(x_recons[:, dim0])), max(np.max(x[:, dim0]), np.max(x_recons[:, dim0]))
+                min_1, max_1 = min(np.min(x[:, dim1]), np.min(x_recons[:, dim1])), max(np.max(x[:, dim1]), np.max(x_recons[:, dim1]))
+                eps = 0.04
 
-        if dataset in image_datasets:
-            to_plot = x.reshape(res)
-            if dataset=="celeba":
-                to_plot = (to_plot + 1) / 2
-            axs[i, nb_cols*j].imshow(to_plot, cmap='gray')
-        elif dataset == "trends":
-            axs[i, nb_cols*j].plot(x, color=colors[labels[i*4+j]])
-        elif dataset in repeat_datasets:
-            axs[i, nb_cols*j].set_ylim([min_1-eps, max_1+eps])
-            axs[i, nb_cols*j].plot(x_full[:, dim0], color=colors[(i*4+j)%len(colors)])
-            axs[i, nb_cols*j].plot(x_full[:, dim1], color=colors[(i*4+j)%len(colors)], linestyle='-.')
-        else:
-            # axs[i, nb_cols*j].set_xlim([min_0-eps, max_0+eps])
-            axs[i, nb_cols*j].set_ylim([min_1-eps, max_1+eps])
-            axs[i, nb_cols*j].plot(x[:, dim0], color=colors[labels[(i*4+j)%nb_examples]%len(colors)])
-            axs[i, nb_cols*j].plot(x[:, dim1], color=colors[labels[(i*4+j)%nb_examples]%len(colors)], linestyle='-.')
-        if i==0:
-            axs[i, nb_cols*j].set_title("GT", fontsize=40)
-        # axs[i, nb_cols*j].axis('off')
-
-        if dataset in image_datasets:
-            to_plot = x_recons.reshape(res)
-            if dataset=="celeba":
-                to_plot = (to_plot + 1) / 2
-            axs[i, nb_cols*j+1].imshow(to_plot, cmap='gray')
-        elif dataset in dynamics_datasets and dataset not in repeat_datasets:
-            # axs[i, nb_cols*j+1].set_xlim([min_0-eps, max_0+eps])
-            axs[i, nb_cols*j+1].set_ylim([min_1-eps, max_1+eps])
-            axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[labels[(i*4+j)%nb_examples]%len(colors)])
-            axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[labels[(i*4+j)%nb_examples]%len(colors)], linestyle='-.')
-        elif dataset in repeat_datasets:
-            axs[i, nb_cols*j+1].set_ylim([min_1-eps, max_1+eps])
-            axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[(i*4+j)%len(colors)])
-            axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[(i*4+j)%len(colors)], linestyle='-.')
-        else:
-            axs[i, nb_cols*j+1].plot(x_recons, color=colors[labels[i*4+j]])
-        if i==0:
-            axs[i, nb_cols*j+1].set_title("Recons", fontsize=40)
-        # axs[i, nb_cols*j+1].axis('off')
-
-        if use_nll_loss:
-            logger.info(f"Min/Max Uncertainty: {np.min(xs_uncert):.3f}, {np.max(xs_uncert):.3f}")
             if dataset in image_datasets:
-                to_plot = xs_uncert[i*4+j].reshape(res)
-                axs[i, nb_cols*j+2].imshow(to_plot, cmap='gray')
-            elif dataset in dynamics_datasets:
-                to_plot = xs_uncert[i*4+j]
-                axs[i, nb_cols*j+2].plot(to_plot[:, dim0], to_plot[:, dim1], color=colors[labels[i*4+j]%len(colors)])
-
+                to_plot = x.reshape(res)
+                if dataset=="celeba":
+                    to_plot = (to_plot + 1) / 2
+                axs[i, nb_cols*j].imshow(to_plot, cmap='gray')
+            elif dataset == "trends":
+                axs[i, nb_cols*j].plot(x, color=colors[labels[i*4+j]])
+            elif dataset in repeat_datasets:
+                axs[i, nb_cols*j].set_ylim([min_1-eps, max_1+eps])
+                axs[i, nb_cols*j].plot(x_full[:, dim0], color=colors[(i*4+j)%len(colors)])
+                axs[i, nb_cols*j].plot(x_full[:, dim1], color=colors[(i*4+j)%len(colors)], linestyle='-.')
+            else:
+                # axs[i, nb_cols*j].set_xlim([min_0-eps, max_0+eps])
+                # axs[i, nb_cols*j].set_ylim([min_1-eps, max_1+eps])
+                axs[i, nb_cols*j].plot(x[:, dim0], color=colors[int(labels[(i*4+j)%nb_examples])%len(colors)])
+                axs[i, nb_cols*j].plot(x[:, dim1], color=colors[int(labels[(i*4+j)%nb_examples])%len(colors)], linestyle='-.')
             if i==0:
-                axs[i, nb_cols*j+2].set_title("Uncertainty", fontsize=36)
-            # axs[i, nb_cols*j+2].axis('off')
+                axs[i, nb_cols*j].set_title("GT", fontsize=40)
+            # axs[i, nb_cols*j].axis('off')
 
-plt.suptitle(f"Reconstruction using {inference_start} initial steps", fontsize=65)
-plt.draw();
-plt.savefig(plots_folder+"samples_generated.png", dpi=100, bbox_inches='tight')
+            if dataset in image_datasets:
+                to_plot = x_recons.reshape(res)
+                if dataset=="celeba":
+                    to_plot = (to_plot + 1) / 2
+                axs[i, nb_cols*j+1].imshow(to_plot, cmap='gray')
+            elif dataset in dynamics_datasets and dataset not in repeat_datasets:
+                # axs[i, nb_cols*j+1].set_xlim([min_0-eps, max_0+eps])
+                axs[i, nb_cols*j+1].set_ylim([min_1-eps, max_1+eps])
+                axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[labels[(i*4+j)%nb_examples]%len(colors)])
+                axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[labels[(i*4+j)%nb_examples]%len(colors)], linestyle='-.')
+            elif dataset in repeat_datasets:
+                axs[i, nb_cols*j+1].set_ylim([min_1-eps, max_1+eps])
+                axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[(i*4+j)%len(colors)])
+                axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[(i*4+j)%len(colors)], linestyle='-.')
+            else:
+                axs[i, nb_cols*j+1].plot(x_recons, color=colors[int(labels[i*4+j])])
+            if i==0:
+                axs[i, nb_cols*j+1].set_title("Recons", fontsize=40)
+            # axs[i, nb_cols*j+1].axis('off')
+
+            if use_nll_loss:
+                logger.info(f"Min/Max Uncertainty: {np.min(xs_uncert):.3f}, {np.max(xs_uncert):.3f}")
+                if dataset in image_datasets:
+                    to_plot = xs_uncert[i*4+j].reshape(res)
+                    axs[i, nb_cols*j+2].imshow(to_plot, cmap='gray')
+                elif dataset in dynamics_datasets:
+                    to_plot = xs_uncert[i*4+j]
+                    axs[i, nb_cols*j+2].plot(to_plot[:, dim0], to_plot[:, dim1], color=colors[labels[i*4+j]%len(colors)])
+
+                if i==0:
+                    axs[i, nb_cols*j+2].set_title("Uncertainty", fontsize=36)
+                # axs[i, nb_cols*j+2].axis('off')
+
+    plt.suptitle(f"Reconstruction using {inference_start} initial steps", fontsize=65)
+    plt.draw();
+    plt.savefig(plots_folder+"samples_generated.png", dpi=100, bbox_inches='tight')
 
 
 
 #%% Get the MSE on the entire test set
 
-eval_loader = NumpyLoader(testloader.dataset, batch_size=len(testloader.dataset), shuffle=False)
+if not classification:
+    eval_loader = NumpyLoader(testloader.dataset, batch_size=len(testloader.dataset), shuffle=False)
 
-batch = next(iter(visloader))
-(xs_true, times), labels = batch
+    batch = next(iter(visloader))
+    (xs_true, times), labels = batch
 
-xs_recons = eval_step(model=best_model, 
-                      X=xs_true, 
-                      times=times, 
-                      key=test_key, 
-                      inference_start=inference_start)
+    xs_recons = eval_step(model=best_model, 
+                        X=xs_true, 
+                        times=times, 
+                        key=test_key, 
+                        inference_start=inference_start)
 
-xs_true = xs_true[:, inference_start:, :]
-xs_recons = xs_recons[:, inference_start:, :data_size]
+    xs_true = xs_true[:, inference_start:, :]
+    xs_recons = xs_recons[:, inference_start:, :data_size]
 
-def metric(pred, true):
-    mse = jnp.mean((pred - true)**2)
-    rmse = jnp.sqrt(mse)
-    mae = jnp.mean(jnp.abs(pred - true))
-    mape = jnp.mean(jnp.abs(pred - true)/jnp.abs(true))
-    mspe = jnp.mean(jnp.abs(pred - true)/jnp.abs(true)**2)
-    return mse, rmse, mae, mape, mspe
+    def metrics(pred, true):
+        mse = jnp.mean((pred - true)**2)
+        rmse = jnp.sqrt(mse)
+        mae = jnp.mean(jnp.abs(pred - true))
+        mape = jnp.mean(jnp.abs(pred - true)/jnp.abs(true))
+        mspe = jnp.mean(jnp.abs(pred - true)/jnp.abs(true)**2)
+        return mse, rmse, mae, mape, mspe
 
-mse, rmse, mae, mape, mspe = metric(xs_recons, xs_true)
-logger.info("Evaluation of forecast MSE on the full test set in inference mode:")
-logger.info(f"    - MSE : {mse:.6f}")
-logger.info(f"    - RMSE : {rmse:.6f}")
-logger.info(f"    - MAE : {mae:.6f}")
-logger.info(f"    - MAPE : {mape:.6f}")
-logger.info(f"    - MSPE : {mspe:.6f}")
+    mse, rmse, mae, mape, mspe = metrics(xs_recons, xs_true)
+    logger.info("Evaluation of forecast MSE on the full test set in inference mode:")
+    logger.info(f"    - MSE : {mse:.6f}")
+    logger.info(f"    - RMSE : {rmse:.6f}")
+    logger.info(f"    - MAE : {mae:.6f}")
+    logger.info(f"    - MAPE : {mape:.6f}")
+    logger.info(f"    - MSPE : {mspe:.6f}")
+
+
+
+# %% Now dealing with classification tasks
+
+if classification:
+    @eqx.filter_jit
+    def eval_step(model, X, times, key, inference_start=None):
+        """ Evaluate the model on a batch of data. """
+        Y_hat = model(X, times, key, inference_start)
+        return Y_hat
+
+    batch = next(iter(testloader))
+    (in_sequence, times), output = batch
+
+    ## Compute the accurary of the model on the test set
+    Y_hat_raw = eval_step(model, in_sequence, times, main_key)
+    Y_hat = jnp.argmax(Y_hat_raw, axis=-1)
+    # Y_hat = Y_hat.reshape(-1)
+    # Y_hat = Y_hat[:, -1]
+    print("Y_hat shape:", Y_hat.shape)
+    output = output.reshape(-1)
+    accuracy = jnp.mean(Y_hat[:, -1] == output)
+    logger.info(f"Test set accuracy: {accuracy:.4f}")
+
+    ## PLot the first 16 seqences, with the title as the predicted class
+    fig, axs = plt.subplots(4, 4, figsize=(10, 10), sharex=True)
+    colors = ['r', 'g', 'b', 'c', 'm', 'y']
+
+    for i in range(4):
+        for j in range(4):
+            idx = i*4+j
+            axs[i, j].plot(in_sequence[idx, :, dim0], in_sequence[idx, :, dim1], color=colors[int(output[idx])%len(colors)], lw=3)
+            # axs[i, j].plot(in_sequence[idx, :, dim0], color=colors[int(output[idx])%len(colors)], lw=3)
+            # axs[i, j].plot(in_sequence[idx, :, dim1], color=colors[int(output[idx])%len(colors)], linestyle='--', lw=3)
+
+            # axs[i, j].plot(Y_hat[idx, :], color=colors[int(output[idx])%len(colors)], lw=1)
+
+            axs[i, j].set_title(f"Predicted Class: {Y_hat[idx, -1]}", fontsize=12)
+            axs[i, j].axis('off')
+
+    plt.suptitle(f"{dataset.upper()} Test Samples", fontsize=20)
+
+    plt.draw();
+    plt.savefig(plots_folder+"samples_test.png", dpi=100, bbox_inches='tight')
+
+    ## Compute the accurary of the model on the test set
+    Y_hat_raw = eval_step(model, in_sequence, times, main_key)
+    Y_hat = jnp.argmax(Y_hat_raw, axis=-1)
+    # Y_hat = Y_hat.reshape(-1)
+    # Y_hat = Y_hat[:, -1]
+    print("Y_hat shape:", Y_hat.shape)
+    output = output.reshape(-1)
+    accuracy = jnp.mean(Y_hat[:, -1] == output)
+    logger.info(f"Test set accuracy: {accuracy:.4f}")
+
+    ## PLot the first 16 seqences, with the title as the predicted class
+    fig, axs = plt.subplots(4, 4, figsize=(10, 10), sharex=True)
+    colors = ['r', 'g', 'b', 'c', 'm', 'y']
+
+    for i in range(4):
+        for j in range(4):
+            idx = i*4+j
+            axs[i, j].plot(Y_hat[idx, :], color=colors[int(output[idx])%len(colors)], lw=1)
+
+            axs[i, j].set_title(f"Predicted Class: {Y_hat[idx, -1]}", fontsize=12)
+            axs[i, j].axis('off')
+
+            axs[i, j].set_ylim([-0.1, 1.1])
+
+    plt.suptitle(f"{dataset.upper()} Test Labels", fontsize=20)
+
+    plt.draw();
+    plt.savefig(plots_folder+"samples_test_labels.png", dpi=100, bbox_inches='tight')

@@ -49,3 +49,333 @@
 2025-04-13 08:42:31,140 - INFO -     - Mean : 0.000137
 2025-04-13 08:42:31,140 - INFO -     - Median : 0.000137
 2025-04-13 08:42:31,141 - INFO -     - Min : 0.000118
+2025-05-08 00:58:08,211 - INFO - Started logging to ./artefacts/testing.log
+2025-05-08 00:58:08,211 - INFO - Config file: config.yaml
+2025-05-08 00:58:08,212 - INFO - ==== Config file's contents ====
+2025-05-08 00:58:08,212 - INFO - general:
+2025-05-08 00:58:08,213 - INFO -   seed: 2024
+2025-05-08 00:58:08,213 - INFO -   train: False
+2025-05-08 00:58:08,213 - INFO -   dataset: lorentz63
+2025-05-08 00:58:08,213 - INFO -   data_path: ./data/
+2025-05-08 00:58:08,214 - INFO -   save_path: None
+2025-05-08 00:58:08,214 - INFO - data:
+2025-05-08 00:58:08,214 - INFO -   downsample_factor: 1
+2025-05-08 00:58:08,215 - INFO -   resolution: [32, 32]
+2025-05-08 00:58:08,215 - INFO -   traj_length: 1000
+2025-05-08 00:58:08,215 - INFO - model:
+2025-05-08 00:58:08,215 - INFO -   mlp_width_size: 48
+2025-05-08 00:58:08,216 - INFO -   mlp_depth: 3
+2025-05-08 00:58:08,216 - INFO -   activation: swish
+2025-05-08 00:58:08,216 - INFO -   input_prev_data: False
+2025-05-08 00:58:08,216 - INFO -   model_type: wsm-rnn
+2025-05-08 00:58:08,217 - INFO -   nb_rnn_layers: 1
+2025-05-08 00:58:08,217 - INFO -   weights_lim: None
+2025-05-08 00:58:08,217 - INFO -   apply_tanh_uncertainty: False
+2025-05-08 00:58:08,218 - INFO -   time_as_channel: False
+2025-05-08 00:58:08,218 - INFO -   forcing_prob: 0.25
+2025-05-08 00:58:08,218 - INFO -   noise_theta_init: None
+2025-05-08 00:58:08,218 - INFO -   std_lower_bound: 0.0001
+2025-05-08 00:58:08,219 - INFO - optimizer:
+2025-05-08 00:58:08,219 - INFO -   init_lr: 1e-05
+2025-05-08 00:58:08,219 - INFO -   gradients_lim: 1e-07
+2025-05-08 00:58:08,220 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-08 00:58:08,220 - INFO - training:
+2025-05-08 00:58:08,220 - INFO -   nb_epochs: 2500
+2025-05-08 00:58:08,220 - INFO -   batch_size: 1024
+2025-05-08 00:58:08,221 - INFO -   print_every: 10
+2025-05-08 00:58:08,221 - INFO -   checkpoint_every: 10
+2025-05-08 00:58:08,221 - INFO -   nb_recons_loss_steps: None
+2025-05-08 00:58:08,221 - INFO -   use_nll_loss: False
+2025-05-08 00:58:08,222 - INFO -   inference_start: 100
+2025-05-08 00:59:07,763 - INFO - Started logging to ./artefacts/testing.log
+2025-05-08 00:59:07,763 - INFO - Started logging to ./artefacts/testing.log
+2025-05-08 00:59:07,763 - INFO - Config file: config.yaml
+2025-05-08 00:59:07,763 - INFO - Config file: config.yaml
+2025-05-08 00:59:07,764 - INFO - ==== Config file's contents ====
+2025-05-08 00:59:07,764 - INFO - ==== Config file's contents ====
+2025-05-08 00:59:07,764 - INFO - general:
+2025-05-08 00:59:07,764 - INFO - general:
+2025-05-08 00:59:07,765 - INFO -   seed: 2024
+2025-05-08 00:59:07,765 - INFO -   seed: 2024
+2025-05-08 00:59:07,765 - INFO -   train: False
+2025-05-08 00:59:07,765 - INFO -   train: False
+2025-05-08 00:59:07,765 - INFO -   dataset: lorentz63
+2025-05-08 00:59:07,765 - INFO -   dataset: lorentz63
+2025-05-08 00:59:07,765 - INFO -   data_path: ./data/
+2025-05-08 00:59:07,765 - INFO -   data_path: ./data/
+2025-05-08 00:59:07,766 - INFO -   save_path: None
+2025-05-08 00:59:07,766 - INFO -   save_path: None
+2025-05-08 00:59:07,766 - INFO - data:
+2025-05-08 00:59:07,766 - INFO - data:
+2025-05-08 00:59:07,766 - INFO -   downsample_factor: 1
+2025-05-08 00:59:07,766 - INFO -   downsample_factor: 1
+2025-05-08 00:59:07,766 - INFO -   resolution: [32, 32]
+2025-05-08 00:59:07,766 - INFO -   resolution: [32, 32]
+2025-05-08 00:59:07,767 - INFO -   traj_length: 1000
+2025-05-08 00:59:07,767 - INFO -   traj_length: 1000
+2025-05-08 00:59:07,767 - INFO - model:
+2025-05-08 00:59:07,767 - INFO - model:
+2025-05-08 00:59:07,767 - INFO -   mlp_width_size: 48
+2025-05-08 00:59:07,767 - INFO -   mlp_width_size: 48
+2025-05-08 00:59:07,767 - INFO -   mlp_depth: 3
+2025-05-08 00:59:07,767 - INFO -   mlp_depth: 3
+2025-05-08 00:59:07,768 - INFO -   activation: swish
+2025-05-08 00:59:07,768 - INFO -   activation: swish
+2025-05-08 00:59:07,768 - INFO -   input_prev_data: False
+2025-05-08 00:59:07,768 - INFO -   input_prev_data: False
+2025-05-08 00:59:07,768 - INFO -   model_type: wsm-rnn
+2025-05-08 00:59:07,768 - INFO -   model_type: wsm-rnn
+2025-05-08 00:59:07,769 - INFO -   nb_rnn_layers: 1
+2025-05-08 00:59:07,769 - INFO -   nb_rnn_layers: 1
+2025-05-08 00:59:07,769 - INFO -   weights_lim: None
+2025-05-08 00:59:07,769 - INFO -   weights_lim: None
+2025-05-08 00:59:07,769 - INFO -   apply_tanh_uncertainty: False
+2025-05-08 00:59:07,769 - INFO -   apply_tanh_uncertainty: False
+2025-05-08 00:59:07,769 - INFO -   time_as_channel: False
+2025-05-08 00:59:07,769 - INFO -   time_as_channel: False
+2025-05-08 00:59:07,770 - INFO -   forcing_prob: 0.25
+2025-05-08 00:59:07,770 - INFO -   forcing_prob: 0.25
+2025-05-08 00:59:07,770 - INFO -   noise_theta_init: None
+2025-05-08 00:59:07,770 - INFO -   noise_theta_init: None
+2025-05-08 00:59:07,770 - INFO -   std_lower_bound: 0.0001
+2025-05-08 00:59:07,770 - INFO -   std_lower_bound: 0.0001
+2025-05-08 00:59:07,770 - INFO - optimizer:
+2025-05-08 00:59:07,770 - INFO - optimizer:
+2025-05-08 00:59:07,770 - INFO -   init_lr: 1e-05
+2025-05-08 00:59:07,770 - INFO -   init_lr: 1e-05
+2025-05-08 00:59:07,771 - INFO -   gradients_lim: 1e-07
+2025-05-08 00:59:07,771 - INFO -   gradients_lim: 1e-07
+2025-05-08 00:59:07,771 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-08 00:59:07,771 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-08 00:59:07,771 - INFO - training:
+2025-05-08 00:59:07,771 - INFO - training:
+2025-05-08 00:59:07,772 - INFO -   nb_epochs: 2500
+2025-05-08 00:59:07,772 - INFO -   nb_epochs: 2500
+2025-05-08 00:59:07,772 - INFO -   batch_size: 1024
+2025-05-08 00:59:07,772 - INFO -   batch_size: 1024
+2025-05-08 00:59:07,772 - INFO -   print_every: 10
+2025-05-08 00:59:07,772 - INFO -   print_every: 10
+2025-05-08 00:59:07,772 - INFO -   checkpoint_every: 10
+2025-05-08 00:59:07,772 - INFO -   checkpoint_every: 10
+2025-05-08 00:59:07,772 - INFO -   nb_recons_loss_steps: None
+2025-05-08 00:59:07,772 - INFO -   nb_recons_loss_steps: None
+2025-05-08 00:59:07,773 - INFO -   use_nll_loss: False
+2025-05-08 00:59:07,773 - INFO -   use_nll_loss: False
+2025-05-08 00:59:07,773 - INFO -   inference_start: 100
+2025-05-08 00:59:07,773 - INFO -   inference_start: 100
+2025-05-08 00:59:47,890 - INFO - Started logging to ./artefacts/testing.log
+2025-05-08 00:59:47,890 - INFO - Started logging to ./artefacts/testing.log
+2025-05-08 00:59:47,890 - INFO - Started logging to ./artefacts/testing.log
+2025-05-08 00:59:47,891 - INFO - Config file: config.yaml
+2025-05-08 00:59:47,891 - INFO - Config file: config.yaml
+2025-05-08 00:59:47,891 - INFO - Config file: config.yaml
+2025-05-08 00:59:47,891 - INFO - ==== Config file's contents ====
+2025-05-08 00:59:47,891 - INFO - ==== Config file's contents ====
+2025-05-08 00:59:47,891 - INFO - ==== Config file's contents ====
+2025-05-08 00:59:47,892 - INFO - general:
+2025-05-08 00:59:47,892 - INFO - general:
+2025-05-08 00:59:47,892 - INFO - general:
+2025-05-08 00:59:47,893 - INFO -   seed: 2024
+2025-05-08 00:59:47,893 - INFO -   seed: 2024
+2025-05-08 00:59:47,893 - INFO -   seed: 2024
+2025-05-08 00:59:47,893 - INFO -   train: False
+2025-05-08 00:59:47,893 - INFO -   train: False
+2025-05-08 00:59:47,893 - INFO -   train: False
+2025-05-08 00:59:47,894 - INFO -   dataset: lorentz63
+2025-05-08 00:59:47,894 - INFO -   dataset: lorentz63
+2025-05-08 00:59:47,894 - INFO -   dataset: lorentz63
+2025-05-08 00:59:47,894 - INFO -   data_path: ./data/
+2025-05-08 00:59:47,894 - INFO -   data_path: ./data/
+2025-05-08 00:59:47,894 - INFO -   data_path: ./data/
+2025-05-08 00:59:47,895 - INFO -   save_path: None
+2025-05-08 00:59:47,895 - INFO -   save_path: None
+2025-05-08 00:59:47,895 - INFO -   save_path: None
+2025-05-08 00:59:47,895 - INFO - data:
+2025-05-08 00:59:47,895 - INFO - data:
+2025-05-08 00:59:47,895 - INFO - data:
+2025-05-08 00:59:47,896 - INFO -   downsample_factor: 1
+2025-05-08 00:59:47,896 - INFO -   downsample_factor: 1
+2025-05-08 00:59:47,896 - INFO -   downsample_factor: 1
+2025-05-08 00:59:47,896 - INFO -   resolution: [32, 32]
+2025-05-08 00:59:47,896 - INFO -   resolution: [32, 32]
+2025-05-08 00:59:47,896 - INFO -   resolution: [32, 32]
+2025-05-08 00:59:47,897 - INFO -   traj_length: 1000
+2025-05-08 00:59:47,897 - INFO -   traj_length: 1000
+2025-05-08 00:59:47,897 - INFO -   traj_length: 1000
+2025-05-08 00:59:47,897 - INFO - model:
+2025-05-08 00:59:47,897 - INFO - model:
+2025-05-08 00:59:47,897 - INFO - model:
+2025-05-08 00:59:47,897 - INFO -   mlp_width_size: 48
+2025-05-08 00:59:47,897 - INFO -   mlp_width_size: 48
+2025-05-08 00:59:47,897 - INFO -   mlp_width_size: 48
+2025-05-08 00:59:47,898 - INFO -   mlp_depth: 3
+2025-05-08 00:59:47,898 - INFO -   mlp_depth: 3
+2025-05-08 00:59:47,898 - INFO -   mlp_depth: 3
+2025-05-08 00:59:47,898 - INFO -   activation: swish
+2025-05-08 00:59:47,898 - INFO -   activation: swish
+2025-05-08 00:59:47,898 - INFO -   activation: swish
+2025-05-08 00:59:47,899 - INFO -   input_prev_data: False
+2025-05-08 00:59:47,899 - INFO -   input_prev_data: False
+2025-05-08 00:59:47,899 - INFO -   input_prev_data: False
+2025-05-08 00:59:47,899 - INFO -   model_type: wsm-rnn
+2025-05-08 00:59:47,899 - INFO -   model_type: wsm-rnn
+2025-05-08 00:59:47,899 - INFO -   model_type: wsm-rnn
+2025-05-08 00:59:47,900 - INFO -   nb_rnn_layers: 1
+2025-05-08 00:59:47,900 - INFO -   nb_rnn_layers: 1
+2025-05-08 00:59:47,900 - INFO -   nb_rnn_layers: 1
+2025-05-08 00:59:47,902 - INFO -   weights_lim: None
+2025-05-08 00:59:47,902 - INFO -   weights_lim: None
+2025-05-08 00:59:47,902 - INFO -   weights_lim: None
+2025-05-08 00:59:47,902 - INFO -   apply_tanh_uncertainty: False
+2025-05-08 00:59:47,902 - INFO -   apply_tanh_uncertainty: False
+2025-05-08 00:59:47,902 - INFO -   apply_tanh_uncertainty: False
+2025-05-08 00:59:47,902 - INFO -   time_as_channel: False
+2025-05-08 00:59:47,902 - INFO -   time_as_channel: False
+2025-05-08 00:59:47,902 - INFO -   time_as_channel: False
+2025-05-08 00:59:47,903 - INFO -   forcing_prob: 0.25
+2025-05-08 00:59:47,903 - INFO -   forcing_prob: 0.25
+2025-05-08 00:59:47,903 - INFO -   forcing_prob: 0.25
+2025-05-08 00:59:47,903 - INFO -   noise_theta_init: None
+2025-05-08 00:59:47,903 - INFO -   noise_theta_init: None
+2025-05-08 00:59:47,903 - INFO -   noise_theta_init: None
+2025-05-08 00:59:47,903 - INFO -   std_lower_bound: 0.0001
+2025-05-08 00:59:47,903 - INFO -   std_lower_bound: 0.0001
+2025-05-08 00:59:47,903 - INFO -   std_lower_bound: 0.0001
+2025-05-08 00:59:47,904 - INFO - optimizer:
+2025-05-08 00:59:47,904 - INFO - optimizer:
+2025-05-08 00:59:47,904 - INFO - optimizer:
+2025-05-08 00:59:47,904 - INFO -   init_lr: 1e-05
+2025-05-08 00:59:47,904 - INFO -   init_lr: 1e-05
+2025-05-08 00:59:47,904 - INFO -   init_lr: 1e-05
+2025-05-08 00:59:47,904 - INFO -   gradients_lim: 1e-07
+2025-05-08 00:59:47,904 - INFO -   gradients_lim: 1e-07
+2025-05-08 00:59:47,904 - INFO -   gradients_lim: 1e-07
+2025-05-08 00:59:47,905 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-08 00:59:47,905 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-08 00:59:47,905 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-08 00:59:47,905 - INFO - training:
+2025-05-08 00:59:47,905 - INFO - training:
+2025-05-08 00:59:47,905 - INFO - training:
+2025-05-08 00:59:47,905 - INFO -   nb_epochs: 2500
+2025-05-08 00:59:47,905 - INFO -   nb_epochs: 2500
+2025-05-08 00:59:47,905 - INFO -   nb_epochs: 2500
+2025-05-08 00:59:47,906 - INFO -   batch_size: 1024
+2025-05-08 00:59:47,906 - INFO -   batch_size: 1024
+2025-05-08 00:59:47,906 - INFO -   batch_size: 1024
+2025-05-08 00:59:47,906 - INFO -   print_every: 10
+2025-05-08 00:59:47,906 - INFO -   print_every: 10
+2025-05-08 00:59:47,906 - INFO -   print_every: 10
+2025-05-08 00:59:47,906 - INFO -   checkpoint_every: 10
+2025-05-08 00:59:47,906 - INFO -   checkpoint_every: 10
+2025-05-08 00:59:47,906 - INFO -   checkpoint_every: 10
+2025-05-08 00:59:47,906 - INFO -   nb_recons_loss_steps: None
+2025-05-08 00:59:47,906 - INFO -   nb_recons_loss_steps: None
+2025-05-08 00:59:47,906 - INFO -   nb_recons_loss_steps: None
+2025-05-08 00:59:47,907 - INFO -   use_nll_loss: False
+2025-05-08 00:59:47,907 - INFO -   use_nll_loss: False
+2025-05-08 00:59:47,907 - INFO -   use_nll_loss: False
+2025-05-08 00:59:47,907 - INFO -   inference_start: 100
+2025-05-08 00:59:47,907 - INFO -   inference_start: 100
+2025-05-08 00:59:47,907 - INFO -   inference_start: 100
+2025-05-08 01:02:37,437 - INFO - Started logging to ./artefacts/testing.log
+2025-05-08 01:02:37,437 - INFO - Config file: config.yaml
+2025-05-08 01:02:37,437 - INFO - ==== Config file's contents ====
+2025-05-08 01:02:37,437 - INFO - general:
+2025-05-08 01:02:37,438 - INFO -   seed: 2024
+2025-05-08 01:02:37,438 - INFO -   train: False
+2025-05-08 01:02:37,438 - INFO -   dataset: lorentz63
+2025-05-08 01:02:37,438 - INFO -   data_path: ./data/
+2025-05-08 01:02:37,438 - INFO -   save_path: None
+2025-05-08 01:02:37,438 - INFO - data:
+2025-05-08 01:02:37,438 - INFO -   downsample_factor: 1
+2025-05-08 01:02:37,438 - INFO -   resolution: [32, 32]
+2025-05-08 01:02:37,439 - INFO -   traj_length: 1000
+2025-05-08 01:02:37,439 - INFO - model:
+2025-05-08 01:02:37,439 - INFO -   mlp_width_size: 48
+2025-05-08 01:02:37,439 - INFO -   mlp_depth: 3
+2025-05-08 01:02:37,439 - INFO -   activation: swish
+2025-05-08 01:02:37,439 - INFO -   input_prev_data: False
+2025-05-08 01:02:37,439 - INFO -   model_type: wsm-rnn
+2025-05-08 01:02:37,439 - INFO -   nb_rnn_layers: 1
+2025-05-08 01:02:37,439 - INFO -   weights_lim: None
+2025-05-08 01:02:37,439 - INFO -   apply_tanh_uncertainty: False
+2025-05-08 01:02:37,440 - INFO -   time_as_channel: False
+2025-05-08 01:02:37,440 - INFO -   forcing_prob: 0.25
+2025-05-08 01:02:37,440 - INFO -   noise_theta_init: None
+2025-05-08 01:02:37,440 - INFO -   std_lower_bound: 0.0001
+2025-05-08 01:02:37,440 - INFO - optimizer:
+2025-05-08 01:02:37,441 - INFO -   init_lr: 1e-05
+2025-05-08 01:02:37,441 - INFO -   gradients_lim: 1e-07
+2025-05-08 01:02:37,441 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-08 01:02:37,441 - INFO - training:
+2025-05-08 01:02:37,441 - INFO -   nb_epochs: 2500
+2025-05-08 01:02:37,441 - INFO -   batch_size: 1024
+2025-05-08 01:02:37,441 - INFO -   print_every: 10
+2025-05-08 01:02:37,441 - INFO -   checkpoint_every: 10
+2025-05-08 01:02:37,441 - INFO -   nb_recons_loss_steps: None
+2025-05-08 01:02:37,442 - INFO -   use_nll_loss: False
+2025-05-08 01:02:37,442 - INFO -   inference_start: 100
+2025-05-08 01:02:38,430 - INFO - Images shape: (1024, 256, 2)
+2025-05-08 01:02:38,431 - INFO - Labels shape: (1024,)
+2025-05-08 01:02:38,431 - INFO - Seq length: 256
+2025-05-08 01:02:38,431 - INFO - Data size: 2
+2025-05-08 01:02:38,432 - INFO - Min/Max in the dataset: (-0.9856310478619905, 0.9731232709978324)
+2025-05-08 01:02:38,432 - INFO - Number of batches:
+2025-05-08 01:02:38,433 - INFO -   - Train: 20
+2025-05-08 01:02:38,433 - INFO -   - Test: 20
+2025-05-08 01:02:40,523 - INFO - Model loaded from ./model.eqx
+2025-05-08 01:03:06,252 - INFO - Evaluation of MSE the test set:
+2025-05-08 01:03:06,254 - INFO -     - Mean : 0.000137
+2025-05-08 01:03:06,254 - INFO -     - Median : 0.000137
+2025-05-08 01:03:06,254 - INFO -     - Min : 0.000118
+2025-05-08 01:09:58,936 - INFO - Started logging to ./artefacts/testing.log
+2025-05-08 01:09:58,936 - INFO - Config file: config.yaml
+2025-05-08 01:09:58,936 - INFO - ==== Config file's contents ====
+2025-05-08 01:09:58,937 - INFO - general:
+2025-05-08 01:09:58,937 - INFO -   seed: 2024
+2025-05-08 01:09:58,937 - INFO -   train: False
+2025-05-08 01:09:58,937 - INFO -   dataset: lorentz63
+2025-05-08 01:09:58,938 - INFO -   data_path: ./data/
+2025-05-08 01:09:58,938 - INFO -   save_path: None
+2025-05-08 01:09:58,938 - INFO - data:
+2025-05-08 01:09:58,938 - INFO -   downsample_factor: 1
+2025-05-08 01:09:58,938 - INFO -   resolution: [32, 32]
+2025-05-08 01:09:58,938 - INFO -   traj_length: 1000
+2025-05-08 01:09:58,939 - INFO - model:
+2025-05-08 01:09:58,939 - INFO -   mlp_width_size: 48
+2025-05-08 01:09:58,939 - INFO -   mlp_depth: 3
+2025-05-08 01:09:58,939 - INFO -   activation: swish
+2025-05-08 01:09:58,939 - INFO -   input_prev_data: False
+2025-05-08 01:09:58,940 - INFO -   model_type: wsm-rnn
+2025-05-08 01:09:58,940 - INFO -   nb_rnn_layers: 1
+2025-05-08 01:09:58,940 - INFO -   weights_lim: None
+2025-05-08 01:09:58,940 - INFO -   apply_tanh_uncertainty: False
+2025-05-08 01:09:58,940 - INFO -   time_as_channel: False
+2025-05-08 01:09:58,941 - INFO -   forcing_prob: 0.25
+2025-05-08 01:09:58,941 - INFO -   noise_theta_init: None
+2025-05-08 01:09:58,941 - INFO -   std_lower_bound: 0.0001
+2025-05-08 01:09:58,941 - INFO - optimizer:
+2025-05-08 01:09:58,941 - INFO -   init_lr: 1e-05
+2025-05-08 01:09:58,941 - INFO -   gradients_lim: 1e-07
+2025-05-08 01:09:58,941 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-08 01:09:58,941 - INFO - training:
+2025-05-08 01:09:58,941 - INFO -   nb_epochs: 2500
+2025-05-08 01:09:58,941 - INFO -   batch_size: 1024
+2025-05-08 01:09:58,942 - INFO -   print_every: 10
+2025-05-08 01:09:58,942 - INFO -   checkpoint_every: 10
+2025-05-08 01:09:58,942 - INFO -   nb_recons_loss_steps: None
+2025-05-08 01:09:58,943 - INFO -   use_nll_loss: False
+2025-05-08 01:09:58,943 - INFO -   inference_start: 100
+2025-05-08 01:09:59,903 - INFO - Images shape: (1024, 256, 2)
+2025-05-08 01:09:59,903 - INFO - Labels shape: (1024,)
+2025-05-08 01:09:59,904 - INFO - Seq length: 256
+2025-05-08 01:09:59,904 - INFO - Data size: 2
+2025-05-08 01:09:59,904 - INFO - Min/Max in the dataset: (-0.9856310478619905, 0.9731232709978324)
+2025-05-08 01:09:59,905 - INFO - Number of batches:
+2025-05-08 01:09:59,905 - INFO -   - Train: 20
+2025-05-08 01:09:59,905 - INFO -   - Test: 20
+2025-05-08 01:10:02,339 - INFO - Model loaded from ./model.eqx
+2025-05-08 01:10:26,311 - INFO - Evaluation of MSE the test set:
+2025-05-08 01:10:26,313 - INFO -     - Mean : 0.000137
+2025-05-08 01:10:26,314 - INFO -     - Median : 0.000137
+2025-05-08 01:10:26,314 - INFO -     - Min : 0.000118

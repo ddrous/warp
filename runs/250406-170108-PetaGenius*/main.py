@@ -549,3 +549,205 @@ for i in range(4):
 plt.suptitle(f"Reconstruction using {inference_start} initial pixels", fontsize=65)
 plt.draw();
 plt.savefig(plots_folder+"samples_generated.png", dpi=300, bbox_inches='tight')
+
+
+# %% Visualising the data in green/red
+
+
+
+# ## Set inference mode to True
+# visloader = NumpyLoader(testloader.dataset, batch_size=16, shuffle=True)
+
+# nb_cols = 3 if use_nll_loss else 2
+# fig, axs = plt.subplots(4, 4*nb_cols, figsize=(16*3, 16), sharex=True, constrained_layout=True)
+
+# batch = next(iter(visloader))
+# (xs_true, times), labels = batch
+
+# inference_start = config['training']['inference_start']
+# xs_recons = eval_step(model=model, 
+#                       X=xs_true, 
+#                       times=times, 
+#                       key=test_key, 
+#                       inference_start=inference_start)
+
+# if use_nll_loss:
+#     xs_uncert = xs_recons[:, :, data_size:]
+#     xs_recons = xs_recons[:, :, :data_size]
+
+# ## Rescale all data to (0,255)
+# print("Min/Max in the dataset:", np.min(xs_true), np.max(xs_true))
+# xs_true = (((xs_true+1) / 2) * 255).astype(np.uint8)
+# xs_recons = (((xs_recons+1) / 2) * 255).astype(np.uint8)
+
+
+# ## Turn this into a 3 channel image: everything after 300 steps is green (for true) and red (for recons)
+# ## Take inspiration from the sample_image_prefix function
+# true = np.zeros((xs_true.shape[0], xs_true.shape[1], 3), dtype=np.uint8)
+# recons = np.zeros((xs_recons.shape[0], xs_recons.shape[1], 3), dtype=np.uint8)
+
+
+# res = (width, width, 3)
+# for i in range(4):
+#     for j in range(4):
+#         x = xs_true[i*4+j]
+#         x_recons = xs_recons[i*4+j]
+
+#         if dataset in image_datasets:
+#             to_plot = x.reshape(res)
+#             if dataset=="celeba":
+#                 to_plot = (to_plot + 1) / 2
+#             axs[i, nb_cols*j].imshow(to_plot, cmap='gray')
+#         elif dataset == "trends":
+#             axs[i, nb_cols*j].plot(x, color=colors[labels[i*4+j]])
+#         else:
+#             axs[i, nb_cols*j].plot(x[:, dim0], x[:, dim1], color=colors[labels[i*4+j]%len(colors)])
+#         if i==0:
+#             axs[i, nb_cols*j].set_title("GT", fontsize=40)
+#         axs[i, nb_cols*j].axis('off')
+
+#         if dataset in image_datasets:
+#             to_plot = x_recons.reshape(res)
+#             if dataset=="celeba":
+#                 to_plot = (to_plot + 1) / 2
+#             axs[i, nb_cols*j+1].imshow(to_plot, cmap='gray')
+#         elif dataset in dynamics_datasets:
+#             axs[i, nb_cols*j+1].plot(x_recons[:, dim0], x_recons[:, dim1], color=colors[labels[i*4+j]%len(colors)])
+#         else:
+#             axs[i, nb_cols*j+1].plot(x_recons, color=colors[labels[i*4+j]])
+#         if i==0:
+#             axs[i, nb_cols*j+1].set_title("Recons", fontsize=40)
+#         axs[i, nb_cols*j+1].axis('off')
+
+#         if use_nll_loss:
+#             logger.info(f"Min/Max Uncertainty: {np.min(xs_uncert):.3f}, {np.max(xs_uncert):.3f}")
+#             if dataset in image_datasets:
+#                 to_plot = xs_uncert[i*4+j].reshape(res)
+#                 axs[i, nb_cols*j+2].imshow(to_plot, cmap='gray')
+#             elif dataset in dynamics_datasets:
+#                 to_plot = xs_uncert[i*4+j]
+#                 axs[i, nb_cols*j+2].plot(to_plot[:, dim0], to_plot[:, dim1], color=colors[labels[i*4+j]%len(colors)])
+
+#             if i==0:
+#                 axs[i, nb_cols*j+2].set_title("Uncertainty", fontsize=36)
+#             axs[i, nb_cols*j+2].axis('off')
+
+# plt.suptitle(f"Reconstruction using {inference_start} initial pixels", fontsize=65)
+# plt.draw();
+# plt.savefig(plots_folder+"samples_generated_green_red.png", dpi=300, bbox_inches='tight')
+
+
+
+
+
+
+
+# %% Visualising the data in green/red
+## Computing various metrics on the test set
+
+
+import numpy as np
+from scipy.linalg import sqrtm
+
+# def compute_nll(y_true, y_pred, eps=1e-8):
+#     # y_true: Ground truth (batch_size, 784, 1)
+#     # y_pred: Predicted probabilities (batch_size, 784, 1)
+#     y_true = y_true.reshape(-1, 784)
+#     y_pred = y_pred.reshape(-1, 784)
+#     nll = -np.mean(y_true * np.log(y_pred + eps) + (1 - y_true) * np.log(1 - y_pred + eps))
+#     return nll
+
+def gaussian_nll(y_true, y_pred, sigma=1.0):  # sigma can be fixed or learned
+    return np.mean(0.5 * np.log(2 * np.pi * sigma**2) + 0.5 * (y_true - y_pred)**2 / sigma**2)
+
+
+def compute_bpd(y_true, mu, sigma, eps=1e-8):
+    """
+    Args:
+        y_true: Ground truth pixels (batch_size, 784)
+        mu: Predicted means (batch_size, 784)
+        sigma: Predicted std devs (batch_size, 784) (must be > 0)
+        eps: Small constant for numerical stability
+    Returns:
+        bits/dimension (scalar)
+    """
+
+    ## Put y_true and y_pred in the (0,1) range
+    y_true = (y_true + 1) / 2
+    mu = (mu + 1) / 2
+
+    # ## Do not cosider the first 300 pixels
+    # y_true = y_true[:, 300:]
+    # mu = mu[:, 300:]
+    # sigma = sigma[:, 300:]
+
+    # Ensure sigma > 0 (e.g., by applying softplus or exp in the model)
+    sigma = np.maximum(sigma, eps)  # Avoid division by zero
+    
+    # Gaussian NLL per pixel (batch_size, 784)
+    nll_per_pixel = 0.5 * np.log(2 * np.pi * sigma**2) + 0.5 * (y_true - mu)**2 / sigma**2
+    
+    # Average NLL per dimension (pixel) over batch and spatial dims
+    nll = np.mean(nll_per_pixel)
+    
+    # Convert nats to bits (1 nat = log2(e) bits ≈ 1.4427 bits)
+    bpd = nll * np.log2(np.exp(1))
+    
+    return bpd, nll
+
+
+# def compute_fid(real_features, gen_features):
+#     # real_features, gen_features: (n_samples, 2048)
+#     mu_real = np.mean(real_features, axis=0)
+#     mu_gen = np.mean(gen_features, axis=0)
+#     sigma_real = np.cov(real_features, rowvar=False)
+#     sigma_gen = np.cov(gen_features, rowvar=False)
+
+#     # Fréchet Distance
+#     diff = mu_real - mu_gen
+#     covmean = sqrtm(sigma_real @ sigma_gen)
+#     if np.iscomplexobj(covmean):
+#         covmean = covmean.real
+#     fid = diff.dot(diff) + np.trace(sigma_real + sigma_gen - 2 * covmean)
+#     return fid
+
+# def compute_inception_score(gen_features, n_splits=10):
+#     # gen_features: (n_samples, 2048)
+#     # Use Inception model to predict class probabilities p(y|x)
+#     probas = ...  # Shape: (n_samples, num_classes)
+#     kl = probas * (np.log(probas + 1e-16) - np.log(np.mean(probas, axis=0, keepdims=True) + 1e-16))
+#     kl = np.sum(kl, axis=1)
+#     is_score = np.exp(np.mean(kl))
+#     return is_score
+
+# from skimage.metrics import structural_similarity as ssim
+# def compute_ssim_psnr(y_true, y_pred):
+#     # Reshape to (batch_size, 28, 28)
+#     y_true = y_true.reshape(-1, 28, 28)
+#     y_pred = y_pred.reshape(-1, 28, 28)
+    
+#     ssim_scores = [ssim(gt, pred, data_range=1.0) for gt, pred in zip(y_true, y_pred)]
+#     psnr_scores = [20 * np.log10(1.0 / np.sqrt(np.mean((gt - pred)**2))) for gt, pred in zip(y_true, y_pred)]
+#     return np.mean(ssim_scores), np.mean(psnr_scores)
+
+
+
+## Calcula and print the BPD over the test set
+evalloader = NumpyLoader(testloader.dataset, batch_size=len(testloader.dataset), shuffle=False)
+batch = next(iter(evalloader))
+(xs_true, times), labels = batch
+
+inference_start = config['training']['inference_start']
+xs_recons = eval_step(model=model, 
+                      X=xs_true, 
+                      times=times, 
+                      key=test_key, 
+                      inference_start=inference_start)
+
+if use_nll_loss:
+    xs_uncert = xs_recons[:, :, data_size:]
+    xs_recons = xs_recons[:, :, :data_size]
+
+bpd, nll = compute_bpd(xs_true, xs_recons, xs_uncert)
+logger.info(f"Bits per dimension: {bpd:.6f}")
+logger.info(f"NLL: {nll:.6f}")

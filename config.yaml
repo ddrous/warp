@@ -4,8 +4,8 @@
 general:
   seed: 2024
   train: True
-  dataset: "mnist"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/"
+  dataset: "spirals"  # Options: mnist, cifar, lorentz, dynamics
+  data_path: "./data/spirals/"
   # save_path: "./runs/250404-175026-Test/"
   save_path: null
 
@@ -19,21 +19,21 @@ data:
 model:
   mlp_width_size: 24
   mlp_depth: 3
-  activation: "relu"
+  activation: "swish"
+  init_state_layers: 2
   input_prev_data: False
-  model_type: "lstm"
+  model_type: "wsm"
   nb_rnn_layers: 1
-  weights_lim: 5.0e-1
-  apply_dynamic_tanh: True
+  weights_lim: null
+  dynamic_tanh_init: [1.1, 0.0, 1.1, 0.0]     ## a, b, alpha, beta
   time_as_channel: False
-  forcing_prob: 0.15
+  forcing_prob: 0.25
   noise_theta_init: null
-  std_lower_bound: 5.0e-1
-  rnn_hidden_size: 1500
+  std_lower_bound: 1.0e-4
 
 # Optimizer hyperparameters
 optimizer:
-  init_lr: 1.0e-4
+  init_lr: 1.0e-5
   gradients_lim: 1.0e-7
   on_plateau:
     factor: 0.5
@@ -45,10 +45,10 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 2
-  batch_size: 640
+  nb_epochs: 100
+  batch_size: 10000
   print_every: 10
   checkpoint_every: 10
-  nb_recons_loss_steps: 400
-  use_nll_loss: True
-  inference_start: 300
+  nb_recons_loss_steps: null
+  use_nll_loss: False
+  inference_start: 100

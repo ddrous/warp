@@ -440,7 +440,7 @@ plt.savefig(plots_folder+"A_matrices.png", dpi=100, bbox_inches='tight')
 @eqx.filter_jit
 def eval_step(model, X, times, key, inference_start=None):
     """ Evaluate the model on a batch of data. """
-    X_recons = model(X, times, key, inference_start)
+    X_recons, thetas = model(X, times, key, inference_start)
     return X_recons
 
 mses = []
@@ -546,3 +546,134 @@ for i in range(4):
 plt.suptitle(f"Reconstruction using {inference_start} initial steps", fontsize=65)
 plt.draw();
 plt.savefig(plots_folder+"samples_generated.png", dpi=100, bbox_inches='tight')
+
+
+
+
+#%%
+len(model.root_utils[0])
+
+
+# %% Analysing the weight space
+### 
+
+@eqx.filter_jit
+def eval_step(model, X, times, key, inference_start=None):
+    """ Evaluate the model on a batch of data. """
+    X_recons, thetas = model(X, times, key, inference_start)
+    return X_recons, thetas
+
+thetas = eval_step(model=model,
+                    X=xs_true, 
+                    times=times, 
+                    key=test_key, 
+                    inference_start=inference_start)[1]
+print(f"Shape of thetas: {thetas.shape}")
+
+# @eqx.filter_vmap
+@eqx.filter_vmap
+def apply_theta(theta):
+    shapes, treedef, static, _ = model.root_utils[0]
+    params = unflatten_pytree(theta, shapes, treedef)
+    root_fun = eqx.combine(params, static)
+    ts = jnp.linspace(0, 1, seq_length)[:, None]
+    X_recons = eqx.filter_vmap(root_fun)(ts)
+    return X_recons
+
+results_matrix = apply_theta(thetas[0])
+
+
+#%%
+results_matrix.shape        ## (256, 256, 2)
+
+## PLot the results matrix in an imshow, on two axes
+fig, axs = plt.subplots(1, 2, figsize=(20, 10))
+min_val = None
+max_val = None
+img = axs[0].imshow(results_matrix[:, :, 0], cmap='viridis', origin='upper')
+axs[0].set_title("Position")
+plt.colorbar(img, ax=axs[0], shrink=0.7)
+img = axs[1].imshow(results_matrix[:, :, 1], cmap='viridis', origin='upper')            
+axs[1].set_title("Velocity")
+plt.colorbar(img, ax=axs[1], shrink=0.7)
+
+# ## Set x ticks as linspace from 0 to 1
+# ticks = np.linspace(0, 1, 5)
+# axs[0].set_xticks(ticks * 256)
+# axs[1].set_xticks(ticks * 256)
+
+# axs[0].set_xticklabels([f"{tick:.2f}" for tick in ticks])
+# axs[1].set_xticklabels([f"{tick:.2f}" for tick in ticks])
+
+axs[0].set_xlabel(r"Time Step $t$")
+axs[1].set_xlabel(r"Time Step $t$")
+axs[0].set_ylabel(r"$\theta_t$")
+axs[1].set_ylabel(r"$\theta_t$")
+
+plt.draw();
+plt.savefig(plots_folder+"results_matrix.png", dpi=100, bbox_inches='tight')
+
+
+#%% Plot the last matrix 
+
+final_res = results_matrix[:, -1, :]
+
+## final res as the diagonal of the matrix
+final_res = np.zeros((256, 2))
+for i in range(256):
+    final_res[i, 0] = results_matrix[i, i, 0]
+    final_res[i, 1] = results_matrix[i, i, 1]
+
+fig, axs = plt.subplots(1, 1, figsize=(10, 10))
+
+plt.plot(final_res[:, 0], 'b-', lw=2, label="X")
+plt.plot(final_res[:, 1], 'g-', lw=2, label="Y")
+
+# plt.title("Final Theta")
+plt.xlabel(r"$t$")
+plt.ylabel("Value")
+
+plt.legend()
+plt.draw();
+
+#%% Lets analyse eigen values of the matrix A
+
+A = model.As[0]
+print(f"Shape of A: {A.shape}")
+eigs = np.linalg.eigvals(A)
+
+
+## Check if the eigen values are complex
+complex_eigs = np.iscomplex(eigs)
+print(f"Number of complex eigen values: {np.sum(complex_eigs)}")
+print(f"Number of real eigen values: {np.sum(~complex_eigs)}")
+## Print the real and imaginary parts of the complex eigen values
+print(f"Real part of complex eigen values: {np.real(eigs[complex_eigs])}")
+print(f"Imaginary part of complex eigen values: {np.imag(eigs[complex_eigs])}")
+
+## Plot the real against the  complex parts of the eigen values 
+# real_eigs = np.real(eigs[~complex_eigs])
+real_part = np.real(eigs[complex_eigs])
+complex_part = np.imag(eigs[complex_eigs])
+
+fig, axs = plt.subplots(1, 1, figsize=(10, 10))
+plt.plot(real_part, complex_part, 'bo', lw=2)
+plt.title("Eigen values of A")
+plt.xlabel("Real part")
+plt.ylabel("Imaginary part")
+plt.draw();
+
+
+## Check whether the matrix is stable
+stable = np.all(np.abs(eigs) < 1)
+print(f"Matrix is stable: {stable}")
+if stable:
+    print("Matrix is stable")
+else:
+    print("Matrix is not stable")
+    print(f"Eigen values: {eigs}")
+    print(f"Max eigen value: {np.max(np.abs(eigs))}")
+    print(f"Min eigen value: {np.min(np.abs(eigs))}")
+    print(f"Mean eigen value: {np.mean(np.abs(eigs))}")
+    print(f"Median eigen value: {np.median(np.abs(eigs))}")
+    print(f"Std eigen value: {np.std(np.abs(eigs))}")

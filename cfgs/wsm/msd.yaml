@@ -5,7 +5,7 @@ general:
   seed: 2028
   train: True
   dataset: "mass_spring_damper"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/dynamics/mass-spring-damper/"
+  data_path: "./data/dynamics/mass-spring-damper-2/"
   # save_path: "./runs/250404-175026-Test/"
   save_path: null
 
@@ -20,11 +20,12 @@ model:
   mlp_width_size: 48
   mlp_depth: 3
   activation: "swish"
+  init_state_layers: 2
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
-  apply_dynamic_tanh: True
+  dynamic_tanh_init: [1.1, 0.0, 1.1, 0.0]     ## a, b, alpha, beta
   time_as_channel: False
   forcing_prob: 0.25
   noise_theta_init: null

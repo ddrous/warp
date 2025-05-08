@@ -1,0 +1,55 @@
+# Base configuration file
+
+# General settings
+general:
+  seed: 2024
+  train: True
+  dataset: "lorentz63"  # Options: mnist, cifar, lorentz, dynamics
+  data_path: "./data/dynamics/lorentz-63/"
+  save_path: null
+
+# Data hyperparameters (dependent on the dataset)
+data:
+  downsample_factor: 1
+  resolution: [32, 32]         # For celebA
+  traj_length: 1000
+
+# Model hyperparameters
+model:
+  mlp_width_size: 128
+  mlp_depth: 1
+  activation: "swish"
+  init_state_layers: 0
+  input_prev_data: False
+  model_type: "wsm"
+  nb_rnn_layers: 1
+  weights_lim: null
+  # dynamic_tanh_init: [4.7, 0.0, 4.7, 0.0]     ## a, b, alpha, beta
+  dynamic_tanh_init: null
+  time_as_channel: False
+  forcing_prob: 0.25
+  noise_theta_init: null
+  std_lower_bound: 1.0e-4
+  rnn_hidden_size: 128          # For GRUs and LSTMs
+
+# Optimizer hyperparameters
+optimizer:
+  init_lr: 1.0e-5
+  gradients_lim: 1.0e-7
+  on_plateau:
+    factor: 0.5
+    min_scale: 1.0e-2
+    patience: 20
+    cooldown: 0
+    rtol: 1.0e-4
+    accum_size: 10
+
+# Training/Inference hyperparameters
+training:
+  nb_epochs: 3000
+  batch_size: 64
+  print_every: 100
+  checkpoint_every: 100
+  nb_recons_loss_steps: null
+  use_nll_loss: False
+  inference_start: 500

@@ -641,6 +641,40 @@ class MovingMNISTDataset(torch.utils.data.Dataset):
     def __len__(self):
         return self.total_envs
 
+
+
+
+
+
+
+class SpiralsDataset(TimeSeriesDataset):
+    """
+    For a spirals dataset
+    """
+
+    def __init__(self, data_dir, traj_length, normalize=True, min_max=None):
+        try:
+            raw_data = np.load(data_dir)
+        except:
+            raise ValueError(f"Data not loadable at {data_dir}")
+
+        ## Normalise the dataset between 0 and 1
+        if normalize:
+            raw_data = (raw_data - self.min_data) / (self.max_data - self.min_data)
+
+        dataset = raw_data["xs"]
+        n_envs, n_timesteps, n_dimensions = dataset.shape
+
+        t_eval = np.linspace(0., 1., n_timesteps)
+        labels = raw_data["ys"].astype(int).squeeze()
+
+        self.total_envs = n_envs
+        self.nb_classes = 2
+        self.num_steps = n_timesteps
+        self.data_size = n_dimensions
+
+        super().__init__(dataset, labels, t_eval, traj_prop=1.0)
+
 ########################################################################
 
 
@@ -671,7 +705,7 @@ class NumpyLoader(data.DataLoader):
         drop_last=drop_last,
         timeout=timeout,
         worker_init_fn=worker_init_fn)
-    
+
     self.num_batches = np.ceil(len(dataset) / batch_size).astype(int)
 
 
@@ -697,7 +731,7 @@ def make_dataloaders(data_folder, config):
                                 num_workers=24)
         testloader = NumpyLoader(MNISTDataset(data_folder, data_split="test", mini_res=downsample_factor, traj_prop=1.0, unit_normalise=False, fashion=fashion),
                                     batch_size=batch_size,
-                                    shuffle=True, 
+                                    shuffle=False, 
                                     num_workers=24)
         nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
         min_res = 28 // downsample_factor
@@ -712,7 +746,7 @@ def make_dataloaders(data_folder, config):
                                 num_workers=24)
         testloader = NumpyLoader(CIFARDataset(data_folder, data_split="test", mini_res=downsample_factor, traj_prop=1.0, unit_normalise=False),
                                     batch_size=batch_size, 
-                                    shuffle=True, 
+                                    shuffle=False, 
                                     num_workers=24)
         nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
         min_res = 32 // downsample_factor
@@ -727,7 +761,7 @@ def make_dataloaders(data_folder, config):
                                 num_workers=24)
         testloader = NumpyLoader(CelebADataset(data_folder+"celeba/", data_split="test", num_shots=np.prod(resolution), resolution=resolution, order_pixels=True, unit_normalise=False),
                                     batch_size=batch_size, 
-                                    shuffle=True, 
+                                    shuffle=False, 
                                     num_workers=24)
         nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
         min_res = min(resolution)
@@ -736,6 +770,7 @@ def make_dataloaders(data_folder, config):
     elif dataset in ["lorentz63", "mass_spring_damper", "cheetah", "electricity"]:        ##TODO: preprocess lorentz63
         print(" #### Dynamics Dataset ####")
         traj_len = np.NaN
+        # normalize = False if dataset in ["cheetah", "electricity", "lorentz63"] else True       ## Cheetah dataset from https://github.com/raminmh/liquid_time_constant_networks
         normalize = False if dataset in ["cheetah", "electricity"] else True       ## Cheetah dataset from https://github.com/raminmh/liquid_time_constant_networks
 
         trainloader = NumpyLoader(DynamicsDataset(data_folder+"train.npy", traj_length=traj_len, normalize=normalize, min_max=None), 
@@ -745,7 +780,7 @@ def make_dataloaders(data_folder, config):
         min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
         testloader = NumpyLoader(DynamicsDataset(data_folder+"test.npy", traj_length=traj_len, normalize=normalize, min_max=min_max),
                                     batch_size=batch_size, 
-                                    shuffle=True, 
+                                    shuffle=False, 
                                     num_workers=24)
         nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
         print("Training sequence length:", seq_length)
@@ -763,7 +798,22 @@ def make_dataloaders(data_folder, config):
         min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
         testloader = NumpyLoader(DynamicsRepeatDataset(data_folder+"test.npz", traj_length=traj_len, min_max=min_max),
                                     batch_size=batch_size, 
-                                    shuffle=True, 
+                                    shuffle=False, 
+                                    num_workers=24)
+        nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
+        print("Training sequence length:", seq_length)
+        min_res = None
+
+    elif dataset in ["spirals"]:
+        traj_len = np.NaN
+
+        trainloader = NumpyLoader(SpiralsDataset(data_folder+"train.npz", traj_length=traj_len, normalize=False, min_max=None),
+                                batch_size=batch_size, 
+                                shuffle=True, 
+                                num_workers=24)
+        testloader = NumpyLoader(SpiralsDataset(data_folder+"test.npz", traj_length=traj_len, normalize=False, min_max=None),
+                                    batch_size=batch_size, 
+                                    shuffle=False, 
                                     num_workers=24)
         nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
         print("Training sequence length:", seq_length)
@@ -777,7 +827,7 @@ def make_dataloaders(data_folder, config):
                                 shuffle=True)
         testloader = NumpyLoader(TrendsDataset(data_folder+"trends/", skip_steps=1, traj_prop=1.0), 
                                 batch_size=batch_size if batch_size<600 else 600,
-                                shuffle=True)
+                                shuffle=False)
         nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
 
         min_res = None

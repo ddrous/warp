@@ -536,7 +536,7 @@ def make_dataloaders(data_folder, config):
     elif dataset in ["lorentz63"]:                  ## TODO: Fix this
         print(" #### Dynamics Dataset ####")
         # data_url = "dynamics/lorentz-63/full.pt"
-        data_url = "dynamics/mass-spring/train.npy"
+        data_url = "dynamics/mass-spring-damper/train.npy"
         traj_len = 1000
 
         trainloader = NumpyLoader(LorentzDataset(data_folder+data_url, traj_length=traj_len), 
