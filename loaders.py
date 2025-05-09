@@ -675,6 +675,56 @@ class SpiralsDataset(TimeSeriesDataset):
 
         super().__init__(dataset, labels, t_eval, traj_prop=1.0)
 
+
+
+
+class UEADataset(TimeSeriesDataset):
+    """
+    For a UEA dataset, from https://github.com/Benjamin-Walker/log-neural-cdes
+    """
+
+    def __init__(self, data_dir, traj_length, normalize=True, min_max=None):
+        try:
+            raw_data = np.load(data_dir)
+        except:
+            raise ValueError(f"Data not loadable at {data_dir}")
+
+        ## Normalise the dataset between 0 and 1
+        dataset = raw_data["data"].astype(np.float32)
+
+        if min_max is not None:
+            self.min_data = min_max[0]
+            self.max_data = min_max[1]
+        else:
+            self.min_data = np.min(dataset, axis=(0, 1), keepdims=True)
+            self.max_data = np.max(dataset, axis=(0, 1), keepdims=True)
+
+        if normalize:
+            dataset = (dataset - self.min_data) / (self.max_data - self.min_data)
+            ## Put things between -1 and 1
+            dataset = (dataset - 0.5) / 0.5
+
+        n_envs, n_timesteps, n_dimensions = dataset.shape
+
+        t_eval = np.linspace(0., 1., n_timesteps)
+        labels = raw_data["labels"].astype(np.int32).squeeze()
+
+        self.total_envs = n_envs
+        self.nb_classes = int(np.max(labels)) + 1
+        self.num_steps = n_timesteps
+        self.data_size = n_dimensions
+
+        super().__init__(dataset, labels, t_eval, traj_prop=1.0)
+
+
+class PathFinderDataset(UEADataset):
+    """
+    Same as the UEADataset, exactly the same
+    """
+    def __init__(self, data_dir, traj_length, normalize=True, min_max=None):
+        super().__init__(data_dir, traj_length, normalize=normalize, min_max=min_max)
+
+
 ########################################################################
 
 
@@ -807,17 +857,56 @@ def make_dataloaders(data_folder, config):
     elif dataset in ["spirals"]:
         traj_len = np.NaN
 
-        trainloader = NumpyLoader(SpiralsDataset(data_folder+"train.npz", traj_length=traj_len, normalize=False, min_max=None),
+        trainloader = NumpyLoader(SpiralsDataset(data_folder+"train.npz", traj_length=traj_len, normalize=True, min_max=None),
                                 batch_size=batch_size, 
                                 shuffle=True, 
                                 num_workers=24)
-        testloader = NumpyLoader(SpiralsDataset(data_folder+"test.npz", traj_length=traj_len, normalize=False, min_max=None),
+        testloader = NumpyLoader(SpiralsDataset(data_folder+"test.npz", traj_length=traj_len, normalize=True, min_max=None),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)
         nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
         print("Training sequence length:", seq_length)
         min_res = None
+
+    elif dataset in ["uea"]:
+        traj_len = np.NaN
+
+        trainloader = NumpyLoader(UEADataset(data_folder+"train.npz", traj_length=traj_len, normalize=True, min_max=None),
+                                batch_size=batch_size, 
+                                shuffle=True, 
+                                num_workers=24)
+        min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
+        valloader = NumpyLoader(UEADataset(data_folder+"val.npz", traj_length=traj_len, normalize=True, min_max=min_max),
+                                    batch_size=batch_size, 
+                                    shuffle=False, 
+                                    num_workers=24)
+        testloader = NumpyLoader(UEADataset(data_folder+"test.npz", traj_length=traj_len, normalize=True, min_max=min_max),
+                                    batch_size=batch_size, 
+                                    shuffle=False, 
+                                    num_workers=24)
+        nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
+        print("Training sequence length:", seq_length)
+        min_res = None
+
+    elif dataset in ["pathfinder"]:
+        traj_len = np.NaN
+
+        trainloader = NumpyLoader(PathFinderDataset(data_folder+"train.npz", traj_length=traj_len, normalize=False, min_max=None),
+                                batch_size=batch_size, 
+                                shuffle=True, 
+                                num_workers=24)
+        valloader = NumpyLoader(PathFinderDataset(data_folder+"val.npz", traj_length=traj_len, normalize=False, min_max=None),
+                                    batch_size=batch_size, 
+                                    shuffle=False, 
+                                    num_workers=24)
+        testloader = NumpyLoader(PathFinderDataset(data_folder+"test.npz", traj_length=traj_len, normalize=False, min_max=None),
+                                    batch_size=batch_size, 
+                                    shuffle=False, 
+                                    num_workers=24)
+        nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
+        print("Training sequence length:", seq_length)
+        min_res = 32
 
     else:
         print(" #### Trends (Synthetic Control) Dataset ####")
@@ -832,7 +921,12 @@ def make_dataloaders(data_folder, config):
 
         min_res = None
 
-    return trainloader, testloader, (nb_classes, seq_length, data_size, min_res)
+    ## Check if valloader is defined
+    if "valloader" not in locals():
+        valloader = testloader
+        print("Validation set same as test set")
+
+    return trainloader, valloader, testloader, (nb_classes, seq_length, data_size, min_res)
 
 
 

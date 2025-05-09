@@ -573,11 +573,12 @@ def make_model(key, data_size, nb_classes, config):
             "autoregressive_train": config['training']['autoregressive'],
         }
         model = WSM(key=key, **model_args)
-        if hasattr(model, "thetas"):
-            print(f"Number of learnable parameters in the root network: {count_params((model.thetas,))/1000:3.1f} k")
-        elif hasattr(model, "thetas_init"):
-            print(f"Number of learnable parameters in the root network: {count_params((model.thetas_init,))/1000:3.1f} k")
-        print(f"Number of learnable parameters for the seqtoseq's transition: {count_params((model.As, model.Bs))/1000:3.1f} k")
+        if not isinstance(model.thetas_init[0], GradualMLP):
+            print(f"Number of weights in the root network: {count_params((model.thetas_init,))/1000:3.1f} k")
+        else:
+            print(f"Number of weights in the root network: {model.thetas_init[0].layers[-1].out_features/1000:3.1f} k")
+            print(f"Number of learnable parameters in the initial hyper-network: {count_params((model.thetas_init,))/1000:3.1f} k")
+        print(f"Number of learnable parameters for the recurrent transition: {count_params((model.As, model.Bs))/1000:3.1f} k")
     elif model_type == "wsm-lstm":
         raise NotImplementedError("LSTM transition model not implemented yet")
     elif model_type == "wsm-gru":

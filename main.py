@@ -15,7 +15,7 @@ import jax
 print("\n\nAvailable devices:", jax.devices())
 
 from jax import config
-config.update("jax_debug_nans", True)
+# config.update("jax_debug_nans", True)
 # config.update("jax_disable_jit", True)
 # config.update("jax_enable_x64", True)
 # from jax.experimental import checkify
@@ -157,7 +157,7 @@ for key, value in config.items():
 
 #%%
 
-trainloader, testloader, data_props = make_dataloaders(data_folder, config)
+trainloader, validloader, testloader, data_props = make_dataloaders(data_folder, config)
 nb_classes, seq_length, data_size, width = data_props
 
 batch = next(iter(trainloader))
@@ -169,6 +169,7 @@ logger.info(f"Data size: {data_size}")
 logger.info(f"Min/Max in the dataset: {np.min(in_sequence), np.max(in_sequence)}")
 logger.info("Number of batches:")
 logger.info(f"  - Train: {trainloader.num_batches}")
+logger.info(f"  - Valid: {validloader.num_batches}")
 logger.info(f"  - Test: {testloader.num_batches}")
 
 ## Plot a few samples in a 4x4 grid (chose them at random)
@@ -176,7 +177,7 @@ fig, axs = plt.subplots(4, 4, figsize=(10, 10), sharex=True)
 colors = ['r', 'g', 'b', 'c', 'm', 'y']
 
 dataset = config['general']['dataset']
-image_datasets = ["mnist", "mnist_fashion", "cifar", "celeba"]
+image_datasets = ["mnist", "mnist_fashion", "cifar", "celeba", "pathfinder"]
 dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_damper", "cheetah", "electricity"]
 repeat_datasets = ["lotka"]
 
@@ -536,10 +537,10 @@ if not classification:
         X_recons = model(X, times, key, inference_start)
         return X_recons
 
-    def eval_on_test_set(model, key):
+    def eval_on_valid_set(model, key):
         mses = []
         new_key, _ = jax.random.split(key)
-        for i, batch in enumerate(testloader):
+        for i, batch in enumerate(validloader):
             new_key, _ = jax.random.split(new_key)
             (X_true, times), X_labs_outs = batch
 
@@ -561,7 +562,7 @@ if not classification:
         return np.mean(mses), np.median(mses), np.min(mses)
 
     test_key, _ = jax.random.split(train_key)
-    mean_mse, median_mse, min_mse = eval_on_test_set(model, test_key)
+    mean_mse, median_mse, min_mse = eval_on_valid_set(model, test_key)
 
     logger.info("Evaluation of MSE on the test set, at the end of the training (Current Best Model):")
     logger.info(f"    - Mean : {mean_mse:.6f}")
@@ -596,7 +597,7 @@ if not classification:
                 logger.info(f"Checkpoint {i} not found. Skipping.")
                 continue
 
-            mean, med, min_ = eval_on_test_set(model, test_key)
+            mean, med, min_ = eval_on_valid_set(model, test_key)
             mses_chekpoints.append(mean)
             id_checkpoints.append(i)
 
@@ -756,7 +757,16 @@ if not classification:
 
 
 
-# %% Now dealing with classification tasks
+
+
+
+
+
+
+
+
+
+
 
 if classification:
     @eqx.filter_jit
@@ -765,6 +775,87 @@ if classification:
         Y_hat = model(X, times, key, inference_start)
         return Y_hat
 
+    def eval_on_valid_set(model, key):
+        cces = []
+        new_key, _ = jax.random.split(key)
+        for i, batch in enumerate(validloader):
+            new_key, _ = jax.random.split(new_key)
+            (X_true, times), X_labs_outs = batch
+
+            Y_hat = model(X_true, times, new_key, inference_start=None)
+            cce = optax.softmax_cross_entropy_with_integer_labels(logits=Y_hat[:, -1], labels=X_labs_outs).mean()
+
+            cces.append(cce)
+
+        return np.mean(cces), np.median(cces), np.min(cces)
+
+    test_key, _ = jax.random.split(train_key)
+    mean_cce, median_cce, min_cce = eval_on_valid_set(model, test_key)
+
+    logger.info("Evaluation of Cross-Entropy on the validation set, at the end of the training (Current Best Model):")
+    logger.info(f"    - Mean : {mean_cce:.6f}")
+    logger.info(f"    - Median : {median_cce:.6f}")
+    logger.info(f"    - Min : {min_cce:.6f}")
+
+    nb_epochs = config['training']['nb_epochs']
+    checkpoint_every = config['training']['checkpoint_every']
+
+    best_model = model
+    best_cce = mean_cce
+    best_cce_epoch = nb_epochs-1        ## TODO: model might not have been trained for all epochs
+
+    if os.path.exists(artefacts_folder+"test_cces.npz"):
+        checkpoints_data = np.load(artefacts_folder+"test_cces.npz")
+        cces_chekpoints = checkpoints_data['data']
+        best_cce_epoch = checkpoints_data['best_epoch'].item()
+        best_cce = checkpoints_data['best_cce'].item()
+        best_model = eqx.tree_deserialise_leaves(checkpoints_folder+f"model_{best_cce_epoch}.eqx", model)
+        id_checkpoints = (np.arange(0, nb_epochs, checkpoint_every).tolist() + [nb_epochs-1])[:len(cces_chekpoints)]
+        logger.info("Checkpoints CCE artefact file found. Loading it.")
+
+    else:
+        cces_chekpoints = [] 
+        id_checkpoints = []
+
+        ## Lead the model at each checkpoint and evaluate it
+        for i in list(range(0, nb_epochs, checkpoint_every))+[nb_epochs-1]:
+            try:
+                model = eqx.tree_deserialise_leaves(checkpoints_folder+f"model_{i}.eqx", model)
+            except:
+                logger.info(f"Checkpoint {i} not found. Skipping.")
+                continue
+
+            mean, med, min_ = eval_on_valid_set(model, test_key)
+            cces_chekpoints.append(mean)
+            id_checkpoints.append(i)
+
+            if mean<best_cce:
+                best_model = model
+                best_cce = mean
+                best_cce_epoch = i
+                logger.info(f"New best model found at epoch {i} with CCE: {best_cce:.6f}")
+            # logger.info(f"Checkpoint {i} MSE: {mean:.6f} (Mean), {med:.6f} (Median), {min_:.6f} (Min)")
+
+        ## Save the checkpoints MSEs artefacts
+        np.savez(artefacts_folder+"test_cces.npz", data=np.array(cces_chekpoints), best_epoch=best_cce_epoch, best_mse=best_cce)
+
+    ## Plot the CCE of the checkpoints
+    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+    ax = sbplot(id_checkpoints, cces_chekpoints, title="CCE on Test Set at Various Checkpoints", x_label='Epoch', y_label='CCE', ax=ax, y_scale="log", linewidth=3);
+    plt.axvline(x=best_cce_epoch, color='r', linestyle='--', linewidth=3, label=f"Best CCE: {best_cce:.6f} at Epoch {best_cce_epoch}")
+    plt.legend(fontsize=16)
+    plt.draw();
+    plt.savefig(plots_folder+"checkpoints_cce.png", dpi=100, bbox_inches='tight')
+    logger.info(f"Best model found at epoch {best_cce_epoch} with CCE: {best_cce:.6f}")
+
+
+### ===== Very importtant: Set the best model on test set as the model for visualisation ? ==== TODO
+model = best_model
+
+
+# %% Now dealing with classification tasks
+
+if classification:
     batch = next(iter(testloader))
     (in_sequence, times), output = batch
 
@@ -785,11 +876,20 @@ if classification:
     for i in range(4):
         for j in range(4):
             idx = i*4+j
-            axs[i, j].plot(in_sequence[idx, :, dim0], in_sequence[idx, :, dim1], color=colors[int(output[idx])%len(colors)], lw=3)
-            # axs[i, j].plot(in_sequence[idx, :, dim0], color=colors[int(output[idx])%len(colors)], lw=3)
-            # axs[i, j].plot(in_sequence[idx, :, dim1], color=colors[int(output[idx])%len(colors)], linestyle='--', lw=3)
 
-            # axs[i, j].plot(Y_hat[idx, :], color=colors[int(output[idx])%len(colors)], lw=1)
+            if dataset in image_datasets:
+                to_plot = in_sequence[idx].reshape(res)
+                axs[i, j].imshow(to_plot, cmap='gray')
+
+            else:
+                if dataset=="spirals":
+                    axs[i, j].plot(in_sequence[idx, :, dim0], in_sequence[idx, :, dim1], color=colors[int(output[idx])%len(colors)], lw=3)
+
+                    # axs[i, j].plot(in_sequence[idx, :, dim0], color=colors[int(output[idx])%len(colors)], lw=3)
+                    # axs[i, j].plot(in_sequence[idx, :, dim1], color=colors[int(output[idx])%len(colors)], linestyle='--', lw=3)
+
+                else:
+                    axs[i, j].plot(in_sequence[idx, :], color=colors[int(output[idx])%len(colors)], lw=3)
 
             axs[i, j].set_title(f"Predicted Class: {Y_hat[idx, -1]}", fontsize=12)
             axs[i, j].axis('off')
@@ -810,20 +910,23 @@ if classification:
     logger.info(f"Test set accuracy: {accuracy:.4f}")
 
     ## PLot the first 16 seqences, with the title as the predicted class
-    fig, axs = plt.subplots(4, 4, figsize=(10, 10), sharex=True)
+    fig, axs = plt.subplots(4, 4, figsize=(20, 10), sharex=True)
     colors = ['r', 'g', 'b', 'c', 'm', 'y']
 
     for i in range(4):
         for j in range(4):
             idx = i*4+j
+
             axs[i, j].plot(Y_hat[idx, :], color=colors[int(output[idx])%len(colors)], lw=1)
 
             axs[i, j].set_title(f"Predicted Class: {Y_hat[idx, -1]}", fontsize=12)
-            axs[i, j].axis('off')
+            # axs[i, j].axis('off')
 
-            axs[i, j].set_ylim([-0.1, 1.1])
+            # axs[i, j].set_ylim([-0.1, 1.1])
+            axs[i, j].set_ylim([-0.1, nb_classes-1+0.1])
 
-    plt.suptitle(f"{dataset.upper()} Test Labels", fontsize=20)
+    plt.tight_layout()
+    plt.suptitle(f"{dataset.upper()} Predicted Test Labels", fontsize=20)
 
     plt.draw();
     plt.savefig(plots_folder+"samples_test_labels.png", dpi=100, bbox_inches='tight')
