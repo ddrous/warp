@@ -18,8 +18,8 @@ data:
 
 # Model hyperparameters
 model:
-  mlp_width_size: 32
-  mlp_depth: 2
+  mlp_width_size: 512
+  mlp_depth: 1
   activation: "relu"
   init_state_layers: 2          ## null to directly learn the initial state
   input_prev_data: False

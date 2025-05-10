@@ -6,7 +6,7 @@ general:
   classification: True
   train: True
   dataset: "uea"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/uea/processed/UEA/EthanolConcentration/"
+  data_path: "./data/uea/processed/UEA/SelfRegulationSCP1/"
   save_path: null
 
 # Data hyperparameters (dependent on the dataset)
@@ -14,10 +14,11 @@ data:
   downsample_factor: 1
   resolution: [32, 32]         # For celebA
   traj_length: 1000
+  normalize: True
 
 # Model hyperparameters
 model:
-  mlp_width_size: 32
+  mlp_width_size: 48
   mlp_depth: 2
   activation: "relu"
   init_state_layers: 2      ## null to directly learn the initial state
@@ -46,7 +47,7 @@ optimizer:
 # Training/Inference hyperparameters
 training:
   nb_epochs: 5000
-  batch_size: 524
+  batch_size: 561
   autoregressive: False
   print_every: 100
   checkpoint_every: 100

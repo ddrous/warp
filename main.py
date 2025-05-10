@@ -178,7 +178,7 @@ colors = ['r', 'g', 'b', 'c', 'm', 'y']
 
 dataset = config['general']['dataset']
 image_datasets = ["mnist", "mnist_fashion", "cifar", "celeba", "pathfinder"]
-dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_damper", "cheetah", "electricity"]
+dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_damper", "cheetah", "electricity", "sine"]
 repeat_datasets = ["lotka"]
 
 res = (width, width, data_size)
@@ -493,7 +493,7 @@ if config["model"]["model_type"] == "wsm":
     ## Print the untrained and trained matrices A as imshows with same range
     fig, axs = plt.subplots(1, 2, figsize=(20, 10))
     min_val = -0.00
-    max_val = 0.0003
+    max_val = 0.000003
 
     img = axs[0].imshow(untrained_model.As[0], cmap='viridis', vmin=min_val, vmax=max_val)
     axs[0].set_title("Untrained A")
@@ -727,7 +727,7 @@ if not classification:
 if not classification:
     eval_loader = NumpyLoader(testloader.dataset, batch_size=len(testloader.dataset), shuffle=False)
 
-    batch = next(iter(visloader))
+    batch = next(iter(eval_loader))
     (xs_true, times), labels = batch
 
     xs_recons = eval_step(model=best_model, 
@@ -767,6 +767,7 @@ if not classification:
 
 
 
+#%% Now dealing with classification tasks
 
 if classification:
     @eqx.filter_jit
@@ -774,6 +775,8 @@ if classification:
         """ Evaluate the model on a batch of data. """
         Y_hat = model(X, times, key, inference_start)
         return Y_hat
+
+    val_criterion = "ErrorRate"       ## could be "CCE" or "ErrorRate"
 
     def eval_on_valid_set(model, key):
         cces = []
@@ -783,7 +786,14 @@ if classification:
             (X_true, times), X_labs_outs = batch
 
             Y_hat = model(X_true, times, new_key, inference_start=None)
-            cce = optax.softmax_cross_entropy_with_integer_labels(logits=Y_hat[:, -1], labels=X_labs_outs).mean()
+
+            if val_criterion == "CCE":
+                ## ==== Use the categorical cross entropy loss for validation ====
+                cce = optax.softmax_cross_entropy_with_integer_labels(logits=Y_hat[:, -1], labels=X_labs_outs).mean()
+            else:
+                ## ==== Let "cce" be the complement accuracy instead (the lower the better) ===
+                cce = jnp.mean(jnp.argmax(Y_hat[:, -1], axis=-1) == X_labs_outs)
+                cce = 1 - cce
 
             cces.append(cce)
 
@@ -792,7 +802,12 @@ if classification:
     test_key, _ = jax.random.split(train_key)
     mean_cce, median_cce, min_cce = eval_on_valid_set(model, test_key)
 
-    logger.info("Evaluation of Cross-Entropy on the validation set, at the end of the training (Current Best Model):")
+    if val_criterion == "CCE":
+        logger.info("Validation criterion is the Categorical Cross Entropy (CCE)")
+    else:
+        logger.info("Validation criterion is the Error Rate (1 - ACC)")
+
+    logger.info(f"Evaluation on the validation set, at the end of the training (Current Best Model):")
     logger.info(f"    - Mean : {mean_cce:.6f}")
     logger.info(f"    - Median : {median_cce:.6f}")
     logger.info(f"    - Min : {min_cce:.6f}")
@@ -804,14 +819,14 @@ if classification:
     best_cce = mean_cce
     best_cce_epoch = nb_epochs-1        ## TODO: model might not have been trained for all epochs
 
-    if os.path.exists(artefacts_folder+"test_cces.npz"):
-        checkpoints_data = np.load(artefacts_folder+"test_cces.npz")
+    if os.path.exists(artefacts_folder+"checkpoints_cces.npz"):
+        checkpoints_data = np.load(artefacts_folder+"checkpoints_cces.npz")
         cces_chekpoints = checkpoints_data['data']
         best_cce_epoch = checkpoints_data['best_epoch'].item()
         best_cce = checkpoints_data['best_cce'].item()
         best_model = eqx.tree_deserialise_leaves(checkpoints_folder+f"model_{best_cce_epoch}.eqx", model)
         id_checkpoints = (np.arange(0, nb_epochs, checkpoint_every).tolist() + [nb_epochs-1])[:len(cces_chekpoints)]
-        logger.info("Checkpoints CCE artefact file found. Loading it.")
+        logger.info(f"Checkpoints {val_criterion} artefact file found. Loading it.")
 
     else:
         cces_chekpoints = [] 
@@ -833,20 +848,20 @@ if classification:
                 best_model = model
                 best_cce = mean
                 best_cce_epoch = i
-                logger.info(f"New best model found at epoch {i} with CCE: {best_cce:.6f}")
+                logger.info(f"New best model found at epoch {i} with {val_criterion}: {best_cce:.6f}")
             # logger.info(f"Checkpoint {i} MSE: {mean:.6f} (Mean), {med:.6f} (Median), {min_:.6f} (Min)")
 
         ## Save the checkpoints MSEs artefacts
-        np.savez(artefacts_folder+"test_cces.npz", data=np.array(cces_chekpoints), best_epoch=best_cce_epoch, best_mse=best_cce)
+        np.savez(artefacts_folder+"checkpoints_cces.npz", data=np.array(cces_chekpoints), best_epoch=best_cce_epoch, best_cce=best_cce)
 
     ## Plot the CCE of the checkpoints
     fig, ax = plt.subplots(1, 1, figsize=(10, 6))
-    ax = sbplot(id_checkpoints, cces_chekpoints, title="CCE on Test Set at Various Checkpoints", x_label='Epoch', y_label='CCE', ax=ax, y_scale="log", linewidth=3);
-    plt.axvline(x=best_cce_epoch, color='r', linestyle='--', linewidth=3, label=f"Best CCE: {best_cce:.6f} at Epoch {best_cce_epoch}")
+    ax = sbplot(id_checkpoints, cces_chekpoints, title=f"{val_criterion} on Test Set at Various Checkpoints", x_label='Epoch', y_label=f'{val_criterion}', ax=ax, y_scale="log", linewidth=3);
+    plt.axvline(x=best_cce_epoch, color='r', linestyle='--', linewidth=3, label=f"Best {val_criterion}: {best_cce:.6f} at Epoch {best_cce_epoch}")
     plt.legend(fontsize=16)
     plt.draw();
-    plt.savefig(plots_folder+"checkpoints_cce.png", dpi=100, bbox_inches='tight')
-    logger.info(f"Best model found at epoch {best_cce_epoch} with CCE: {best_cce:.6f}")
+    plt.savefig(plots_folder+f"checkpoints_{val_criterion.lower()}.png", dpi=100, bbox_inches='tight')
+    logger.info(f"Best model found at epoch {best_cce_epoch} with {val_criterion}: {best_cce:.6f}")
 
 
 ### ===== Very importtant: Set the best model on test set as the model for visualisation ? ==== TODO
@@ -856,21 +871,37 @@ model = best_model
 # %% Now dealing with classification tasks
 
 if classification:
-    batch = next(iter(testloader))
-    (in_sequence, times), output = batch
 
-    ## Compute the accurary of the model on the test set
-    Y_hat_raw = eval_step(model, in_sequence, times, main_key)
-    Y_hat = jnp.argmax(Y_hat_raw, axis=-1)
-    # Y_hat = Y_hat.reshape(-1)
-    # Y_hat = Y_hat[:, -1]
-    print("Y_hat shape:", Y_hat.shape)
-    output = output.reshape(-1)
-    accuracy = jnp.mean(Y_hat[:, -1] == output)
+    ## Compute the accurary of the model on the test set in one go
+    evalloader = NumpyLoader(testloader.dataset, batch_size=config["training"]["batch_size"], shuffle=False)
+    # evalloader = NumpyLoader(validloader.dataset, batch_size=16, shuffle=False)
+    
+    # batch = next(iter(evalloader))
+    # (in_sequence, times), output = batch
+
+    accs = []
+    for i, batch in enumerate(evalloader):
+        (in_sequence, times), output = batch
+        Y_hat_raw = eval_step(model, in_sequence, times, main_key)
+        Y_hat = jnp.argmax(Y_hat_raw, axis=-1)
+        print("\nY_hat shape:", Y_hat.shape, "Y shape:", output.shape)
+        acc = jnp.mean(Y_hat[:, -1] == output)
+
+        accs.append(acc)
+
+    accuracy = np.mean(accs)
     logger.info(f"Test set accuracy: {accuracy:.4f}")
 
+
+
+
+    #### ## Visualise the model on the test set
+    visloader = NumpyLoader(testloader.dataset, batch_size=16, shuffle=True)
+    batch = next(iter(visloader))
+    (in_sequence, times), output = batch
+
     ## PLot the first 16 seqences, with the title as the predicted class
-    fig, axs = plt.subplots(4, 4, figsize=(10, 10), sharex=True)
+    fig, axs = plt.subplots(4, 4, figsize=(20, 15), sharex=True)
     colors = ['r', 'g', 'b', 'c', 'm', 'y']
 
     for i in range(4):
@@ -899,34 +930,33 @@ if classification:
     plt.draw();
     plt.savefig(plots_folder+"samples_test.png", dpi=100, bbox_inches='tight')
 
-    ## Compute the accurary of the model on the test set
-    Y_hat_raw = eval_step(model, in_sequence, times, main_key)
-    Y_hat = jnp.argmax(Y_hat_raw, axis=-1)
-    # Y_hat = Y_hat.reshape(-1)
-    # Y_hat = Y_hat[:, -1]
-    print("Y_hat shape:", Y_hat.shape)
-    output = output.reshape(-1)
-    accuracy = jnp.mean(Y_hat[:, -1] == output)
-    logger.info(f"Test set accuracy: {accuracy:.4f}")
 
-    ## PLot the first 16 seqences, with the title as the predicted class
-    fig, axs = plt.subplots(4, 4, figsize=(20, 10), sharex=True)
-    colors = ['r', 'g', 'b', 'c', 'm', 'y']
+
+    ## PLot the first 16 seqences class over time, with the title as the predicted class
+    fig, axs = plt.subplots(4, 4, figsize=(20, 15), sharex=True, sharey=True)
 
     for i in range(4):
         for j in range(4):
             idx = i*4+j
 
-            axs[i, j].plot(Y_hat[idx, :], color=colors[int(output[idx])%len(colors)], lw=1)
+            axs[i, j].plot(Y_hat[idx, :], color=colors[int(output[idx])%len(colors)], lw=3)
 
-            axs[i, j].set_title(f"Predicted Class: {Y_hat[idx, -1]}", fontsize=12)
+            axs[i, j].set_title(f"Predicted Class: {Y_hat[idx, -1]}", fontsize=22)
             # axs[i, j].axis('off')
 
             # axs[i, j].set_ylim([-0.1, 1.1])
             axs[i, j].set_ylim([-0.1, nb_classes-1+0.1])
 
+            ## Set the y ticks to be the class labels
+            axs[i, j].set_yticks(np.arange(nb_classes))
+            axs[i, j].set_yticklabels(np.arange(nb_classes))
+
+            ## Set the x label as time step
+            if i==3:
+                axs[i, j].set_xlabel("Time Step", fontsize=22)
+
     plt.tight_layout()
-    plt.suptitle(f"{dataset.upper()} Predicted Test Labels", fontsize=20)
+    plt.suptitle(f"{dataset.upper()} Predicted Test Labels", fontsize=20, y=1.02)
 
     plt.draw();
     plt.savefig(plots_folder+"samples_test_labels.png", dpi=100, bbox_inches='tight')

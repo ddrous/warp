@@ -2,30 +2,32 @@
 
 # General settings
 general:
-  seed: 2024
-  classification: True
+  seed: 2028
   train: True
-  dataset: "uea"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/uea/processed/UEA/EigenWorms/"
+  dataset: "sine"  # Options: mnist, cifar, lorentz, dynamics
+  data_path: "./data/dynamics/sine/huge/"
+  # save_path: "./runs/250404-175026-Test/"
   save_path: null
+  classification: False
 
 # Data hyperparameters (dependent on the dataset)
 data:
   downsample_factor: 1
   resolution: [32, 32]         # For celebA
   traj_length: 1000
+  normalize: False
 
 # Model hyperparameters
 model:
-  mlp_width_size: 128
-  mlp_depth: 1
-  activation: "relu"
-  init_state_layers: 2      ## null to directly learn the initial state
+  root_width_size: 48
+  root_depth: 3
+  root_activation: "swish"
+  root_final_activation: null       ## Only applies to the mean !
+  init_state_layers: 2
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
-  dynamic_tanh_init: null     ## a, b, alpha, beta
   time_as_channel: False
   forcing_prob: 0.25
   noise_theta_init: null
@@ -45,11 +47,10 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 1800
-  batch_size: 48
-  autoregressive: False
-  print_every: 100
-  checkpoint_every: 100
+  nb_epochs: 1000
+  batch_size: 10000
+  print_every: 10
+  checkpoint_every: 10
   nb_recons_loss_steps: null
   use_nll_loss: False
-  inference_start: 100
+  inference_start: 1

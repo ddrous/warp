@@ -3,10 +3,10 @@
 # General settings
 general:
   seed: 2024
-  classification: True
+  classification: False
   train: True
-  dataset: "uea"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/uea/processed/UEA/MotorImagery/"
+  dataset: "electricity"  # Options: mnist, cifar, lorentz, dynamics
+  data_path: "./data/dynamics/electricity/h2/"
   save_path: null
 
 # Data hyperparameters (dependent on the dataset)
@@ -18,23 +18,24 @@ data:
 
 # Model hyperparameters
 model:
-  mlp_width_size: 32
-  mlp_depth: 2
-  activation: "relu"
-  init_state_layers: 2      ## null to directly learn the initial state
+  root_width_size: 128
+  root_depth: 1
+  rootactivation: "relu"
+  root_final_activation: [7.0, 0.0, 7.0, 0.0]    ## a, b, alpha, beta
   input_prev_data: False
   model_type: "wsm"
+  init_state_layers: 2          ## null to directly learn the initial state
   nb_rnn_layers: 1
   weights_lim: null
-  dynamic_tanh_init: null     ## a, b, alpha, beta
   time_as_channel: False
-  forcing_prob: 0.25
+  forcing_prob: 0.5
   noise_theta_init: null
   std_lower_bound: 1.0e-4
+  rnn_hidden_size: 128          # For GRUs and LSTMs
 
 # Optimizer hyperparameters
 optimizer:
-  init_lr: 1.0e-5
+  init_lr: 1.0e-4
   gradients_lim: 1.0e-7
   on_plateau:
     factor: 0.5
@@ -42,15 +43,15 @@ optimizer:
     patience: 20
     cooldown: 0
     rtol: 1.0e-4
-    accum_size: 50
+    accum_size: 10
 
 # Training/Inference hyperparameters
 training:
   nb_epochs: 5000
-  batch_size: 300
-  autoregressive: False
+  batch_size: 4800
   print_every: 100
+  autoregressive: False
   checkpoint_every: 100
   nb_recons_loss_steps: null
   use_nll_loss: False
-  inference_start: 100
+  inference_start: 96

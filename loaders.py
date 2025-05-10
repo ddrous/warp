@@ -678,7 +678,7 @@ class SpiralsDataset(TimeSeriesDataset):
 
 
 
-class UEADataset(TimeSeriesDataset):
+class UEASineDataset(TimeSeriesDataset):
     """
     For a UEA dataset, from https://github.com/Benjamin-Walker/log-neural-cdes
     """
@@ -717,9 +717,9 @@ class UEADataset(TimeSeriesDataset):
         super().__init__(dataset, labels, t_eval, traj_prop=1.0)
 
 
-class PathFinderDataset(UEADataset):
+class PathFinderDataset(UEASineDataset):
     """
-    Same as the UEADataset, exactly the same
+    Same as the UEASineDataset, exactly the same
     """
     def __init__(self, data_dir, traj_length, normalize=True, min_max=None):
         super().__init__(data_dir, traj_length, normalize=normalize, min_max=min_max)
@@ -821,7 +821,8 @@ def make_dataloaders(data_folder, config):
         print(" #### Dynamics Dataset ####")
         traj_len = np.NaN
         # normalize = False if dataset in ["cheetah", "electricity", "lorentz63"] else True       ## Cheetah dataset from https://github.com/raminmh/liquid_time_constant_networks
-        normalize = False if dataset in ["cheetah", "electricity"] else True       ## Cheetah dataset from https://github.com/raminmh/liquid_time_constant_networks
+        # normalize = False if dataset in ["cheetah", "electricity"] else True       ## Cheetah dataset from https://github.com/raminmh/liquid_time_constant_networks
+        normalize = config["data"]["normalize"]
 
         trainloader = NumpyLoader(DynamicsDataset(data_folder+"train.npy", traj_length=traj_len, normalize=normalize, min_max=None), 
                                 batch_size=batch_size, 
@@ -857,11 +858,11 @@ def make_dataloaders(data_folder, config):
     elif dataset in ["spirals"]:
         traj_len = np.NaN
 
-        trainloader = NumpyLoader(SpiralsDataset(data_folder+"train.npz", traj_length=traj_len, normalize=True, min_max=None),
+        trainloader = NumpyLoader(SpiralsDataset(data_folder+"train.npz", traj_length=traj_len, normalize=False, min_max=None),
                                 batch_size=batch_size, 
                                 shuffle=True, 
                                 num_workers=24)
-        testloader = NumpyLoader(SpiralsDataset(data_folder+"test.npz", traj_length=traj_len, normalize=True, min_max=None),
+        testloader = NumpyLoader(SpiralsDataset(data_folder+"test.npz", traj_length=traj_len, normalize=False, min_max=None),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)
@@ -869,19 +870,20 @@ def make_dataloaders(data_folder, config):
         print("Training sequence length:", seq_length)
         min_res = None
 
-    elif dataset in ["uea"]:
+    elif dataset in ["uea", "sine"]:
         traj_len = np.NaN
+        normalize = config["data"]["normalize"]
 
-        trainloader = NumpyLoader(UEADataset(data_folder+"train.npz", traj_length=traj_len, normalize=True, min_max=None),
+        trainloader = NumpyLoader(UEASineDataset(data_folder+"train.npz", traj_length=traj_len, normalize=normalize, min_max=None),
                                 batch_size=batch_size, 
                                 shuffle=True, 
                                 num_workers=24)
         min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
-        valloader = NumpyLoader(UEADataset(data_folder+"val.npz", traj_length=traj_len, normalize=True, min_max=min_max),
+        valloader = NumpyLoader(UEASineDataset(data_folder+"val.npz", traj_length=traj_len, normalize=normalize, min_max=min_max),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)
-        testloader = NumpyLoader(UEADataset(data_folder+"test.npz", traj_length=traj_len, normalize=True, min_max=min_max),
+        testloader = NumpyLoader(UEASineDataset(data_folder+"test.npz", traj_length=traj_len, normalize=normalize, min_max=min_max),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)

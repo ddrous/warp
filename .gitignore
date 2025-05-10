@@ -67,6 +67,10 @@ data/dynamics/lorentz-63/noisy.pt
 **/m1/*.npy
 **/m2/*.npy
 
+## Ignore sine files
+**/sine/*.npy
+**/sine/*/*.npy
+
 ## Ignore all lorentz files
 **/lorentz-63/*.npy
 
