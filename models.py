@@ -175,12 +175,19 @@ class WSM(eqx.Module):
         As = []
         Bs = []
         for i in range(nb_wsm_layers):
-            if nb_classes is None:          ## Regresion problem
+            if nb_classes is None:          ## Regression problem
+                if isinstance(final_activation, str):
+                    final_activation_fn = builtin_fns[final_activation]
+                elif isinstance(final_activation, float):
+                    final_activation_fn = lambda x: jnp.clip(x, -final_activation, final_activation)
+                else:
+                    final_activation_fn = None
+
                 root = RootMLP(data_size, 
                             width_size, 
                             depth, 
                             builtin_fns[activation], 
-                            final_activation=builtin_fns[final_activation] if isinstance(final_activation, str) else None,
+                            final_activation=final_activation_fn,
                             input_prev_data=input_prev_data, 
                             predict_uncertainty=predict_uncertainty,
                             key=keys[i])
@@ -279,8 +286,8 @@ class WSM(eqx.Module):
                     x_t = jnp.where(jax.random.bernoulli(key, self.forcing_prob), x_true, x_hat)
 
                 if self.time_as_channel:
-                    x_t = jnp.concatenate([t_curr, x_t], axis=-1)
-                    x_prev = jnp.concatenate([t_prev, x_prev], axis=-1)
+                    x_t = jnp.concatenate([x_t, t_curr], axis=-1)
+                    x_prev = jnp.concatenate([x_prev, t_prev], axis=-1)
 
                 thet_next = A@thet + B@(x_t - x_prev)     ## Key step
 
@@ -292,7 +299,7 @@ class WSM(eqx.Module):
                 root_fun = eqx.combine(params, static)
                 root_in = t_curr+delta_t
                 if self.input_prev_data:
-                    root_in = jnp.concatenate([root_in, x_prev], axis=-1)
+                    root_in = jnp.concatenate([root_in, x_prev[:x_true.shape[0]]], axis=-1)
                 x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                  ## Evaluated at the next time step
 
                 x_next_mean = x_next[:x_true.shape[0]]

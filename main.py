@@ -183,6 +183,10 @@ repeat_datasets = ["lotka"]
 
 res = (width, width, data_size)
 dim0, dim1 = (0, 1)
+if dim1>= data_size:
+    dim1 = 0
+    logger.info(f"dim1 is out of bounds. Setting it to 0.")
+
 for i in range(4):
     for j in range(4):
         idx = np.random.randint(0, in_sequence.shape[0])
@@ -506,7 +510,7 @@ if config["model"]["model_type"] == "wsm":
     plt.savefig(plots_folder+"A_matrices.png", dpi=100, bbox_inches='tight')
 
     ## Print the dynamic tanh_params attribute
-    if config['model']['dynamic_tanh_init'] and not classification:
+    if isinstance(config['model']['root_final_activation'], list) and not classification:
         latex_string = r"y = \alpha \cdot \text{tanh} \left( \frac{x-b}{a} \right) + \beta"
         logger.info(f"Dynamic tanh params (final root network activation) : ${latex_string}$ ")
 
@@ -574,7 +578,11 @@ if not classification:
 
     best_model = model
     best_mse = mean_mse
-    best_mse_epoch = nb_epochs-1        ## TODO: model might not have been trained for all epochs
+
+    ## Parse the checkpoints folder to know when training ended ==
+    all_files = [f for f in os.listdir(checkpoints_folder) if f.endswith(".eqx")]
+    all_epochs = [int(f.split("_")[1].split(".")[0]) for f in all_files]
+    best_mse_epoch = sorted(all_epochs)[-1] if len(all_epochs)>0 else nb_epochs-1
 
     if os.path.exists(artefacts_folder+"test_mses.npz"):
         checkpoints_data = np.load(artefacts_folder+"test_mses.npz")
@@ -657,11 +665,11 @@ if not classification:
             x_recons = xs_recons[(i*4+j)%nb_examples]
             x_full = labels[(i*4+j)%nb_examples]
 
-            if dataset in dynamics_datasets+repeat_datasets:
-                ## Min/max along dim0, for both x and x_recons
-                min_0, max_0 = min(np.min(x[:, dim0]), np.min(x_recons[:, dim0])), max(np.max(x[:, dim0]), np.max(x_recons[:, dim0]))
-                min_1, max_1 = min(np.min(x[:, dim1]), np.min(x_recons[:, dim1])), max(np.max(x[:, dim1]), np.max(x_recons[:, dim1]))
-                eps = 0.04
+            # if dataset in dynamics_datasets+repeat_datasets:
+            ## Min/max along dim0, for both x and x_recons
+            min_0, max_0 = min(np.min(x[:, dim0]), np.min(x_recons[:, dim0])), max(np.max(x[:, dim0]), np.max(x_recons[:, dim0]))
+            min_1, max_1 = min(np.min(x[:, dim1]), np.min(x_recons[:, dim1])), max(np.max(x[:, dim1]), np.max(x_recons[:, dim1]))
+            eps = 0.04
 
             if dataset in image_datasets:
                 to_plot = x.reshape(res)
@@ -671,12 +679,12 @@ if not classification:
             elif dataset == "trends":
                 axs[i, nb_cols*j].plot(x, color=colors[labels[i*4+j]])
             elif dataset in repeat_datasets:
-                axs[i, nb_cols*j].set_ylim([min_1-eps, max_1+eps])
+                axs[i, nb_cols*j].set_ylim([min(min_0, min_1)-eps, max(max_0, max_1)+eps])
                 axs[i, nb_cols*j].plot(x_full[:, dim0], color=colors[(i*4+j)%len(colors)])
                 axs[i, nb_cols*j].plot(x_full[:, dim1], color=colors[(i*4+j)%len(colors)], linestyle='-.')
             else:
                 # axs[i, nb_cols*j].set_xlim([min_0-eps, max_0+eps])
-                # axs[i, nb_cols*j].set_ylim([min_1-eps, max_1+eps])
+                axs[i, nb_cols*j].set_ylim([min(min_0, min_1)-eps, max(max_0, max_1)+eps])
                 axs[i, nb_cols*j].plot(x[:, dim0], color=colors[int(labels[(i*4+j)%nb_examples])%len(colors)])
                 axs[i, nb_cols*j].plot(x[:, dim1], color=colors[int(labels[(i*4+j)%nb_examples])%len(colors)], linestyle='-.')
             if i==0:
@@ -688,29 +696,32 @@ if not classification:
                 if dataset=="celeba":
                     to_plot = (to_plot + 1) / 2
                 axs[i, nb_cols*j+1].imshow(to_plot, cmap='gray')
-            elif dataset in dynamics_datasets and dataset not in repeat_datasets:
-                # axs[i, nb_cols*j+1].set_xlim([min_0-eps, max_0+eps])
-                axs[i, nb_cols*j+1].set_ylim([min_1-eps, max_1+eps])
-                axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[labels[(i*4+j)%nb_examples]%len(colors)])
-                axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[labels[(i*4+j)%nb_examples]%len(colors)], linestyle='-.')
+            # elif dataset in dynamics_datasets and dataset not in repeat_datasets:
             elif dataset in repeat_datasets:
-                axs[i, nb_cols*j+1].set_ylim([min_1-eps, max_1+eps])
+                axs[i, nb_cols*j+1].set_ylim([min(min_0, min_1)-eps, max(max_0, max_1)+eps])
                 axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[(i*4+j)%len(colors)])
                 axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[(i*4+j)%len(colors)], linestyle='-.')
             else:
-                axs[i, nb_cols*j+1].plot(x_recons, color=colors[int(labels[i*4+j])])
+                # axs[i, nb_cols*j+1].plot(x_recons, color=colors[int(labels[i*4+j])])
+                axs[i, nb_cols*j+1].set_ylim([min(min_0, min_1)-eps, max(max_0, max_1)+eps])
+                axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[labels[(i*4+j)%nb_examples]%len(colors)])
+                axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[labels[(i*4+j)%nb_examples]%len(colors)], linestyle='-.')
+
             if i==0:
                 axs[i, nb_cols*j+1].set_title("Recons", fontsize=40)
             # axs[i, nb_cols*j+1].axis('off')
 
             if use_nll_loss:
-                logger.info(f"Min/Max Uncertainty: {np.min(xs_uncert):.3f}, {np.max(xs_uncert):.3f}")
+                # logger.info(f"Min/Max Uncertainty: {np.min(xs_uncert):.3f}, {np.max(xs_uncert):.3f}")
                 if dataset in image_datasets:
                     to_plot = xs_uncert[i*4+j].reshape(res)
                     axs[i, nb_cols*j+2].imshow(to_plot, cmap='gray')
-                elif dataset in dynamics_datasets:
+                # elif dataset in dynamics_datasets:
+                    # axs[i, nb_cols*j+2].plot(to_plot[:, dim0], to_plot[:, dim1], color=colors[labels[i*4+j]%len(colors)])
+                else:
                     to_plot = xs_uncert[i*4+j]
-                    axs[i, nb_cols*j+2].plot(to_plot[:, dim0], to_plot[:, dim1], color=colors[labels[i*4+j]%len(colors)])
+                    axs[i, nb_cols*j+2].plot(to_plot[:, dim0], color=colors[labels[i*4+j]%len(colors)])
+                    axs[i, nb_cols*j+2].plot(to_plot[:, dim1], color=colors[labels[i*4+j]%len(colors)], linestyle='-.')
 
                 if i==0:
                     axs[i, nb_cols*j+2].set_title("Uncertainty", fontsize=36)
@@ -817,7 +828,11 @@ if classification:
 
     best_model = model
     best_cce = mean_cce
-    best_cce_epoch = nb_epochs-1        ## TODO: model might not have been trained for all epochs
+
+    ## Parse the checkpoint folder to get the latest checpoint epoch ==
+    all_files = [f for f in os.listdir(checkpoints_folder) if f.endswith(".eqx")]
+    all_epochs = [int(f.split("_")[1].split(".")[0]) for f in all_files]
+    best_cce_epoch = sorted(all_epochs)[-1] if len(all_epochs)>0 else nb_epochs-1
 
     if os.path.exists(artefacts_folder+"checkpoints_cces.npz"):
         checkpoints_data = np.load(artefacts_folder+"checkpoints_cces.npz")
