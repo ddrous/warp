@@ -630,7 +630,7 @@ if not classification:
 
 
 ### ===== Very importtant: Set the best model on test set as the model for visualisation ? ==== TODO
-# model = best_model
+model = best_model
 
 # %% Visualising a few reconstruction samples
 

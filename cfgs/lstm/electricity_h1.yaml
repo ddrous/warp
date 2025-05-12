@@ -6,7 +6,7 @@ general:
   classification: False
   train: True
   dataset: "electricity"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/dynamics/electricity/h2/"
+  data_path: "./data/dynamics/electricity/h1/"
   save_path: null
 
 # Data hyperparameters (dependent on the dataset)
@@ -23,7 +23,7 @@ model:
   root_activation: "relu"
   root_final_activation: 1.0
   input_prev_data: False
-  model_type: "wsm"
+  model_type: "lstm"
   init_state_layers: 2          ## null to directly learn the initial state
   nb_rnn_layers: 1
   weights_lim: null
@@ -31,7 +31,7 @@ model:
   forcing_prob: 0.25
   noise_theta_init: null
   std_lower_bound: 1.0e-4
-  rnn_hidden_size: 128          # For GRUs and LSTMs
+  rnn_hidden_size: 920          # For GRUs and LSTMs
 
 # Optimizer hyperparameters
 optimizer:
@@ -47,8 +47,8 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 2000
-  batch_size: 4800
+  nb_epochs: 1000
+  batch_size: 1400
   print_every: 100
   autoregressive: True
   checkpoint_every: 100

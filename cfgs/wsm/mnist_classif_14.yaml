@@ -18,15 +18,15 @@ data:
 
 # Model hyperparameters
 model:
-  mlp_width_size: 24
-  mlp_depth: 3
-  activation: "relu"
+  root_width_size: 24
+  root_depth: 3
+  root_activation: "relu"
+  root_final_activation: null
   init_state_layers: null          ## null to directly learn the initial state
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
-  dynamic_tanh_init: null
   time_as_channel: False
   forcing_prob: 0.15
   noise_theta_init: null

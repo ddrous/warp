@@ -4,6 +4,7 @@
 general:
   seed: 2028
   train: True
+  classification: False
   dataset: "cheetah"  # Options: mnist, cifar, lorentz, dynamics
   data_path: "./data/dynamics/cheetah/"
   # save_path: "./runs/250404-175026-Test/"
@@ -18,14 +19,15 @@ data:
 
 # Model hyperparameters
 model:
-  mlp_width_size: 48
-  mlp_depth: 3
-  activation: "swish"
+  root_width_size: 48
+  root_depth: 3
+  root_activation: "swish"
+  root_final_activation: 23.0
+  init_state_layers: 2
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
-  dynamic_tanh_init: [10.0, 0.0, 23.0, 0.0]    ## a, b, alpha, beta
   time_as_channel: True
   forcing_prob: 0.25
   noise_theta_init: null
@@ -46,10 +48,11 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 20000
-  batch_size: 320
+  nb_epochs: 2000
+  batch_size: 300
+  autoregressive: True
   print_every: 100
   checkpoint_every: 100
   nb_recons_loss_steps: null
   use_nll_loss: False
-  inference_start: 10
+  inference_start: 50

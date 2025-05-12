@@ -4,6 +4,7 @@
 general:
   seed: 2024
   train: True
+  classification: False
   dataset: "lorentz63"  # Options: mnist, cifar, lorentz, dynamics
   data_path: "./data/dynamics/lorentz-63/"
   save_path: null
@@ -13,20 +14,21 @@ data:
   downsample_factor: 1
   resolution: [32, 32]         # For celebA
   traj_length: 1000
+  normalize: False
 
 # Model hyperparameters
 model:
-  mlp_width_size: 128
-  mlp_depth: 1
-  activation: "swish"
-  init_state_layers: 0
+  root_width_size: 256
+  root_depth: 1
+  root_activation: "swish"
+  root_final_activation: 5.0
   input_prev_data: False
+  init_state_layers: 2
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
-  # dynamic_tanh_init: [4.7, 0.0, 4.7, 0.0]     ## a, b, alpha, beta
   dynamic_tanh_init: null
-  time_as_channel: False
+  time_as_channel: True
   forcing_prob: 0.25
   noise_theta_init: null
   std_lower_bound: 1.0e-4
@@ -46,9 +48,10 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 3000
+  nb_epochs: 4000
   batch_size: 64
   print_every: 100
+  autoregressive: True
   checkpoint_every: 100
   nb_recons_loss_steps: null
   use_nll_loss: False

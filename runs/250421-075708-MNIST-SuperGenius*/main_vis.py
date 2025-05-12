@@ -41,11 +41,11 @@ plt.rcParams['font.family'] = 'serif'
 plt.rcParams['mathtext.fontset'] = 'dejavuserif'
 plt.rcParams['savefig.bbox'] = 'tight'
 
+from IPython.display import display, Math
 import yaml
 import argparse
 import os
 import time
-from pprint import pprint
 import sys
 import pickle
 
@@ -113,7 +113,16 @@ else:
     data_folder = f"../../{data_path}"
 
 print("Using run folder:", run_folder)
+## Copy the module files to the run folder
 logger, checkpoints_folder, plots_folder, artefacts_folder = setup_run_folder(run_folder, training=train)
+
+## Copy the config file to the run folder, renaming it as config.yaml
+if not os.path.exists(run_folder+"config.yaml"):
+    # os.system(f"cp {args.config_file} {run_folder}config.yaml")
+    test_config = config.copy()
+    test_config['general']['train'] = False             ## Set the train flag to False
+    with open(run_folder+"config.yaml", 'w') as file:
+        yaml.dump(test_config, file)
 
 ## Print the config file using the logger and pprint
 logger.info(f"Config file: {args.config_file}")
@@ -141,41 +150,52 @@ trainloader, testloader, data_props = make_dataloaders(data_folder, config)
 nb_classes, seq_length, data_size, width = data_props
 
 batch = next(iter(testloader))
-(images, times), labels = batch
-logger.info(f"Images shape: {images.shape}")
-logger.info(f"Labels shape: {labels.shape}")
+(in_sequence, times), output = batch
+logger.info(f"Input sequence shape: {in_sequence.shape}")
+logger.info(f"Labels/OutputSequence shape: {output.shape}")
 logger.info(f"Seq length: {seq_length}")
 logger.info(f"Data size: {data_size}")
-logger.info(f"Min/Max in the dataset: {np.min(images), np.max(images)}")
+logger.info(f"Min/Max in the dataset: {np.min(in_sequence), np.max(in_sequence)}")
 logger.info("Number of batches:")
 logger.info(f"  - Train: {trainloader.num_batches}")
 logger.info(f"  - Test: {testloader.num_batches}")
 
-## Plot a few samples, along with their labels as title in a 4x4 grid (chose them at random)
+## Plot a few samples in a 4x4 grid (chose them at random)
 fig, axs = plt.subplots(4, 4, figsize=(10, 10), sharex=True)
 colors = ['r', 'g', 'b', 'c', 'm', 'y']
 
 dataset = config['general']['dataset']
 image_datasets = ["mnist", "mnist_fashion", "cifar", "celeba"]
-dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends"]
+dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_damper"]
+repeat_datasets = ["lotka"]
 
 res = (width, width, data_size)
+dim0, dim1 = (0, 1)
 for i in range(4):
     for j in range(4):
-        idx = np.random.randint(0, images.shape[0])
+        idx = np.random.randint(0, in_sequence.shape[0])
         if dataset in image_datasets:
-            to_plot = images[idx].reshape(res)
+            to_plot = in_sequence[idx].reshape(res)
             if dataset=="celeba":
                 to_plot = (to_plot + 1) / 2
             axs[i, j].imshow(to_plot, cmap='gray')
         elif dataset=="trends":
-            axs[i, j].plot(images[idx], color=colors[labels[idx]])
-            dim0, dim1 = (0, 1)
+            axs[i, j].plot(in_sequence[idx], color=colors[output[idx]])
+        elif dataset in repeat_datasets:
+            # axs[i, j].plot(in_sequence[idx, :, dim0], in_sequence[idx, :, dim1], color=colors[(i*j)%len(colors)])
+            # axs[i, j].plot(output[idx, :, dim0], output[idx, :, dim1], color=colors[(i*j)%len(colors)], linestyle='--')
+            ## Make 4 plots against time steps instead
+            axs[i, j].plot(output[idx, :, dim0], color=colors[(i*j)%len(colors)], linestyle='-', lw=1, alpha=0.5)
+            axs[i, j].plot(output[idx, :, dim1], color=colors[(i*j)%len(colors)], linestyle='--', lw=1, alpha=0.5)
+            axs[i, j].plot(in_sequence[idx, :, dim0], color=colors[(i*j)%len(colors)], lw=3)
+            axs[i, j].plot(in_sequence[idx, :, dim1], color=colors[(i*j)%len(colors)], linestyle='--', lw=3)
         else:
-            dim0, dim1 = (0, 1)
-            axs[i, j].plot(images[idx, :, dim0], images[idx, :, dim1], color=colors[labels[idx]%len(colors)])
+            # axs[i, j].plot(in_sequence[idx, :, dim0], in_sequence[idx, :, dim1], color=colors[output[idx]%len(colors)])
+            axs[i, j].plot(in_sequence[idx, :, dim0], color=colors[output[idx]%len(colors)], lw=3)
+            axs[i, j].plot(in_sequence[idx, :, dim1], color=colors[output[idx]%len(colors)], linestyle='--', lw=3)
 
-        axs[i, j].set_title(f"Class: {labels[idx]}", fontsize=12)
+        if dataset not in repeat_datasets:
+            axs[i, j].set_title(f"Class: {output[idx]}", fontsize=12)
         axs[i, j].axis('off')
 
 plt.suptitle(f"{dataset.upper()} Training Samples", fontsize=20)
@@ -198,7 +218,7 @@ def loss_fn(model, batch, key):
     Ts: (batch, time)
     Ys: (batch, num_classes)
     """
-    (X_true, times), _ = batch
+    (X_true, times), X_true_out = batch
 
     X_recons = model(X_true, times, key, inference_start=None)
 
@@ -209,11 +229,18 @@ def loss_fn(model, batch, key):
         indices_1 = jax.random.randint(key, (batch_size, nb_recons_loss_steps), 0, nb_timesteps)
 
         X_recons_ = jnp.stack([X_recons[indices_0, indices_1[:,j]] for j in range(nb_recons_loss_steps)], axis=1)
-        X_true_ = jnp.stack([X_true[indices_0, indices_1[:,j]] for j in range(nb_recons_loss_steps)], axis=1)
+
+        if dataset not in repeat_datasets:
+            X_true_ = jnp.stack([X_true[indices_0, indices_1[:,j]] for j in range(nb_recons_loss_steps)], axis=1)
+        else:
+            X_true_ = jnp.stack([X_true_out[indices_0, indices_1[:,j]] for j in range(nb_recons_loss_steps)], axis=1)
 
     else:
         X_recons_ = X_recons
-        X_true_ = X_true
+        if dataset not in repeat_datasets:
+            X_true_ = X_true
+        else:
+            X_true_ = X_true_out
 
     if use_nll_loss:
         means = X_recons_[:, :, :data_size]
@@ -321,6 +348,10 @@ if train:
                     pickle.dump(opt_state, f)
                 logger.info("Best model saved ...")
 
+        if epoch==3:     ## Print the output of nvidia-smi to check VRAM usage
+            os.system("nvidia-smi")
+            os.system("nvidia-smi >> "+artefacts_folder+"training.log")
+
     wall_time = time.time() - start_time
     logger.info("\nTraining complete. Total time: %d hours %d mins %d secs" %seconds_to_hours(wall_time))
 
@@ -391,48 +422,68 @@ if os.path.exists(artefacts_folder+"lr_scales.npy"):
 
 # %% Other visualisation of the model
 
-## Let's visualise the distribution of values along the main diagonal of A and theta
-fig, axs = plt.subplots(1, 2, figsize=(20, 10))
-axs[0].hist(jnp.diag(model.As[0], k=0), bins=100)
+if config["model"]["model_type"] == "wsm":
 
-axs[0].set_title("Histogram of diagonal values of A (first layer)")
+    ## Let's visualise the distribution of values along the main diagonal of A and theta
+    fig, axs = plt.subplots(1, 2, figsize=(20, 10))
+    axs[0].hist(jnp.diag(model.As[0], k=0), bins=100)
 
-axs[1].hist(model.thetas[0], bins=100, label="After Training")
-axs[1].hist(untrained_model.thetas[0], bins=100, alpha=0.5, label="Before Training", color='r')
-axs[1].set_title(r"Histogram of $\theta_0$ values")
-plt.legend();
-plt.draw();
-plt.savefig(plots_folder+"A_theta_histograms.png", dpi=100, bbox_inches='tight')
+    axs[0].set_title("Histogram of diagonal values of A (first layer)")
 
-## PLot all values of B in a lineplot (all dimensions)
-if not isinstance(model.Bs[0], eqx.nn.Linear):
-    fig, ax = plt.subplots(1, 1, figsize=(10, 4))
-    ax.plot(model.Bs[0], label="Values of B")
-    ax.set_title("Values of B")
-    ax.set_xlabel("Dimension")
+    axs[1].hist(model.thetas[0], bins=100, label="After Training")
+    axs[1].hist(untrained_model.thetas[0], bins=100, alpha=0.5, label="Before Training", color='r')
+    axs[1].set_title(r"Histogram of $\theta_0$ values")
+    plt.legend();
     plt.draw();
-    plt.savefig(plots_folder+"B_values.png", dpi=100, bbox_inches='tight')
+    plt.savefig(plots_folder+"A_theta_histograms.png", dpi=100, bbox_inches='tight')
 
-## Print the untrained and trained matrices A as imshows with same range
-fig, axs = plt.subplots(1, 2, figsize=(20, 10))
-min_val = -0.00
-max_val = 0.00003
+    ## PLot all values of B in a lineplot (all dimensions)
+    if not isinstance(model.Bs[0], eqx.nn.Linear):
+        fig, ax = plt.subplots(1, 1, figsize=(10, 4))
+        ax.plot(model.Bs[0], label="Values of B")
+        ax.set_title("Values of B")
+        ax.set_xlabel("Dimension")
+        plt.draw();
+        plt.savefig(plots_folder+"B_values.png", dpi=100, bbox_inches='tight')
 
-img = axs[0].imshow(untrained_model.As[0], cmap='viridis', vmin=min_val, vmax=max_val)
-axs[0].set_title("Untrained A")
-plt.colorbar(img, ax=axs[0], shrink=0.7)
+    ## Print the untrained and trained matrices A as imshows with same range
+    fig, axs = plt.subplots(1, 2, figsize=(20, 10))
+    min_val = -0.00
+    max_val = 0.0003
 
-img = axs[1].imshow(model.As[0], cmap='viridis', vmin=min_val, vmax=max_val)
-axs[1].set_title("Trained A")
-plt.colorbar(img, ax=axs[1], shrink=0.7)
-plt.draw();
-plt.savefig(plots_folder+"A_matrices.png", dpi=100, bbox_inches='tight')
+    img = axs[0].imshow(untrained_model.As[0], cmap='viridis', vmin=min_val, vmax=max_val)
+    axs[0].set_title("Untrained A")
+    plt.colorbar(img, ax=axs[0], shrink=0.7)
+
+    img = axs[1].imshow(model.As[0], cmap='viridis', vmin=min_val, vmax=max_val)
+    axs[1].set_title("Trained A")
+    plt.colorbar(img, ax=axs[1], shrink=0.7)
+    plt.draw();
+    plt.savefig(plots_folder+"A_matrices.png", dpi=100, bbox_inches='tight')
 
 
+    ## Print the dynamic tanh_params attribute
+    if config['model']['apply_dynamic_tanh']:
+        latex_string = r"y = \alpha \cdot \text{tanh} \left( \frac{x-b}{a} \right) + \beta"
+        logger.info(f"Dynamic tanh params (final root network activation) : ${latex_string}$ ")
 
+        display(Math(latex_string))
+        logger.info(f"a, b, alpha, beta: {model.dtanh_params}")
 
-
-
+        ## Plot this against a normal tanh
+        fig, ax = plt.subplots(1, 1, figsize=(10, 4))
+        x = np.linspace(-3.5, 3.5, 500)
+        y = np.tanh(x)
+        a, b, alpha, beta = model.dtanh_params
+        y2 = alpha * np.tanh((x-b)/a) + beta
+        ax.plot(x, y, label="tanh")
+        ax.plot(x, y2, label="Dynamic tanh")
+        ax.set_title("Dynamic tanh vs tanh after training")
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        ax.legend()
+        plt.draw();
+        plt.savefig(plots_folder+"dynamic_tanh.png", dpi=100, bbox_inches='tight')
 
 
 # %% Evaluate the model on the test set
@@ -440,42 +491,97 @@ plt.savefig(plots_folder+"A_matrices.png", dpi=100, bbox_inches='tight')
 @eqx.filter_jit
 def eval_step(model, X, times, key, inference_start=None):
     """ Evaluate the model on a batch of data. """
-    X_recons, thetas = model(X, times, key, inference_start)
+    X_recons, _ = model(X, times, key, inference_start)
     return X_recons
 
-mses = []
+def eval_on_test_set(model, key):
+    mses = []
+    new_key, _ = jax.random.split(key)
+    for i, batch in enumerate(testloader):
+        new_key, _ = jax.random.split(new_key)
+        (X_true, times), X_labs_outs = batch
+
+        X_recons = eval_step(model, X_true, times, new_key, inference_start=None)
+        if use_nll_loss:
+            X_recons = X_recons[:, :, :data_size]
+        if dataset in repeat_datasets:
+            mse = jnp.mean((X_recons - X_labs_outs)**2)
+        else:
+            mse = jnp.mean((X_recons - X_true)**2)
+        mses.append(mse)
+
+    return np.mean(mses), np.median(mses), np.min(mses)
+
 test_key, _ = jax.random.split(train_key)
-for i, batch in enumerate(testloader):
-    test_key, _ = jax.random.split(test_key)
-    (X_true, times), X_labels = batch
+mean_mse, median_mse, min_mse = eval_on_test_set(model, test_key)
 
-    X_recons = eval_step(model, X_true, times, test_key, inference_start=None)
-    if use_nll_loss:
-        X_recons = X_recons[:, :, :data_size]
-    mse = jnp.mean((X_recons - X_true)**2)
-    mses.append(mse)
+logger.info("Evaluation of MSE on the test set, at the end of the training (Current Best Model):")
+logger.info(f"    - Mean : {mean_mse:.6f}")
+logger.info(f"    - Median : {median_mse:.6f}")
+logger.info(f"    - Min : {min_mse:.6f}")
 
-logger.info("Evaluation of MSE the test set:")
-logger.info(f"    - Mean : {np.mean(mses):.6f}")
-logger.info(f"    - Median : {np.median(mses):.6f}")
-logger.info(f"    - Min : {np.min(mses):.6f}")
+nb_epochs = config['training']['nb_epochs']
+checkpoint_every = config['training']['checkpoint_every']
+
+best_model = model
+best_mse = mean_mse
+best_mse_epoch = nb_epochs-1        ## TODO: model might not have been trained for all epochs
+
+if os.path.exists(artefacts_folder+"test_mses.npz"):
+    checkpoints_data = np.load(artefacts_folder+"test_mses.npz")
+    mses_chekpoints = checkpoints_data['data']
+    best_mse_epoch = checkpoints_data['best_epoch'].item()
+    best_mse = checkpoints_data['best_mse'].item()
+    best_model = eqx.tree_deserialise_leaves(checkpoints_folder+f"model_{best_mse_epoch}.eqx", model)
+    id_checkpoints = (np.arange(0, nb_epochs, checkpoint_every).tolist() + [nb_epochs-1])[:len(mses_chekpoints)]
+    logger.info("Checkpoints MSE artefact file found. Loading it.")
+
+else:
+    mses_chekpoints = [] 
+    id_checkpoints = []
+
+    ## Lead the model at each checkpoint and evaluate it
+    for i in list(range(0, nb_epochs, checkpoint_every))+[nb_epochs-1]:
+        try:
+            model = eqx.tree_deserialise_leaves(checkpoints_folder+f"model_{i}.eqx", model)
+        except:
+            logger.info(f"Checkpoint {i} not found. Skipping.")
+            continue
+
+        mean, med, min_ = eval_on_test_set(model, test_key)
+        mses_chekpoints.append(mean)
+        id_checkpoints.append(i)
+
+        if mean<best_mse:
+            best_model = model
+            best_mse = mean
+            best_mse_epoch = i
+            logger.info(f"New best model found at epoch {i} with MSE: {best_mse:.6f}")
+        # logger.info(f"Checkpoint {i} MSE: {mean:.6f} (Mean), {med:.6f} (Median), {min_:.6f} (Min)")
+
+    ## Save the checkpoints MSEs artefacts
+    np.savez(artefacts_folder+"test_mses.npz", data=np.array(mses_chekpoints), best_epoch=best_mse_epoch, best_mse=best_mse)
+
+## Plot the MSE of the checkpoints
+fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+ax = sbplot(id_checkpoints, mses_chekpoints, title="MSE on Test Set at Various Checkpoints", x_label='Epoch', y_label='MSE', ax=ax, y_scale="log", linewidth=3);
+plt.axvline(x=best_mse_epoch, color='r', linestyle='--', linewidth=3, label=f"Best MSE: {best_mse:.6f} at Epoch {best_mse_epoch}")
+plt.legend(fontsize=16)
+plt.draw();
+plt.savefig(plots_folder+"checkpoints_mse.png", dpi=100, bbox_inches='tight')
+logger.info(f"Best model found at epoch {best_mse_epoch} with MSE: {best_mse:.6f}")
 
 
-
-
-
+### ===== Very importtant: Set the best model on test set as the model for visualisation ? ==== TODO
+# model = best_model
 
 # %% Visualising a few reconstruction samples
-
-## Change the numpy and torch seed
-np.random.seed(seed+1)
-torch.manual_seed(seed+1)
 
 ## Set inference mode to True
 visloader = NumpyLoader(testloader.dataset, batch_size=16, shuffle=True)
 
 nb_cols = 3 if use_nll_loss else 2
-fig, axs = plt.subplots(4, 4*nb_cols, figsize=(16*3, 16), sharex=False, constrained_layout=True)
+fig, axs = plt.subplots(4, 4*nb_cols, figsize=(16*3, 16), sharex=True, constrained_layout=True)
 
 batch = next(iter(visloader))
 (xs_true, times), labels = batch
@@ -492,15 +598,19 @@ if use_nll_loss:
     xs_recons = xs_recons[:, :, :data_size]
 
 res = (width, width, data_size)
+mpl.rcParams['lines.linewidth'] = 3
+
 for i in range(4):
     for j in range(4):
         x = xs_true[i*4+j]
         x_recons = xs_recons[i*4+j]
+        x_full = labels[i*4+j]
 
-        ## Min/max along dim0, for both x and x_recons
-        min_0, max_0 = min(np.min(x[:, dim0]), np.min(x_recons[:, dim0])), max(np.max(x[:, dim0]), np.max(x_recons[:, dim0]))
-        min_1, max_1 = min(np.min(x[:, dim1]), np.min(x_recons[:, dim1])), max(np.max(x[:, dim1]), np.max(x_recons[:, dim1]))
-        eps = 0.04
+        if dataset in dynamics_datasets+repeat_datasets:
+            ## Min/max along dim0, for both x and x_recons
+            min_0, max_0 = min(np.min(x[:, dim0]), np.min(x_recons[:, dim0])), max(np.max(x[:, dim0]), np.max(x_recons[:, dim0]))
+            min_1, max_1 = min(np.min(x[:, dim1]), np.min(x_recons[:, dim1])), max(np.max(x[:, dim1]), np.max(x_recons[:, dim1]))
+            eps = 0.04
 
         if dataset in image_datasets:
             to_plot = x.reshape(res)
@@ -509,11 +619,15 @@ for i in range(4):
             axs[i, nb_cols*j].imshow(to_plot, cmap='gray')
         elif dataset == "trends":
             axs[i, nb_cols*j].plot(x, color=colors[labels[i*4+j]])
+        elif dataset in repeat_datasets:
+            axs[i, nb_cols*j].set_ylim([min_1-eps, max_1+eps])
+            axs[i, nb_cols*j].plot(x_full[:, dim0], color=colors[(i*4+j)%len(colors)])
+            axs[i, nb_cols*j].plot(x_full[:, dim1], color=colors[(i*4+j)%len(colors)], linestyle='-.')
         else:
             # axs[i, nb_cols*j].set_xlim([min_0-eps, max_0+eps])
             axs[i, nb_cols*j].set_ylim([min_1-eps, max_1+eps])
             axs[i, nb_cols*j].plot(x[:, dim0], color=colors[labels[i*4+j]%len(colors)])
-            axs[i, nb_cols*j].plot(x[:, dim1], color=colors[labels[i*4+j]%len(colors)])
+            axs[i, nb_cols*j].plot(x[:, dim1], color=colors[labels[i*4+j]%len(colors)], linestyle='-.')
         if i==0:
             axs[i, nb_cols*j].set_title("GT", fontsize=40)
         # axs[i, nb_cols*j].axis('off')
@@ -523,11 +637,15 @@ for i in range(4):
             if dataset=="celeba":
                 to_plot = (to_plot + 1) / 2
             axs[i, nb_cols*j+1].imshow(to_plot, cmap='gray')
-        elif dataset in dynamics_datasets:
+        elif dataset in dynamics_datasets and dataset not in repeat_datasets:
             # axs[i, nb_cols*j+1].set_xlim([min_0-eps, max_0+eps])
             axs[i, nb_cols*j+1].set_ylim([min_1-eps, max_1+eps])
             axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[labels[i*4+j]%len(colors)])
-            axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[labels[i*4+j]%len(colors)])
+            axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[labels[i*4+j]%len(colors)], linestyle='-.')
+        elif dataset in repeat_datasets:
+            axs[i, nb_cols*j+1].set_ylim([min_1-eps, max_1+eps])
+            axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[(i*4+j)%len(colors)])
+            axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[(i*4+j)%len(colors)], linestyle='-.')
         else:
             axs[i, nb_cols*j+1].plot(x_recons, color=colors[labels[i*4+j]])
         if i==0:
@@ -553,9 +671,6 @@ plt.savefig(plots_folder+"samples_generated.png", dpi=100, bbox_inches='tight')
 
 
 
-
-#%%
-len(model.root_utils[0])
 
 
 # %% Analysing the weight space
@@ -637,8 +752,6 @@ plt.savefig(plots_folder+"results_matrix.pdf", dpi=100, bbox_inches='tight')
 
 #%% Visualise the thetas themselves
 fig, ax = plt.subplots(1, 1, figsize=(10, 10), sharey=True)
-# min_val = 0.
-# max_val = 1.
 
 
 ## Noramlisation along the axis1
@@ -660,71 +773,14 @@ ax.set_title(r"$\theta_t$", fontsize=40)
 
 #%% Let's finetune theta0, but each step individually
 
-# def tinetune_loss_fn(thets):
-#     X_recons = eqx.filter_vmap(apply_theta)(thets)
-#     X_recons = jnp.stack([X_recons[i, i, :] for i in range(X_recons.shape[0])], axis=0)
-#     print(f"Shape of X_recons: {X_recons.shape}")
-#     loss_r = optax.l2_loss(X_recons, xs_true[0])
-#     loss = jnp.mean(loss_r)
-#     return loss
-
-# finetune_opt = optax.adabelief(1e-2)
-# # thet = thetas[0, :, :]
-# thet = jnp.tile(thetas[0, 0, :], (256, 1))
-# print(f"Shape of thet: {thet.shape}")
-
-# finetune_opt_state = finetune_opt.init(eqx.filter(thet, eqx.is_array))
-
-# @eqx.filter_jit
-# def finetune_step(thet, opt_state):
-#     print('\nCompiling function "finetune_step" ...')
-#     loss, grads = eqx.filter_value_and_grad(tinetune_loss_fn)(thet)
-#     updates, opt_state = finetune_opt.update(grads, opt_state, thet)
-#     thet = eqx.apply_updates(thet, updates)
-#     return thet, opt_state, loss
-
-# finetune_losses = []
-# finetune_thetas_all = []
-# for ep in range(256):
-#     thet, finetune_opt_state, loss = finetune_step(thet, finetune_opt_state)
-#     finetune_losses.append(loss)
-#     finetune_thetas_all.append(thet)
-
-#     if ep%100==0 or ep==255:
-#         logger.info(f"Finetuning step {ep} - Loss: {loss:.6f}")
-
-
-# finetune_thetas_all = np.stack(finetune_thetas_all)
-# ## Plot the finetuning losses
-# fig, ax = plt.subplots(1, 1, figsize=(10, 5))
-# ax.plot(finetune_losses, 'b-', lw=2, label="Finetuning Loss")
-# ax.set_title("Finetuning Loss")
-# ax.set_xlabel("Finetuning Steps")
-
-
-# ## Visualize the finetuning trajectory
-# fig, ax = plt.subplots(1, 1, figsize=(10, 10), sharey=True)
-# # min_val = 0.
-# # max_val = 1.
-# # finetune_recons = apply_theta(thetas[0, 0, :])
-# X_recons = eqx.filter_vmap(apply_theta)(thet)
-# finetune_recons = jnp.stack([X_recons[i, i, :] for i in range(X_recons.shape[0])], axis=0)
-# ax.plot(finetune_recons[:, 0])
-# ax.plot(finetune_recons[:, 1])
-# ax.set_title("Finetuning Trajectory")
-# #%%
-# # finetune_thetas = finetune_thetas_all[-1]
-# finetune_thetas = finetune_thetas_all[:, -1, :]
-# print(f"Shape of finetune_thetas: {finetune_thetas_all.shape}")
-
-
 
 
 
 #%% Let's finetune theta0 for 256 gradient descent steps on the trajectory
 def tinetune_loss_fn(thet):
     X_recons = apply_theta(thet)
-    loss_r = optax.l2_loss(X_recons, xs_true[0])
+    print(f"Shape of X_recons: {X_recons.shape}, {xs_true[0].shape}")
+    loss_r = optax.l2_loss(X_recons[...,:1], xs_true[0])
     loss = jnp.mean(loss_r)
     return loss
 
@@ -788,15 +844,11 @@ ax.set_xlabel("Finetuning Steps")
 
 ## Visualize the finetuning trajectory
 fig, ax = plt.subplots(1, 1, figsize=(10, 10), sharey=True)
-# min_val = 0.
-# max_val = 1.
 # finetune_recons = apply_theta(thetas[0, 0, :])
 finetune_recons = apply_theta(thet)
 ax.plot(finetune_recons[:, 0])
 ax.plot(finetune_recons[:, 1])
 ax.set_title("Finetuning Trajectory")
-
-
 
 
 #%% Let's do PCA on theta_0
@@ -892,66 +944,4 @@ plt.draw();
 plt.savefig(plots_folder+"wsm_vs_gd_grad.png", dpi=100, bbox_inches='tight')
 plt.savefig(plots_folder+"wsm_vs_gd_grad.pdf", dpi=100, bbox_inches='tight')
 
-#%% Plot the last matrix 
-
-final_res = results_matrix[:, -1, :]
-
-## final res as the diagonal of the matrix
-final_res = np.zeros((256, 2))
-for i in range(256):
-    final_res[i, 0] = results_matrix[i, i, 0]
-    final_res[i, 1] = results_matrix[i, i, 1]
-
-fig, axs = plt.subplots(1, 1, figsize=(10, 5))
-
-plt.plot(final_res[:, 0], 'b-', lw=2, label="X")
-plt.plot(final_res[:, 1], 'g-', lw=2, label="Y")
-
-# plt.title("Final Theta")
-plt.xlabel(r"$t$")
-# plt.ylabel("Value")
-
-plt.legend()
-plt.draw();
-
-#%% Lets analyse eigen values of the matrix A
-
-A = model.As[0]
-print(f"Shape of A: {A.shape}")
-eigs = np.linalg.eigvals(A)
-
-
-## Check if the eigen values are complex
-complex_eigs = np.iscomplex(eigs)
-print(f"Number of complex eigen values: {np.sum(complex_eigs)}")
-print(f"Number of real eigen values: {np.sum(~complex_eigs)}")
-## Print the real and imaginary parts of the complex eigen values
-print(f"Real part of complex eigen values: {np.real(eigs[complex_eigs])}")
-print(f"Imaginary part of complex eigen values: {np.imag(eigs[complex_eigs])}")
-
-## Plot the real against the  complex parts of the eigen values 
-# real_eigs = np.real(eigs[~complex_eigs])
-real_part = np.real(eigs[complex_eigs])
-complex_part = np.imag(eigs[complex_eigs])
-
-fig, axs = plt.subplots(1, 1, figsize=(10, 10))
-plt.plot(real_part, complex_part, 'bo', lw=2)
-plt.title("Eigen values of A")
-plt.xlabel("Real part")
-plt.ylabel("Imaginary part")
-plt.draw();
-
-
-## Check whether the matrix is stable
-stable = np.all(np.abs(eigs) < 1)
-print(f"Matrix is stable: {stable}")
-if stable:
-    print("Matrix is stable")
-else:
-    print("Matrix is not stable")
-    print(f"Eigen values: {eigs}")
-    print(f"Max eigen value: {np.max(np.abs(eigs))}")
-    print(f"Min eigen value: {np.min(np.abs(eigs))}")
-    print(f"Mean eigen value: {np.mean(np.abs(eigs))}")
-    print(f"Median eigen value: {np.median(np.abs(eigs))}")
-    print(f"Std eigen value: {np.std(np.abs(eigs))}")
+# %%

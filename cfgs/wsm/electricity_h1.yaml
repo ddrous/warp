@@ -7,7 +7,6 @@ general:
   train: True
   dataset: "electricity"  # Options: mnist, cifar, lorentz, dynamics
   data_path: "./data/dynamics/electricity/h1/"
-  # save_path: "./runs/250404-175026-Test/"
   save_path: null
 
 # Data hyperparameters (dependent on the dataset)
@@ -15,20 +14,21 @@ data:
   downsample_factor: 1
   resolution: [32, 32]         # For celebA
   traj_length: 1000
+  normalize: True
 
 # Model hyperparameters
 model:
-  mlp_width_size: 128
-  mlp_depth: 1
-  activation: "swish"
+  root_width_size: 148
+  root_depth: 1
+  root_activation: "relu"
+  root_final_activation: 1.0
   input_prev_data: False
   model_type: "wsm"
   init_state_layers: 2          ## null to directly learn the initial state
   nb_rnn_layers: 1
   weights_lim: null
-  dynamic_tanh_init: [5.0, 0.0, 5.0, 0.0]    ## a, b, alpha, beta
-  time_as_channel: False
-  forcing_prob: 0.5
+  time_as_channel: True
+  forcing_prob: 0.25
   noise_theta_init: null
   std_lower_bound: 1.0e-4
   rnn_hidden_size: 128          # For GRUs and LSTMs
@@ -47,10 +47,10 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 5000
+  nb_epochs: 1000
   batch_size: 4800
   print_every: 100
-  autoregressive: False
+  autoregressive: True
   checkpoint_every: 100
   nb_recons_loss_steps: null
   use_nll_loss: False

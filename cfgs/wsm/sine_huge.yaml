@@ -47,7 +47,7 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 100
+  nb_epochs: 1000
   batch_size: 10000
   autoregressive: True
   print_every: 10

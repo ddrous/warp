@@ -517,3 +517,198 @@
 2025-04-21 11:45:20,114 - INFO - Min/Max Uncertainty: 0.500, 1.118
 2025-04-21 11:45:20,118 - INFO - Min/Max Uncertainty: 0.500, 1.118
 2025-04-21 11:45:20,123 - INFO - Min/Max Uncertainty: 0.500, 1.118
+2025-05-12 16:26:59,250 - INFO - Started logging to ./artefacts/testing.log
+2025-05-12 16:26:59,251 - INFO - Config file: config.yaml
+2025-05-12 16:26:59,252 - INFO - ==== Config file's contents ====
+2025-05-12 16:26:59,252 - INFO - general:
+2025-05-12 16:26:59,252 - INFO -   seed: 2024
+2025-05-12 16:26:59,252 - INFO -   train: False
+2025-05-12 16:26:59,252 - INFO -   dataset: mnist
+2025-05-12 16:26:59,253 - INFO -   data_path: ./data/
+2025-05-12 16:26:59,253 - INFO -   save_path: None
+2025-05-12 16:26:59,253 - INFO - data:
+2025-05-12 16:26:59,253 - INFO -   downsample_factor: 1
+2025-05-12 16:26:59,253 - INFO -   resolution: [32, 32]
+2025-05-12 16:26:59,253 - INFO -   traj_length: 1000
+2025-05-12 16:26:59,253 - INFO - model:
+2025-05-12 16:26:59,254 - INFO -   mlp_width_size: 24
+2025-05-12 16:26:59,254 - INFO -   mlp_depth: 3
+2025-05-12 16:26:59,254 - INFO -   activation: relu
+2025-05-12 16:26:59,254 - INFO -   input_prev_data: False
+2025-05-12 16:26:59,254 - INFO -   model_type: wsm
+2025-05-12 16:26:59,254 - INFO -   nb_rnn_layers: 1
+2025-05-12 16:26:59,254 - INFO -   weights_lim: 0.5
+2025-05-12 16:26:59,254 - INFO -   apply_dynamic_tanh: True
+2025-05-12 16:26:59,255 - INFO -   time_as_channel: False
+2025-05-12 16:26:59,255 - INFO -   forcing_prob: 0.15
+2025-05-12 16:26:59,255 - INFO -   noise_theta_init: None
+2025-05-12 16:26:59,255 - INFO -   std_lower_bound: 0.5
+2025-05-12 16:26:59,255 - INFO - optimizer:
+2025-05-12 16:26:59,255 - INFO -   init_lr: 0.0001
+2025-05-12 16:26:59,256 - INFO -   gradients_lim: 1e-07
+2025-05-12 16:26:59,256 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-12 16:26:59,256 - INFO - training:
+2025-05-12 16:26:59,256 - INFO -   nb_epochs: 500
+2025-05-12 16:26:59,256 - INFO -   batch_size: 640
+2025-05-12 16:26:59,256 - INFO -   print_every: 10
+2025-05-12 16:26:59,257 - INFO -   checkpoint_every: 10
+2025-05-12 16:26:59,257 - INFO -   nb_recons_loss_steps: 400
+2025-05-12 16:26:59,257 - INFO -   use_nll_loss: True
+2025-05-12 16:26:59,257 - INFO -   inference_start: 300
+2025-05-12 16:27:02,924 - INFO - Input sequence shape: (640, 784, 1)
+2025-05-12 16:27:02,924 - INFO - Labels/OutputSequence shape: (640,)
+2025-05-12 16:27:02,925 - INFO - Seq length: 784
+2025-05-12 16:27:02,925 - INFO - Data size: 1
+2025-05-12 16:27:02,926 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-05-12 16:27:02,926 - INFO - Number of batches:
+2025-05-12 16:27:02,926 - INFO -   - Train: 94
+2025-05-12 16:27:02,927 - INFO -   - Test: 16
+2025-05-12 16:27:04,796 - INFO - Model loaded from ./model.eqx
+2025-05-12 16:27:07,371 - INFO - Dynamic tanh params (final root network activation) : $y = \alpha \cdot \text{tanh} \left( \frac{x-b}{a} \right) + \beta$ 
+2025-05-12 16:27:07,373 - INFO - a, b, alpha, beta: [ 1.0810678   0.00204512  1.0031788  -0.00825324]
+2025-05-12 16:27:12,058 - INFO - Evaluation of MSE on the test set, at the end of the training (Current Best Model):
+2025-05-12 16:27:12,059 - INFO -     - Mean : 0.119783
+2025-05-12 16:27:12,059 - INFO -     - Median : 0.119902
+2025-05-12 16:27:12,059 - INFO -     - Min : 0.116215
+2025-05-12 16:27:12,079 - INFO - Checkpoints MSE artefact file found. Loading it.
+2025-05-12 16:27:12,257 - INFO - Best model found at epoch 499 with MSE: 0.119237
+2025-05-12 16:27:13,035 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,049 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,062 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,076 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,089 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,103 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,116 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,130 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,143 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,157 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,170 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,184 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,198 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,211 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,224 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:27:13,233 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:29:40,343 - INFO - Started logging to ./artefacts/testing.log
+2025-05-12 16:29:40,344 - INFO - Config file: config.yaml
+2025-05-12 16:29:40,344 - INFO - ==== Config file's contents ====
+2025-05-12 16:29:40,345 - INFO - general:
+2025-05-12 16:29:40,345 - INFO -   seed: 2024
+2025-05-12 16:29:40,345 - INFO -   train: False
+2025-05-12 16:29:40,345 - INFO -   dataset: mnist
+2025-05-12 16:29:40,345 - INFO -   data_path: ./data/
+2025-05-12 16:29:40,346 - INFO -   save_path: None
+2025-05-12 16:29:40,346 - INFO - data:
+2025-05-12 16:29:40,347 - INFO -   downsample_factor: 1
+2025-05-12 16:29:40,347 - INFO -   resolution: [32, 32]
+2025-05-12 16:29:40,347 - INFO -   traj_length: 1000
+2025-05-12 16:29:40,347 - INFO - model:
+2025-05-12 16:29:40,348 - INFO -   mlp_width_size: 24
+2025-05-12 16:29:40,348 - INFO -   mlp_depth: 3
+2025-05-12 16:29:40,348 - INFO -   activation: relu
+2025-05-12 16:29:40,348 - INFO -   input_prev_data: False
+2025-05-12 16:29:40,349 - INFO -   model_type: wsm
+2025-05-12 16:29:40,349 - INFO -   nb_rnn_layers: 1
+2025-05-12 16:29:40,349 - INFO -   weights_lim: 0.5
+2025-05-12 16:29:40,350 - INFO -   apply_dynamic_tanh: True
+2025-05-12 16:29:40,350 - INFO -   time_as_channel: False
+2025-05-12 16:29:40,350 - INFO -   forcing_prob: 0.15
+2025-05-12 16:29:40,350 - INFO -   noise_theta_init: None
+2025-05-12 16:29:40,351 - INFO -   std_lower_bound: 0.5
+2025-05-12 16:29:40,351 - INFO - optimizer:
+2025-05-12 16:29:40,351 - INFO -   init_lr: 0.0001
+2025-05-12 16:29:40,352 - INFO -   gradients_lim: 1e-07
+2025-05-12 16:29:40,352 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-12 16:29:40,352 - INFO - training:
+2025-05-12 16:29:40,352 - INFO -   nb_epochs: 500
+2025-05-12 16:29:40,352 - INFO -   batch_size: 640
+2025-05-12 16:29:40,352 - INFO -   print_every: 10
+2025-05-12 16:29:40,353 - INFO -   checkpoint_every: 10
+2025-05-12 16:29:40,353 - INFO -   nb_recons_loss_steps: 400
+2025-05-12 16:29:40,353 - INFO -   use_nll_loss: True
+2025-05-12 16:29:40,353 - INFO -   inference_start: 300
+2025-05-12 16:29:44,019 - INFO - Input sequence shape: (640, 784, 1)
+2025-05-12 16:29:44,020 - INFO - Labels/OutputSequence shape: (640,)
+2025-05-12 16:29:44,021 - INFO - Seq length: 784
+2025-05-12 16:29:44,021 - INFO - Data size: 1
+2025-05-12 16:29:44,022 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-05-12 16:29:44,023 - INFO - Number of batches:
+2025-05-12 16:29:44,023 - INFO -   - Train: 94
+2025-05-12 16:29:44,023 - INFO -   - Test: 16
+2025-05-12 16:29:45,895 - INFO - Model loaded from ./model.eqx
+2025-05-12 16:29:48,307 - INFO - Dynamic tanh params (final root network activation) : $y = \alpha \cdot \text{tanh} \left( \frac{x-b}{a} \right) + \beta$ 
+2025-05-12 16:29:48,309 - INFO - a, b, alpha, beta: [ 1.0810678   0.00204512  1.0031788  -0.00825324]
+2025-05-12 16:30:30,369 - INFO - Started logging to ./artefacts/testing.log
+2025-05-12 16:30:30,369 - INFO - Config file: config.yaml
+2025-05-12 16:30:30,370 - INFO - ==== Config file's contents ====
+2025-05-12 16:30:30,370 - INFO - general:
+2025-05-12 16:30:30,370 - INFO -   seed: 2024
+2025-05-12 16:30:30,370 - INFO -   train: False
+2025-05-12 16:30:30,370 - INFO -   dataset: mnist
+2025-05-12 16:30:30,370 - INFO -   data_path: ./data/
+2025-05-12 16:30:30,371 - INFO -   save_path: None
+2025-05-12 16:30:30,371 - INFO - data:
+2025-05-12 16:30:30,371 - INFO -   downsample_factor: 1
+2025-05-12 16:30:30,371 - INFO -   resolution: [32, 32]
+2025-05-12 16:30:30,371 - INFO -   traj_length: 1000
+2025-05-12 16:30:30,371 - INFO - model:
+2025-05-12 16:30:30,371 - INFO -   mlp_width_size: 24
+2025-05-12 16:30:30,372 - INFO -   mlp_depth: 3
+2025-05-12 16:30:30,372 - INFO -   activation: relu
+2025-05-12 16:30:30,372 - INFO -   input_prev_data: False
+2025-05-12 16:30:30,372 - INFO -   model_type: wsm
+2025-05-12 16:30:30,372 - INFO -   nb_rnn_layers: 1
+2025-05-12 16:30:30,372 - INFO -   weights_lim: 0.5
+2025-05-12 16:30:30,373 - INFO -   apply_dynamic_tanh: True
+2025-05-12 16:30:30,373 - INFO -   time_as_channel: False
+2025-05-12 16:30:30,373 - INFO -   forcing_prob: 0.15
+2025-05-12 16:30:30,373 - INFO -   noise_theta_init: None
+2025-05-12 16:30:30,373 - INFO -   std_lower_bound: 0.5
+2025-05-12 16:30:30,374 - INFO - optimizer:
+2025-05-12 16:30:30,374 - INFO -   init_lr: 0.0001
+2025-05-12 16:30:30,374 - INFO -   gradients_lim: 1e-07
+2025-05-12 16:30:30,375 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-12 16:30:30,375 - INFO - training:
+2025-05-12 16:30:30,375 - INFO -   nb_epochs: 500
+2025-05-12 16:30:30,375 - INFO -   batch_size: 640
+2025-05-12 16:30:30,375 - INFO -   print_every: 10
+2025-05-12 16:30:30,376 - INFO -   checkpoint_every: 10
+2025-05-12 16:30:30,376 - INFO -   nb_recons_loss_steps: 400
+2025-05-12 16:30:30,376 - INFO -   use_nll_loss: True
+2025-05-12 16:30:30,376 - INFO -   inference_start: 300
+2025-05-12 16:30:33,831 - INFO - Input sequence shape: (640, 784, 1)
+2025-05-12 16:30:33,832 - INFO - Labels/OutputSequence shape: (640,)
+2025-05-12 16:30:33,832 - INFO - Seq length: 784
+2025-05-12 16:30:33,833 - INFO - Data size: 1
+2025-05-12 16:30:33,833 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-05-12 16:30:33,833 - INFO - Number of batches:
+2025-05-12 16:30:33,833 - INFO -   - Train: 94
+2025-05-12 16:30:33,834 - INFO -   - Test: 16
+2025-05-12 16:30:35,939 - INFO - Model loaded from ./model.eqx
+2025-05-12 16:30:38,521 - INFO - Dynamic tanh params (final root network activation) : $y = \alpha \cdot \text{tanh} \left( \frac{x-b}{a} \right) + \beta$ 
+2025-05-12 16:30:38,522 - INFO - a, b, alpha, beta: [ 1.0810678   0.00204512  1.0031788  -0.00825324]
+2025-05-12 16:30:43,121 - INFO - Evaluation of MSE on the test set, at the end of the training (Current Best Model):
+2025-05-12 16:30:43,124 - INFO -     - Mean : 0.119783
+2025-05-12 16:30:43,125 - INFO -     - Median : 0.119902
+2025-05-12 16:30:43,125 - INFO -     - Min : 0.116215
+2025-05-12 16:30:43,130 - INFO - Checkpoints MSE artefact file found. Loading it.
+2025-05-12 16:30:43,303 - INFO - Best model found at epoch 499 with MSE: 0.119237
+2025-05-12 16:30:44,023 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,030 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,042 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,054 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,065 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,075 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,088 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,097 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,112 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,126 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,140 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,153 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,168 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,182 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,196 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:30:44,209 - INFO - Min/Max Uncertainty: 0.500, 0.975
+2025-05-12 16:32:45,484 - INFO - Finetuning step 0 - Loss: 0.159416
+2025-05-12 16:32:45,554 - INFO - Finetuning step 100 - Loss: 0.128427
+2025-05-12 16:32:45,606 - INFO - Finetuning step 200 - Loss: 0.127900
+2025-05-12 16:32:45,771 - INFO - Finetuning step 255 - Loss: 0.127479

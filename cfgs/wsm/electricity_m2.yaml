@@ -6,7 +6,7 @@ general:
   classification: False
   train: True
   dataset: "electricity"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/dynamics/electricity/h2/"
+  data_path: "./data/dynamics/electricity/m2/"
   save_path: null
 
 # Data hyperparameters (dependent on the dataset)
@@ -47,7 +47,7 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 2000
+  nb_epochs: 1000
   batch_size: 4800
   print_every: 100
   autoregressive: True
