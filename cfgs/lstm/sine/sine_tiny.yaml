@@ -1,0 +1,58 @@
+# Base configuration file
+
+# General settings
+general:
+  seed: 2028
+  train: True
+  dataset: "sine"  # Options: mnist, cifar, lorentz, dynamics
+  data_path: "./data/dynamics/sine/tiny/"
+  # save_path: "./runs/250404-175026-Test/"
+  save_path: null
+  classification: False
+
+# Data hyperparameters (dependent on the dataset)
+data:
+  downsample_factor: 1
+  resolution: [32, 32]         # For celebA
+  traj_length: 1000
+  normalize: False
+
+# Model hyperparameters
+model:
+  root_width_size: 48
+  root_depth: 3
+  root_activation: "swish"
+  root_final_activation: null       ## Only applies to the mean !
+  init_state_layers: 2
+  input_prev_data: False
+  model_type: "lstm"
+  nb_rnn_layers: 1
+  weights_lim: null
+  time_as_channel: False
+  forcing_prob: 0.25
+  noise_theta_init: null
+  std_lower_bound: 1.0e-4
+  rnn_hidden_size: 2280          # For GRUs and LSTMs
+
+# Optimizer hyperparameters
+optimizer:
+  init_lr: 1.0e-5
+  gradients_lim: 1.0e-7
+  on_plateau:
+    factor: 0.5
+    min_scale: 1.0e-2
+    patience: 20
+    cooldown: 0
+    rtol: 1.0e-4
+    accum_size: 50
+
+# Training/Inference hyperparameters
+training:
+  nb_epochs: 2000
+  batch_size: 10000
+  autoregressive: True
+  print_every: 100
+  checkpoint_every: 100
+  nb_recons_loss_steps: null
+  use_nll_loss: False
+  inference_start: 1

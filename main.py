@@ -122,7 +122,7 @@ if train:
     data_folder = data_path
 else:
     run_folder = "./"
-    data_folder = f"../../{data_path}"
+    data_folder = f"../../../{data_path}"
 
 print("Using run folder:", run_folder)
 ## Copy the module files to the run folder
