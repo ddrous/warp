@@ -302,3 +302,165 @@
 2025-05-07 11:53:11,983 - INFO - NLL: 0.413910
 2025-05-07 11:53:26,171 - INFO - Bits per dimension: 0.515644
 2025-05-07 11:53:26,172 - INFO - NLL: 0.357417
+2025-05-13 14:37:36,379 - INFO - Started logging to ./artefacts/testing.log
+2025-05-13 14:37:36,379 - INFO - Config file: config.yaml
+2025-05-13 14:37:36,379 - INFO - ==== Config file's contents ====
+2025-05-13 14:37:36,380 - INFO - general:
+2025-05-13 14:37:36,380 - INFO -   seed: 2024
+2025-05-13 14:37:36,380 - INFO -   train: False
+2025-05-13 14:37:36,381 - INFO -   dataset: mnist
+2025-05-13 14:37:36,381 - INFO -   data_path: ./data/
+2025-05-13 14:37:36,381 - INFO -   save_path: None
+2025-05-13 14:37:36,381 - INFO - data:
+2025-05-13 14:37:36,381 - INFO -   downsample_factor: 1
+2025-05-13 14:37:36,381 - INFO -   resolution: [32, 32]
+2025-05-13 14:37:36,382 - INFO -   traj_length: 1000
+2025-05-13 14:37:36,382 - INFO - model:
+2025-05-13 14:37:36,382 - INFO -   mlp_width_size: 24
+2025-05-13 14:37:36,382 - INFO -   mlp_depth: 3
+2025-05-13 14:37:36,382 - INFO -   activation: relu
+2025-05-13 14:37:36,382 - INFO -   input_prev_data: False
+2025-05-13 14:37:36,383 - INFO -   model_type: wsm-rnn
+2025-05-13 14:37:36,383 - INFO -   nb_rnn_layers: 1
+2025-05-13 14:37:36,384 - INFO -   weights_lim: 0.5
+2025-05-13 14:37:36,384 - INFO -   apply_tanh_uncertainty: False
+2025-05-13 14:37:36,384 - INFO -   time_as_channel: False
+2025-05-13 14:37:36,385 - INFO -   forcing_prob: 0.15
+2025-05-13 14:37:36,385 - INFO -   noise_theta_init: None
+2025-05-13 14:37:36,385 - INFO -   std_lower_bound: 0.5
+2025-05-13 14:37:36,386 - INFO - optimizer:
+2025-05-13 14:37:36,386 - INFO -   init_lr: 0.0001
+2025-05-13 14:37:36,386 - INFO -   gradients_lim: 1e-07
+2025-05-13 14:37:36,386 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-13 14:37:36,386 - INFO - training:
+2025-05-13 14:37:36,387 - INFO -   nb_epochs: 500
+2025-05-13 14:37:36,387 - INFO -   batch_size: 640
+2025-05-13 14:37:36,387 - INFO -   print_every: 10
+2025-05-13 14:37:36,387 - INFO -   checkpoint_every: 10
+2025-05-13 14:37:36,387 - INFO -   nb_recons_loss_steps: 400
+2025-05-13 14:37:36,388 - INFO -   use_nll_loss: True
+2025-05-13 14:37:36,388 - INFO -   inference_start: 300
+2025-05-13 14:37:39,363 - INFO - Images shape: (640, 784, 1)
+2025-05-13 14:37:39,364 - INFO - Labels shape: (640,)
+2025-05-13 14:37:39,364 - INFO - Seq length: 784
+2025-05-13 14:37:39,364 - INFO - Data size: 1
+2025-05-13 14:37:39,365 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-05-13 14:37:39,365 - INFO - Number of batches:
+2025-05-13 14:37:39,365 - INFO -   - Train: 94
+2025-05-13 14:37:39,365 - INFO -   - Test: 16
+2025-05-13 14:37:41,087 - INFO - Model loaded from ./model.eqx
+2025-05-13 14:37:41,128 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-05-13 14:37:41,129 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-05-13 14:37:41,129 - INFO - No losses found in the nohup.log file
+2025-05-13 14:37:47,370 - INFO - Evaluation of MSE the test set:
+2025-05-13 14:37:47,371 - INFO -     - Mean : 0.141287
+2025-05-13 14:37:47,372 - INFO -     - Median : 0.141081
+2025-05-13 14:37:47,372 - INFO -     - Min : 0.138342
+2025-05-13 14:37:47,907 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,913 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,918 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,924 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,929 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,934 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,939 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,944 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,948 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,953 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,958 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,963 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,968 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,973 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,978 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:47,983 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 14:37:54,449 - INFO - Bits per dimension (BPD): 0.515644
+2025-05-13 14:37:54,450 - INFO - Gaussian negative log-likelyhood (NLL): 0.357417
+2025-05-13 14:38:19,874 - INFO - Bits per dimension (BPD): 0.52
+2025-05-13 14:38:19,875 - INFO - Gaussian negative log-likelyhood (NLL): 0.36
+2025-05-13 14:40:59,872 - INFO - Gaussian negative log-likelyhood (NLL): 0.36
+2025-05-13 14:40:59,873 - INFO - Bits per dimension (BPD): 0.52
+2025-05-13 14:40:59,873 - INFO - Mean Squared Error (MSE): 0.04
+2025-05-13 14:41:49,287 - INFO - Gaussian negative log-likelyhood (NLL): 0.43
+2025-05-13 14:41:49,288 - INFO - Bits per dimension (BPD): 0.61
+2025-05-13 14:41:49,288 - INFO - Mean Squared Error (MSE): 0.07
+2025-05-13 14:42:12,499 - INFO - Mean Squared Error (MSE): 0.07
+2025-05-13 14:42:12,500 - INFO - Bits per dimension (BPD): 0.61
+2025-05-13 14:42:33,170 - INFO - Mean Squared Error (MSE): 0.01
+2025-05-13 14:42:33,171 - INFO - Bits per dimension (BPD): 0.42
+2025-05-13 14:42:44,795 - INFO - Mean Squared Error (MSE): 0.014
+2025-05-13 14:42:44,796 - INFO - Bits per dimension (BPD): 0.416
+2025-05-13 14:43:18,900 - INFO - Mean Squared Error (MSE): 0.042
+2025-05-13 14:43:18,901 - INFO - Bits per dimension (BPD): 0.516
+2025-05-13 14:43:38,901 - INFO - Mean Squared Error (MSE): 0.071
+2025-05-13 14:43:38,902 - INFO - Bits per dimension (BPD): 0.615
+2025-05-13 15:01:44,768 - INFO - Started logging to ./artefacts/testing.log
+2025-05-13 15:01:44,769 - INFO - Config file: config.yaml
+2025-05-13 15:01:44,769 - INFO - ==== Config file's contents ====
+2025-05-13 15:01:44,770 - INFO - general:
+2025-05-13 15:01:44,770 - INFO -   seed: 2024
+2025-05-13 15:01:44,770 - INFO -   train: False
+2025-05-13 15:01:44,771 - INFO -   dataset: mnist
+2025-05-13 15:01:44,771 - INFO -   data_path: ./data/
+2025-05-13 15:01:44,771 - INFO -   save_path: None
+2025-05-13 15:01:44,772 - INFO - data:
+2025-05-13 15:01:44,772 - INFO -   downsample_factor: 1
+2025-05-13 15:01:44,772 - INFO -   resolution: [32, 32]
+2025-05-13 15:01:44,773 - INFO -   traj_length: 1000
+2025-05-13 15:01:44,773 - INFO - model:
+2025-05-13 15:01:44,773 - INFO -   mlp_width_size: 24
+2025-05-13 15:01:44,773 - INFO -   mlp_depth: 3
+2025-05-13 15:01:44,774 - INFO -   activation: relu
+2025-05-13 15:01:44,774 - INFO -   input_prev_data: False
+2025-05-13 15:01:44,774 - INFO -   model_type: wsm-rnn
+2025-05-13 15:01:44,775 - INFO -   nb_rnn_layers: 1
+2025-05-13 15:01:44,775 - INFO -   weights_lim: 0.5
+2025-05-13 15:01:44,775 - INFO -   apply_tanh_uncertainty: False
+2025-05-13 15:01:44,775 - INFO -   time_as_channel: False
+2025-05-13 15:01:44,776 - INFO -   forcing_prob: 0.15
+2025-05-13 15:01:44,776 - INFO -   noise_theta_init: None
+2025-05-13 15:01:44,776 - INFO -   std_lower_bound: 0.5
+2025-05-13 15:01:44,777 - INFO - optimizer:
+2025-05-13 15:01:44,777 - INFO -   init_lr: 0.0001
+2025-05-13 15:01:44,777 - INFO -   gradients_lim: 1e-07
+2025-05-13 15:01:44,777 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-13 15:01:44,778 - INFO - training:
+2025-05-13 15:01:44,778 - INFO -   nb_epochs: 500
+2025-05-13 15:01:44,778 - INFO -   batch_size: 640
+2025-05-13 15:01:44,778 - INFO -   print_every: 10
+2025-05-13 15:01:44,779 - INFO -   checkpoint_every: 10
+2025-05-13 15:01:44,779 - INFO -   nb_recons_loss_steps: 400
+2025-05-13 15:01:44,779 - INFO -   use_nll_loss: True
+2025-05-13 15:01:44,780 - INFO -   inference_start: 300
+2025-05-13 15:01:47,715 - INFO - Images shape: (640, 784, 1)
+2025-05-13 15:01:47,716 - INFO - Labels shape: (640,)
+2025-05-13 15:01:47,716 - INFO - Seq length: 784
+2025-05-13 15:01:47,716 - INFO - Data size: 1
+2025-05-13 15:01:47,716 - INFO - Min/Max in the dataset: (-1.0, 1.0)
+2025-05-13 15:01:47,717 - INFO - Number of batches:
+2025-05-13 15:01:47,717 - INFO -   - Train: 94
+2025-05-13 15:01:47,717 - INFO -   - Test: 16
+2025-05-13 15:01:49,418 - INFO - Model loaded from ./model.eqx
+2025-05-13 15:01:49,466 - INFO - Initial model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-05-13 15:01:49,467 - INFO - Final model dynamic tanh params: [0.99 0.19 0.53 0.77]
+2025-05-13 15:01:49,468 - INFO - No losses found in the nohup.log file
+2025-05-13 15:01:55,656 - INFO - Evaluation of MSE the test set:
+2025-05-13 15:01:55,657 - INFO -     - Mean : 0.141287
+2025-05-13 15:01:55,657 - INFO -     - Median : 0.141081
+2025-05-13 15:01:55,658 - INFO -     - Min : 0.138342
+2025-05-13 15:01:56,167 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,173 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,179 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,184 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,189 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,194 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,200 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,206 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,210 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,215 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,220 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,225 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,230 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,235 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,240 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:01:56,244 - INFO - Min/Max Uncertainty: 0.500, 1.006
+2025-05-13 15:02:02,661 - INFO - Mean Squared Error (MSE): 0.071
+2025-05-13 15:02:02,662 - INFO - Bits per dimension (BPD): 0.615

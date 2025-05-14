@@ -2,7 +2,7 @@
 
 import os
 
-configs = ["msd_2", "msd", "sine_huge", "sine_large", "sine_small", "sine_medium", "sine_tiny"]
+configs = ["electricity_h1", "electricity_h2"]
 
 for config in configs:
     print(f"\n\n=========== Running {config}... ===========", flush=True)

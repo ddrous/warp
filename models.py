@@ -148,6 +148,7 @@ class WSM(eqx.Module):
 
     std_lower_bound: float
     dtanh_params: jnp.ndarray
+    stochastic_ar: bool
 
     def __init__(self, 
                  data_size, 
@@ -166,6 +167,7 @@ class WSM(eqx.Module):
                  noise_theta_init=None,             ## Noise to be added to the initial theta 
                  nb_wsm_layers=1,                  ## TODO, to be implemented as in Fig 2. of https://arxiv.org/abs/2202.07022
                  autoregressive_train=True,
+                 stochastic_ar=True,
                  key=None):
 
         keys = jax.random.split(key, num=nb_wsm_layers)
@@ -230,6 +232,7 @@ class WSM(eqx.Module):
 
         self.classification = nb_classes is not None
         self.ar_train = autoregressive_train
+        self.stochastic_ar = stochastic_ar
 
         if self.classification and self.ar_train:
             raise ValueError("The WSM model is not compatible with autoregressive training for classification tasks.")
@@ -255,7 +258,10 @@ class WSM(eqx.Module):
             return self.non_ar_call(xs, ts, k)
         else:       ## Regression task
             if (self.ar_train) or (inference_start is not None):
-                return self.ar_call(xs, ts, k, inference_start=inference_start)
+                if self.stochastic_ar:
+                    return self.ar_call_stochastic(xs, ts, k, inference_start=inference_start)
+                else:
+                    return self.ar_call(xs, ts, k, inference_start=inference_start)
             else:
                 return self.non_ar_call(xs, ts, k)
 
@@ -323,6 +329,150 @@ class WSM(eqx.Module):
         ## Batched version of the forward pass
         ks = jax.random.split(k, xs.shape[0])
         return eqx.filter_vmap(forward)(xs, ts, ks)
+
+
+    def ar_call_stochastic(self, xs, ts, k, inference_start=None):
+        """ Forward pass of the model on batch of sequences, ==autoregressively and stochastically==
+            xs: (batch, time, data_size)
+            ts: (batch, time)
+            k:  (key_dim)
+            inference_start: whether/when to use the model in autoregressive mode
+            """
+
+        def forward(xs_, ts_, k_):
+            """ Forward pass on a single sequence """
+
+            def f(carry, input_signal):
+                thet, x_mu_sigma, x_prev, t_prev = carry
+                x_true, t_curr, key = input_signal
+                delta_t = t_curr - t_prev
+
+                x_hat_mean, x_hat_std = jnp.split(x_mu_sigma, 2, axis=-1)
+
+                A = self.As[0]
+                B = self.Bs[0]
+                root_utils = self.root_utils[0]
+
+                if inference_start is not None:
+                    # x_hat = x_hat_mean
+                    x_hat = jax.random.normal(key, x_hat_mean.shape)*x_hat_std + x_hat_mean
+                    x_t = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
+                else:
+                    x_hat = jax.random.normal(key, x_hat_mean.shape)*x_hat_std + x_hat_mean
+                    x_t = jnp.where(jax.random.bernoulli(key, self.forcing_prob), x_true, x_hat)        ## Sample x_hat from the normal distribution
+
+                if self.time_as_channel:
+                    x_t = jnp.concatenate([x_t, t_curr], axis=-1)
+                    x_prev = jnp.concatenate([x_prev, t_prev], axis=-1)
+
+                thet_next = A@thet + B@(x_t - x_prev)     ## Key step
+
+                if self.weights_lim is not None:
+                    thet_next = jnp.clip(thet_next, -self.weights_lim, self.weights_lim)
+
+                shapes, treedef, static, _ = root_utils
+                params = unflatten_pytree(thet_next, shapes, treedef)
+                root_fun = eqx.combine(params, static)
+                root_in = t_curr+delta_t
+                if self.input_prev_data:
+                    root_in = jnp.concatenate([root_in, x_prev[:x_true.shape[0]]], axis=-1)
+                x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                  ## Evaluated at the next time step
+
+                # x_next_mean = x_next[:x_true.shape[0]]
+
+                return (thet_next, x_next, x_hat, t_curr), (x_next, )
+
+            if self.init_state_layers is None:
+                theta_init = self.thetas_init[0]
+            else:
+                theta_init = self.thetas_init[0](xs_[0])
+
+            if self.noise_theta_init is not None:
+                theta_init += jax.random.normal(k_, theta_init.shape)*self.noise_theta_init
+
+            keys = jax.random.split(k_, xs_.shape[0])
+            mu_sigma_init = jnp.concatenate([xs_[0], jnp.zeros_like(xs_[0])], axis=-1)        ## Initial mean and std
+
+            _, (xs_hat, ) = jax.lax.scan(f, (theta_init, mu_sigma_init, xs_[0], ts_[0:1]), (xs_, ts_[:, None], keys))
+
+            return xs_hat
+
+        ## Batched version of the forward pass
+        ks = jax.random.split(k, xs.shape[0])
+        return eqx.filter_vmap(forward)(xs, ts, ks)
+
+
+
+    # def ar_call_stochastic(self, xs, ts, k, inference_start=None):  ## TODO: feeding directly into matrix B
+    #     """ Forward pass of the model on batch of sequences, ==autoregressively and stochastically==
+    #         xs: (batch, time, data_size)
+    #         ts: (batch, time)
+    #         k:  (key_dim)
+    #         inference_start: whether/when to use the model in autoregressive mode
+    #         """
+
+    #     def forward(xs_, ts_, k_):
+    #         """ Forward pass on a single sequence """
+
+    #         def f(carry, input_signal):
+    #             thet, x_mu_sigma, x_prev, t_prev = carry
+    #             x_true, t_curr, key = input_signal
+    #             delta_t = t_curr - t_prev
+
+    #             x_hat_mean, x_hat_std = jnp.split(x_mu_sigma, 2, axis=-1)
+
+    #             A = self.As[0]
+    #             B = self.Bs[0]
+    #             root_utils = self.root_utils[0]
+
+    #             if inference_start is not None:
+    #                 x_hat = x_hat_mean
+    #                 x_t = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
+    #             else:
+    #                 x_hat = x_mu_sigma
+    #                 # x_hat = jax.random.normal(key, x_hat_mean.shape)*x_hat_std + x_hat_mean
+    #                 x_true = jnp.concatenate([x_true, x_hat_std], axis=-1)
+    #                 x_t = jnp.where(jax.random.bernoulli(key, self.forcing_prob), x_true, x_hat)        ## Sample x_hat from the normal distribution
+
+    #             if self.time_as_channel:
+    #                 x_t = jnp.concatenate([x_t, t_curr], axis=-1)
+    #                 x_prev = jnp.concatenate([x_prev, t_prev], axis=-1)
+
+    #             thet_next = A@thet + B@(x_t - x_prev)     ## Key step
+
+    #             if self.weights_lim is not None:
+    #                 thet_next = jnp.clip(thet_next, -self.weights_lim, self.weights_lim)
+
+    #             shapes, treedef, static, _ = root_utils
+    #             params = unflatten_pytree(thet_next, shapes, treedef)
+    #             root_fun = eqx.combine(params, static)
+    #             root_in = t_curr+delta_t
+    #             if self.input_prev_data:
+    #                 root_in = jnp.concatenate([root_in, x_prev[:x_true.shape[0]]], axis=-1)
+    #             x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                  ## Evaluated at the next time step
+
+    #             # x_next_mean = x_next[:x_true.shape[0]]
+
+    #             return (thet_next, x_next, x_hat, t_curr), (x_next, )
+
+    #         if self.init_state_layers is None:
+    #             theta_init = self.thetas_init[0]
+    #         else:
+    #             theta_init = self.thetas_init[0](xs_[0])
+
+    #         if self.noise_theta_init is not None:
+    #             theta_init += jax.random.normal(k_, theta_init.shape)*self.noise_theta_init
+
+    #         keys = jax.random.split(k_, xs_.shape[0])
+    #         mu_sigma_init = jnp.concatenate([xs_[0], jnp.zeros_like(xs_[0])], axis=-1)        ## Initial mean and std
+
+    #         _, (xs_hat, ) = jax.lax.scan(f, (theta_init, mu_sigma_init, mu_sigma_init, ts_[0:1]), (xs_, ts_[:, None], keys))
+
+    #         return xs_hat
+
+    #     ## Batched version of the forward pass
+    #     ks = jax.random.split(k, xs.shape[0])
+    #     return eqx.filter_vmap(forward)(xs, ts, ks)
 
 
     def non_ar_call(self, xs, ts, k):
@@ -686,7 +836,7 @@ class LSTM(eqx.Module):
 
 
 
-def make_model(key, data_size, nb_classes, config):
+def make_model(key, data_size, nb_classes, config, logger):
     """ Make a model using the given key and kwargs """
 
     model_type = config['model']['model_type']
@@ -708,14 +858,22 @@ def make_model(key, data_size, nb_classes, config):
             "weights_lim": config['model']['weights_lim'],
             "noise_theta_init": config['model']['noise_theta_init'],
             "autoregressive_train": config['training']['autoregressive'],
+            "stochastic_ar": config['training']['stochastic'],
         }
+
+        ## Chechk if mode params are ok
+        if model_args['autoregressive_train'] and model_args['stochastic_ar'] and not config['training']['use_nll_loss']:
+            raise ValueError("The WSM model is not compatible with stochastic autoregressive training without NLL loss.")
+
         model = WSM(key=key, **model_args)
         if not isinstance(model.thetas_init[0], GradualMLP):
-            print(f"Number of weights in the root network: {count_params((model.thetas_init,))/1000:3.1f} k")
+            logger.info(f"Number of weights in the root network:  {count_params((model.thetas_init,))/1000:3.1f} k")
         else:
-            print(f"Number of weights in the root network: {model.thetas_init[0].layers[-1].out_features/1000:3.1f} k")
-            print(f"Number of learnable parameters in the initial hyper-network: {count_params((model.thetas_init,))/1000:3.1f} k")
-        print(f"Number of learnable parameters for the recurrent transition: {count_params((model.As, model.Bs))/1000:3.1f} k")
+            logger.info(f"Number of weights in the root network: {model.thetas_init[0].layers[-1].out_features/1000:3.1f} k")
+            logger.info(f"Number of learnable parameters in the initial hyper-network: {count_params((model.thetas_init,))/1000:3.1f} k")
+
+        logger.info(f"Number of learnable parameters for the recurrent transition: {count_params((model.As, model.Bs))/1000:3.1f} k")
+
     elif model_type == "wsm-lstm":
         raise NotImplementedError("LSTM transition model not implemented yet")
     elif model_type == "wsm-gru":
@@ -749,7 +907,7 @@ def make_model(key, data_size, nb_classes, config):
     elif model_type == "transformer":
         raise NotImplementedError("Transformer not implemented yet")
 
-    print(f"Number of learnable parameters in the model: {count_params(model)/1000:3.1f} k")
+    logger.info(f"Number of learnable parameters in the model: {count_params(model)/1000:3.1f} k")
 
     return model
 

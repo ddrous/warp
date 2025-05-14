@@ -6,7 +6,7 @@ general:
   classification: False
   train: True
   dataset: "electricity"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/dynamics/electricity/h2/"
+  data_path: "./data/dynamics/electricity/m1/"
   save_path: null
 
 # Data hyperparameters (dependent on the dataset)
@@ -27,7 +27,7 @@ model:
   init_state_layers: 2          ## null to directly learn the initial state
   nb_rnn_layers: 1
   weights_lim: null
-  time_as_channel: True
+  time_as_channel: False
   forcing_prob: 0.25
   noise_theta_init: null
   std_lower_bound: 1.0e-4
@@ -35,7 +35,7 @@ model:
 
 # Optimizer hyperparameters
 optimizer:
-  init_lr: 1.0e-5
+  init_lr: 1.0e-4
   gradients_lim: 1.0e-7
   on_plateau:
     factor: 0.5
@@ -47,7 +47,7 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 500
+  nb_epochs: 250
   batch_size: 3600
   autoregressive: True
   stochastic: True

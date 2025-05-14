@@ -1454,3 +1454,58 @@
 2025-05-12 16:23:22,020 - INFO - Finetuning step 255 - Loss: 0.000435
 2025-05-12 16:23:22,020 - INFO - Finetuning step 255 - Loss: 0.000435
 2025-05-12 16:23:22,020 - INFO - Finetuning step 255 - Loss: 0.000435
+2025-05-13 19:07:35,200 - INFO - Started logging to ./artefacts/testing.log
+2025-05-13 19:07:35,200 - INFO - Config file: config.yaml
+2025-05-13 19:07:35,201 - INFO - ==== Config file's contents ====
+2025-05-13 19:07:35,201 - INFO - general:
+2025-05-13 19:07:35,201 - INFO -   seed: 2024
+2025-05-13 19:07:35,201 - INFO -   train: False
+2025-05-13 19:07:35,202 - INFO -   dataset: lorentz63
+2025-05-13 19:07:35,202 - INFO -   data_path: ./data/
+2025-05-13 19:07:35,202 - INFO -   save_path: None
+2025-05-13 19:07:35,203 - INFO - data:
+2025-05-13 19:07:35,203 - INFO -   downsample_factor: 1
+2025-05-13 19:07:35,203 - INFO -   resolution: [32, 32]
+2025-05-13 19:07:35,203 - INFO -   traj_length: 1000
+2025-05-13 19:07:35,203 - INFO - model:
+2025-05-13 19:07:35,204 - INFO -   mlp_width_size: 48
+2025-05-13 19:07:35,204 - INFO -   mlp_depth: 3
+2025-05-13 19:07:35,204 - INFO -   activation: swish
+2025-05-13 19:07:35,204 - INFO -   input_prev_data: False
+2025-05-13 19:07:35,204 - INFO -   model_type: wsm-rnn
+2025-05-13 19:07:35,204 - INFO -   nb_rnn_layers: 1
+2025-05-13 19:07:35,205 - INFO -   weights_lim: None
+2025-05-13 19:07:35,205 - INFO -   apply_tanh_uncertainty: False
+2025-05-13 19:07:35,205 - INFO -   time_as_channel: False
+2025-05-13 19:07:35,205 - INFO -   forcing_prob: 0.25
+2025-05-13 19:07:35,205 - INFO -   noise_theta_init: None
+2025-05-13 19:07:35,206 - INFO -   std_lower_bound: 0.0001
+2025-05-13 19:07:35,206 - INFO - optimizer:
+2025-05-13 19:07:35,206 - INFO -   init_lr: 1e-05
+2025-05-13 19:07:35,206 - INFO -   gradients_lim: 1e-07
+2025-05-13 19:07:35,206 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-13 19:07:35,206 - INFO - training:
+2025-05-13 19:07:35,207 - INFO -   nb_epochs: 2500
+2025-05-13 19:07:35,207 - INFO -   batch_size: 1024
+2025-05-13 19:07:35,207 - INFO -   print_every: 10
+2025-05-13 19:07:35,207 - INFO -   checkpoint_every: 10
+2025-05-13 19:07:35,207 - INFO -   nb_recons_loss_steps: None
+2025-05-13 19:07:35,208 - INFO -   use_nll_loss: False
+2025-05-13 19:07:35,208 - INFO -   inference_start: 100
+2025-05-13 19:07:35,893 - INFO - Images shape: (1024, 256, 2)
+2025-05-13 19:07:35,894 - INFO - Labels shape: (1024,)
+2025-05-13 19:07:35,894 - INFO - Seq length: 256
+2025-05-13 19:07:35,894 - INFO - Data size: 2
+2025-05-13 19:07:35,895 - INFO - Min/Max in the dataset: (-0.9856310478619905, 0.9731232709978324)
+2025-05-13 19:07:35,895 - INFO - Number of batches:
+2025-05-13 19:07:35,896 - INFO -   - Train: 20
+2025-05-13 19:07:35,896 - INFO -   - Test: 20
+2025-05-13 19:07:37,672 - INFO - Model loaded from ./model.eqx
+2025-05-13 19:07:59,205 - INFO - Evaluation of MSE the test set:
+2025-05-13 19:07:59,206 - INFO -     - Mean : 0.000137
+2025-05-13 19:07:59,207 - INFO -     - Median : 0.000137
+2025-05-13 19:07:59,207 - INFO -     - Min : 0.000118
+2025-05-13 19:08:06,290 - INFO - Finetuning step 0 - Loss: 0.011561
+2025-05-13 19:08:06,743 - INFO - Finetuning step 100 - Loss: 0.002701
+2025-05-13 19:08:07,042 - INFO - Finetuning step 200 - Loss: 0.000275
+2025-05-13 19:08:07,292 - INFO - Finetuning step 255 - Loss: 0.000435

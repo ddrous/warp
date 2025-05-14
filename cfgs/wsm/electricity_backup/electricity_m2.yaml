@@ -6,7 +6,7 @@ general:
   classification: False
   train: True
   dataset: "electricity"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/dynamics/electricity/h2/"
+  data_path: "./data/dynamics/electricity/m2/"
   save_path: null
 
 # Data hyperparameters (dependent on the dataset)
@@ -21,7 +21,7 @@ model:
   root_width_size: 148
   root_depth: 1
   root_activation: "relu"
-  root_final_activation: null
+  root_final_activation: 1.0
   input_prev_data: False
   model_type: "wsm"
   init_state_layers: 2          ## null to directly learn the initial state
@@ -35,7 +35,7 @@ model:
 
 # Optimizer hyperparameters
 optimizer:
-  init_lr: 1.0e-5
+  init_lr: 1.0e-4
   gradients_lim: 1.0e-7
   on_plateau:
     factor: 0.5
@@ -47,12 +47,11 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 500
-  batch_size: 3600
+  nb_epochs: 1000
+  batch_size: 4800
+  print_every: 100
   autoregressive: True
-  stochastic: True
-  print_every: 10
-  checkpoint_every: 10
+  checkpoint_every: 100
   nb_recons_loss_steps: null
-  use_nll_loss: True
+  use_nll_loss: False
   inference_start: 96

@@ -693,7 +693,10 @@ def compute_bpd(y_true, mu, sigma, eps=1e-8):
     # Convert nats to bits (1 nat = log2(e) bits ≈ 1.4427 bits)
     bpd = nll * np.log2(np.exp(1))
     
-    return bpd, nll
+    # compute the mse as well
+    mse = np.mean((y_true - mu)**2)
+
+    return bpd, nll, mse
 
 
 # def compute_fid(real_features, gen_features):
@@ -737,7 +740,10 @@ evalloader = NumpyLoader(testloader.dataset, batch_size=len(testloader.dataset),
 batch = next(iter(evalloader))
 (xs_true, times), labels = batch
 
-inference_start = config['training']['inference_start']
+# inference_start = config['training']['inference_start']
+inference_start = 100
+print("Inference start:", inference_start)
+
 xs_recons = eval_step(model=model, 
                       X=xs_true, 
                       times=times, 
@@ -748,6 +754,7 @@ if use_nll_loss:
     xs_uncert = xs_recons[:, :, data_size:]
     xs_recons = xs_recons[:, :, :data_size]
 
-bpd, nll = compute_bpd(xs_true, xs_recons, xs_uncert)
-logger.info(f"Bits per dimension: {bpd:.6f}")
-logger.info(f"NLL: {nll:.6f}")
+bpd, nll, mse = compute_bpd(xs_true, xs_recons, xs_uncert)
+logger.info(f"Mean Squared Error (MSE): {mse:.3f}")
+# logger.info(f"Gaussian negative log-likelyhood (NLL): {nll:.2f}")
+logger.info(f"Bits per dimension (BPD): {bpd:.3f}")

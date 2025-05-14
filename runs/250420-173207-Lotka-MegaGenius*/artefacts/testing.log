@@ -288,3 +288,321 @@
 2025-04-21 09:46:51,109 - INFO - New best model found at epoch 250 with MSE: 0.049596
 2025-04-21 09:47:01,403 - INFO - New best model found at epoch 290 with MSE: 0.047145
 2025-04-21 09:52:14,703 - INFO - Best model found at epoch 290 with MSE: 0.047145
+2025-05-13 16:05:59,714 - INFO - Started logging to ./artefacts/testing.log
+2025-05-13 16:05:59,715 - INFO - Config file: config.yaml
+2025-05-13 16:05:59,715 - INFO - ==== Config file's contents ====
+2025-05-13 16:05:59,715 - INFO - general:
+2025-05-13 16:05:59,716 - INFO -   seed: 2024
+2025-05-13 16:05:59,716 - INFO -   train: False
+2025-05-13 16:05:59,716 - INFO -   dataset: lotka
+2025-05-13 16:05:59,716 - INFO -   data_path: ./data/dynamics/lotka/
+2025-05-13 16:05:59,716 - INFO -   save_path: None
+2025-05-13 16:05:59,717 - INFO - data:
+2025-05-13 16:05:59,717 - INFO -   downsample_factor: 1
+2025-05-13 16:05:59,717 - INFO -   resolution: [32, 32]
+2025-05-13 16:05:59,717 - INFO -   traj_length: 1000
+2025-05-13 16:05:59,717 - INFO - model:
+2025-05-13 16:05:59,717 - INFO -   mlp_width_size: 48
+2025-05-13 16:05:59,718 - INFO -   mlp_depth: 3
+2025-05-13 16:05:59,718 - INFO -   activation: swish
+2025-05-13 16:05:59,718 - INFO -   input_prev_data: False
+2025-05-13 16:05:59,718 - INFO -   model_type: wsm
+2025-05-13 16:05:59,718 - INFO -   nb_rnn_layers: 1
+2025-05-13 16:05:59,718 - INFO -   weights_lim: None
+2025-05-13 16:05:59,718 - INFO -   apply_tanh_uncertainty: False
+2025-05-13 16:05:59,718 - INFO -   time_as_channel: False
+2025-05-13 16:05:59,719 - INFO -   forcing_prob: 1.0
+2025-05-13 16:05:59,719 - INFO -   noise_theta_init: None
+2025-05-13 16:05:59,719 - INFO -   std_lower_bound: 0.0001
+2025-05-13 16:05:59,719 - INFO - optimizer:
+2025-05-13 16:05:59,719 - INFO -   init_lr: 1e-05
+2025-05-13 16:05:59,719 - INFO -   gradients_lim: 1e-07
+2025-05-13 16:05:59,719 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-13 16:05:59,720 - INFO - training:
+2025-05-13 16:05:59,720 - INFO -   nb_epochs: 1500
+2025-05-13 16:05:59,720 - INFO -   batch_size: 1024
+2025-05-13 16:05:59,720 - INFO -   print_every: 10
+2025-05-13 16:05:59,720 - INFO -   checkpoint_every: 10
+2025-05-13 16:05:59,720 - INFO -   nb_recons_loss_steps: None
+2025-05-13 16:05:59,720 - INFO -   use_nll_loss: False
+2025-05-13 16:05:59,720 - INFO -   inference_start: 100
+2025-05-13 16:06:00,377 - INFO - Input sequence shape: (1024, 256, 2)
+2025-05-13 16:06:00,377 - INFO - Labels/OutputSequence shape: (1024, 256, 2)
+2025-05-13 16:06:00,378 - INFO - Seq length: 256
+2025-05-13 16:06:00,378 - INFO - Data size: 2
+2025-05-13 16:06:00,378 - INFO - Min/Max in the dataset: (-1.0, 1.378643503171046)
+2025-05-13 16:06:00,379 - INFO - Number of batches:
+2025-05-13 16:06:00,379 - INFO -   - Train: 15
+2025-05-13 16:06:00,379 - INFO -   - Test: 3
+2025-05-13 16:06:01,814 - INFO - Model loaded from ./model.eqx
+2025-05-13 16:06:10,685 - INFO - Evaluation of MSE on the test set, at the end of the training (Current Best Model):
+2025-05-13 16:06:10,686 - INFO -     - Mean : 0.062439
+2025-05-13 16:06:10,686 - INFO -     - Median : 0.061460
+2025-05-13 16:06:10,686 - INFO -     - Min : 0.058543
+2025-05-13 16:06:10,765 - INFO - Checkpoints MSE artefact file found. Loading it.
+2025-05-13 16:06:10,934 - INFO - Best model found at epoch 290 with MSE: 0.047145
+2025-05-13 16:07:35,531 - INFO - Started logging to ./artefacts/testing.log
+2025-05-13 16:07:35,531 - INFO - Started logging to ./artefacts/testing.log
+2025-05-13 16:07:35,533 - INFO - Config file: config.yaml
+2025-05-13 16:07:35,533 - INFO - Config file: config.yaml
+2025-05-13 16:07:35,534 - INFO - ==== Config file's contents ====
+2025-05-13 16:07:35,534 - INFO - ==== Config file's contents ====
+2025-05-13 16:07:35,535 - INFO - general:
+2025-05-13 16:07:35,535 - INFO - general:
+2025-05-13 16:07:35,536 - INFO -   seed: 2024
+2025-05-13 16:07:35,536 - INFO -   seed: 2024
+2025-05-13 16:07:35,537 - INFO -   train: False
+2025-05-13 16:07:35,537 - INFO -   train: False
+2025-05-13 16:07:35,537 - INFO -   dataset: lotka
+2025-05-13 16:07:35,537 - INFO -   dataset: lotka
+2025-05-13 16:07:35,538 - INFO -   data_path: ./data/dynamics/lotka/
+2025-05-13 16:07:35,538 - INFO -   data_path: ./data/dynamics/lotka/
+2025-05-13 16:07:35,539 - INFO -   save_path: None
+2025-05-13 16:07:35,539 - INFO -   save_path: None
+2025-05-13 16:07:35,540 - INFO - data:
+2025-05-13 16:07:35,540 - INFO - data:
+2025-05-13 16:07:35,540 - INFO -   downsample_factor: 1
+2025-05-13 16:07:35,540 - INFO -   downsample_factor: 1
+2025-05-13 16:07:35,541 - INFO -   resolution: [32, 32]
+2025-05-13 16:07:35,541 - INFO -   resolution: [32, 32]
+2025-05-13 16:07:35,541 - INFO -   traj_length: 1000
+2025-05-13 16:07:35,541 - INFO -   traj_length: 1000
+2025-05-13 16:07:35,541 - INFO - model:
+2025-05-13 16:07:35,541 - INFO - model:
+2025-05-13 16:07:35,542 - INFO -   mlp_width_size: 48
+2025-05-13 16:07:35,542 - INFO -   mlp_width_size: 48
+2025-05-13 16:07:35,542 - INFO -   mlp_depth: 3
+2025-05-13 16:07:35,542 - INFO -   mlp_depth: 3
+2025-05-13 16:07:35,543 - INFO -   activation: swish
+2025-05-13 16:07:35,543 - INFO -   activation: swish
+2025-05-13 16:07:35,543 - INFO -   input_prev_data: False
+2025-05-13 16:07:35,543 - INFO -   input_prev_data: False
+2025-05-13 16:07:35,543 - INFO -   model_type: wsm
+2025-05-13 16:07:35,543 - INFO -   model_type: wsm
+2025-05-13 16:07:35,544 - INFO -   nb_rnn_layers: 1
+2025-05-13 16:07:35,544 - INFO -   nb_rnn_layers: 1
+2025-05-13 16:07:35,544 - INFO -   weights_lim: None
+2025-05-13 16:07:35,544 - INFO -   weights_lim: None
+2025-05-13 16:07:35,544 - INFO -   apply_tanh_uncertainty: False
+2025-05-13 16:07:35,544 - INFO -   apply_tanh_uncertainty: False
+2025-05-13 16:07:35,544 - INFO -   time_as_channel: False
+2025-05-13 16:07:35,544 - INFO -   time_as_channel: False
+2025-05-13 16:07:35,545 - INFO -   forcing_prob: 1.0
+2025-05-13 16:07:35,545 - INFO -   forcing_prob: 1.0
+2025-05-13 16:07:35,545 - INFO -   noise_theta_init: None
+2025-05-13 16:07:35,545 - INFO -   noise_theta_init: None
+2025-05-13 16:07:35,545 - INFO -   std_lower_bound: 0.0001
+2025-05-13 16:07:35,545 - INFO -   std_lower_bound: 0.0001
+2025-05-13 16:07:35,546 - INFO - optimizer:
+2025-05-13 16:07:35,546 - INFO - optimizer:
+2025-05-13 16:07:35,546 - INFO -   init_lr: 1e-05
+2025-05-13 16:07:35,546 - INFO -   init_lr: 1e-05
+2025-05-13 16:07:35,546 - INFO -   gradients_lim: 1e-07
+2025-05-13 16:07:35,546 - INFO -   gradients_lim: 1e-07
+2025-05-13 16:07:35,546 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-13 16:07:35,546 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-13 16:07:35,547 - INFO - training:
+2025-05-13 16:07:35,547 - INFO - training:
+2025-05-13 16:07:35,547 - INFO -   nb_epochs: 1500
+2025-05-13 16:07:35,547 - INFO -   nb_epochs: 1500
+2025-05-13 16:07:35,547 - INFO -   batch_size: 1024
+2025-05-13 16:07:35,547 - INFO -   batch_size: 1024
+2025-05-13 16:07:35,547 - INFO -   print_every: 10
+2025-05-13 16:07:35,547 - INFO -   print_every: 10
+2025-05-13 16:07:35,548 - INFO -   checkpoint_every: 10
+2025-05-13 16:07:35,548 - INFO -   checkpoint_every: 10
+2025-05-13 16:07:35,548 - INFO -   nb_recons_loss_steps: None
+2025-05-13 16:07:35,548 - INFO -   nb_recons_loss_steps: None
+2025-05-13 16:07:35,548 - INFO -   use_nll_loss: False
+2025-05-13 16:07:35,548 - INFO -   use_nll_loss: False
+2025-05-13 16:07:35,548 - INFO -   inference_start: 256
+2025-05-13 16:07:35,548 - INFO -   inference_start: 256
+2025-05-13 16:07:36,220 - INFO - Input sequence shape: (1024, 256, 2)
+2025-05-13 16:07:36,220 - INFO - Input sequence shape: (1024, 256, 2)
+2025-05-13 16:07:36,221 - INFO - Labels/OutputSequence shape: (1024, 256, 2)
+2025-05-13 16:07:36,221 - INFO - Labels/OutputSequence shape: (1024, 256, 2)
+2025-05-13 16:07:36,221 - INFO - Seq length: 256
+2025-05-13 16:07:36,221 - INFO - Seq length: 256
+2025-05-13 16:07:36,221 - INFO - Data size: 2
+2025-05-13 16:07:36,221 - INFO - Data size: 2
+2025-05-13 16:07:36,222 - INFO - Min/Max in the dataset: (-1.0, 1.378643503171046)
+2025-05-13 16:07:36,222 - INFO - Min/Max in the dataset: (-1.0, 1.378643503171046)
+2025-05-13 16:07:36,222 - INFO - Number of batches:
+2025-05-13 16:07:36,222 - INFO - Number of batches:
+2025-05-13 16:07:36,223 - INFO -   - Train: 15
+2025-05-13 16:07:36,223 - INFO -   - Train: 15
+2025-05-13 16:07:36,223 - INFO -   - Test: 3
+2025-05-13 16:07:36,223 - INFO -   - Test: 3
+2025-05-13 16:07:36,801 - INFO - Model loaded from ./model.eqx
+2025-05-13 16:07:36,801 - INFO - Model loaded from ./model.eqx
+2025-05-13 16:07:44,815 - INFO - Evaluation of MSE on the test set, at the end of the training (Current Best Model):
+2025-05-13 16:07:44,815 - INFO - Evaluation of MSE on the test set, at the end of the training (Current Best Model):
+2025-05-13 16:07:44,816 - INFO -     - Mean : 0.062439
+2025-05-13 16:07:44,816 - INFO -     - Mean : 0.062439
+2025-05-13 16:07:44,816 - INFO -     - Median : 0.061460
+2025-05-13 16:07:44,816 - INFO -     - Median : 0.061460
+2025-05-13 16:07:44,816 - INFO -     - Min : 0.058543
+2025-05-13 16:07:44,816 - INFO -     - Min : 0.058543
+2025-05-13 16:07:44,840 - INFO - Checkpoints MSE artefact file found. Loading it.
+2025-05-13 16:07:44,840 - INFO - Checkpoints MSE artefact file found. Loading it.
+2025-05-13 16:07:45,007 - INFO - Best model found at epoch 290 with MSE: 0.047145
+2025-05-13 16:07:45,007 - INFO - Best model found at epoch 290 with MSE: 0.047145
+2025-05-13 16:07:54,670 - INFO - Started logging to ./artefacts/testing.log
+2025-05-13 16:07:54,670 - INFO - Started logging to ./artefacts/testing.log
+2025-05-13 16:07:54,670 - INFO - Started logging to ./artefacts/testing.log
+2025-05-13 16:07:54,672 - INFO - Config file: config.yaml
+2025-05-13 16:07:54,672 - INFO - Config file: config.yaml
+2025-05-13 16:07:54,672 - INFO - Config file: config.yaml
+2025-05-13 16:07:54,673 - INFO - ==== Config file's contents ====
+2025-05-13 16:07:54,673 - INFO - ==== Config file's contents ====
+2025-05-13 16:07:54,673 - INFO - ==== Config file's contents ====
+2025-05-13 16:07:54,674 - INFO - general:
+2025-05-13 16:07:54,674 - INFO - general:
+2025-05-13 16:07:54,674 - INFO - general:
+2025-05-13 16:07:54,675 - INFO -   seed: 2024
+2025-05-13 16:07:54,675 - INFO -   seed: 2024
+2025-05-13 16:07:54,675 - INFO -   seed: 2024
+2025-05-13 16:07:54,676 - INFO -   train: False
+2025-05-13 16:07:54,676 - INFO -   train: False
+2025-05-13 16:07:54,676 - INFO -   train: False
+2025-05-13 16:07:54,677 - INFO -   dataset: lotka
+2025-05-13 16:07:54,677 - INFO -   dataset: lotka
+2025-05-13 16:07:54,677 - INFO -   dataset: lotka
+2025-05-13 16:07:54,678 - INFO -   data_path: ./data/dynamics/lotka/
+2025-05-13 16:07:54,678 - INFO -   data_path: ./data/dynamics/lotka/
+2025-05-13 16:07:54,678 - INFO -   data_path: ./data/dynamics/lotka/
+2025-05-13 16:07:54,679 - INFO -   save_path: None
+2025-05-13 16:07:54,679 - INFO -   save_path: None
+2025-05-13 16:07:54,679 - INFO -   save_path: None
+2025-05-13 16:07:54,680 - INFO - data:
+2025-05-13 16:07:54,680 - INFO - data:
+2025-05-13 16:07:54,680 - INFO - data:
+2025-05-13 16:07:54,681 - INFO -   downsample_factor: 1
+2025-05-13 16:07:54,681 - INFO -   downsample_factor: 1
+2025-05-13 16:07:54,681 - INFO -   downsample_factor: 1
+2025-05-13 16:07:54,682 - INFO -   resolution: [32, 32]
+2025-05-13 16:07:54,682 - INFO -   resolution: [32, 32]
+2025-05-13 16:07:54,682 - INFO -   resolution: [32, 32]
+2025-05-13 16:07:54,684 - INFO -   traj_length: 1000
+2025-05-13 16:07:54,684 - INFO -   traj_length: 1000
+2025-05-13 16:07:54,684 - INFO -   traj_length: 1000
+2025-05-13 16:07:54,686 - INFO - model:
+2025-05-13 16:07:54,686 - INFO - model:
+2025-05-13 16:07:54,686 - INFO - model:
+2025-05-13 16:07:54,688 - INFO -   mlp_width_size: 48
+2025-05-13 16:07:54,688 - INFO -   mlp_width_size: 48
+2025-05-13 16:07:54,688 - INFO -   mlp_width_size: 48
+2025-05-13 16:07:54,689 - INFO -   mlp_depth: 3
+2025-05-13 16:07:54,689 - INFO -   mlp_depth: 3
+2025-05-13 16:07:54,689 - INFO -   mlp_depth: 3
+2025-05-13 16:07:54,691 - INFO -   activation: swish
+2025-05-13 16:07:54,691 - INFO -   activation: swish
+2025-05-13 16:07:54,691 - INFO -   activation: swish
+2025-05-13 16:07:54,693 - INFO -   input_prev_data: False
+2025-05-13 16:07:54,693 - INFO -   input_prev_data: False
+2025-05-13 16:07:54,693 - INFO -   input_prev_data: False
+2025-05-13 16:07:54,695 - INFO -   model_type: wsm
+2025-05-13 16:07:54,695 - INFO -   model_type: wsm
+2025-05-13 16:07:54,695 - INFO -   model_type: wsm
+2025-05-13 16:07:54,697 - INFO -   nb_rnn_layers: 1
+2025-05-13 16:07:54,697 - INFO -   nb_rnn_layers: 1
+2025-05-13 16:07:54,697 - INFO -   nb_rnn_layers: 1
+2025-05-13 16:07:54,700 - INFO -   weights_lim: None
+2025-05-13 16:07:54,700 - INFO -   weights_lim: None
+2025-05-13 16:07:54,700 - INFO -   weights_lim: None
+2025-05-13 16:07:54,701 - INFO -   apply_tanh_uncertainty: False
+2025-05-13 16:07:54,701 - INFO -   apply_tanh_uncertainty: False
+2025-05-13 16:07:54,701 - INFO -   apply_tanh_uncertainty: False
+2025-05-13 16:07:54,703 - INFO -   time_as_channel: False
+2025-05-13 16:07:54,703 - INFO -   time_as_channel: False
+2025-05-13 16:07:54,703 - INFO -   time_as_channel: False
+2025-05-13 16:07:54,704 - INFO -   forcing_prob: 1.0
+2025-05-13 16:07:54,704 - INFO -   forcing_prob: 1.0
+2025-05-13 16:07:54,704 - INFO -   forcing_prob: 1.0
+2025-05-13 16:07:54,706 - INFO -   noise_theta_init: None
+2025-05-13 16:07:54,706 - INFO -   noise_theta_init: None
+2025-05-13 16:07:54,706 - INFO -   noise_theta_init: None
+2025-05-13 16:07:54,707 - INFO -   std_lower_bound: 0.0001
+2025-05-13 16:07:54,707 - INFO -   std_lower_bound: 0.0001
+2025-05-13 16:07:54,707 - INFO -   std_lower_bound: 0.0001
+2025-05-13 16:07:54,709 - INFO - optimizer:
+2025-05-13 16:07:54,709 - INFO - optimizer:
+2025-05-13 16:07:54,709 - INFO - optimizer:
+2025-05-13 16:07:54,710 - INFO -   init_lr: 1e-05
+2025-05-13 16:07:54,710 - INFO -   init_lr: 1e-05
+2025-05-13 16:07:54,710 - INFO -   init_lr: 1e-05
+2025-05-13 16:07:54,711 - INFO -   gradients_lim: 1e-07
+2025-05-13 16:07:54,711 - INFO -   gradients_lim: 1e-07
+2025-05-13 16:07:54,711 - INFO -   gradients_lim: 1e-07
+2025-05-13 16:07:54,714 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-13 16:07:54,714 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-13 16:07:54,714 - INFO -   on_plateau: {'factor': 0.5, 'min_scale': 0.01, 'patience': 20, 'cooldown': 0, 'rtol': 0.0001, 'accum_size': 50}
+2025-05-13 16:07:54,715 - INFO - training:
+2025-05-13 16:07:54,715 - INFO - training:
+2025-05-13 16:07:54,715 - INFO - training:
+2025-05-13 16:07:54,717 - INFO -   nb_epochs: 1500
+2025-05-13 16:07:54,717 - INFO -   nb_epochs: 1500
+2025-05-13 16:07:54,717 - INFO -   nb_epochs: 1500
+2025-05-13 16:07:54,719 - INFO -   batch_size: 1024
+2025-05-13 16:07:54,719 - INFO -   batch_size: 1024
+2025-05-13 16:07:54,719 - INFO -   batch_size: 1024
+2025-05-13 16:07:54,720 - INFO -   print_every: 10
+2025-05-13 16:07:54,720 - INFO -   print_every: 10
+2025-05-13 16:07:54,720 - INFO -   print_every: 10
+2025-05-13 16:07:54,721 - INFO -   checkpoint_every: 10
+2025-05-13 16:07:54,721 - INFO -   checkpoint_every: 10
+2025-05-13 16:07:54,721 - INFO -   checkpoint_every: 10
+2025-05-13 16:07:54,722 - INFO -   nb_recons_loss_steps: None
+2025-05-13 16:07:54,722 - INFO -   nb_recons_loss_steps: None
+2025-05-13 16:07:54,722 - INFO -   nb_recons_loss_steps: None
+2025-05-13 16:07:54,723 - INFO -   use_nll_loss: False
+2025-05-13 16:07:54,723 - INFO -   use_nll_loss: False
+2025-05-13 16:07:54,723 - INFO -   use_nll_loss: False
+2025-05-13 16:07:54,724 - INFO -   inference_start: 257
+2025-05-13 16:07:54,724 - INFO -   inference_start: 257
+2025-05-13 16:07:54,724 - INFO -   inference_start: 257
+2025-05-13 16:07:55,419 - INFO - Input sequence shape: (1024, 256, 2)
+2025-05-13 16:07:55,419 - INFO - Input sequence shape: (1024, 256, 2)
+2025-05-13 16:07:55,419 - INFO - Input sequence shape: (1024, 256, 2)
+2025-05-13 16:07:55,420 - INFO - Labels/OutputSequence shape: (1024, 256, 2)
+2025-05-13 16:07:55,420 - INFO - Labels/OutputSequence shape: (1024, 256, 2)
+2025-05-13 16:07:55,420 - INFO - Labels/OutputSequence shape: (1024, 256, 2)
+2025-05-13 16:07:55,420 - INFO - Seq length: 256
+2025-05-13 16:07:55,420 - INFO - Seq length: 256
+2025-05-13 16:07:55,420 - INFO - Seq length: 256
+2025-05-13 16:07:55,421 - INFO - Data size: 2
+2025-05-13 16:07:55,421 - INFO - Data size: 2
+2025-05-13 16:07:55,421 - INFO - Data size: 2
+2025-05-13 16:07:55,422 - INFO - Min/Max in the dataset: (-1.0, 1.378643503171046)
+2025-05-13 16:07:55,422 - INFO - Min/Max in the dataset: (-1.0, 1.378643503171046)
+2025-05-13 16:07:55,422 - INFO - Min/Max in the dataset: (-1.0, 1.378643503171046)
+2025-05-13 16:07:55,422 - INFO - Number of batches:
+2025-05-13 16:07:55,422 - INFO - Number of batches:
+2025-05-13 16:07:55,422 - INFO - Number of batches:
+2025-05-13 16:07:55,422 - INFO -   - Train: 15
+2025-05-13 16:07:55,422 - INFO -   - Train: 15
+2025-05-13 16:07:55,422 - INFO -   - Train: 15
+2025-05-13 16:07:55,423 - INFO -   - Test: 3
+2025-05-13 16:07:55,423 - INFO -   - Test: 3
+2025-05-13 16:07:55,423 - INFO -   - Test: 3
+2025-05-13 16:07:55,998 - INFO - Model loaded from ./model.eqx
+2025-05-13 16:07:55,998 - INFO - Model loaded from ./model.eqx
+2025-05-13 16:07:55,998 - INFO - Model loaded from ./model.eqx
+2025-05-13 16:08:03,999 - INFO - Evaluation of MSE on the test set, at the end of the training (Current Best Model):
+2025-05-13 16:08:03,999 - INFO - Evaluation of MSE on the test set, at the end of the training (Current Best Model):
+2025-05-13 16:08:03,999 - INFO - Evaluation of MSE on the test set, at the end of the training (Current Best Model):
+2025-05-13 16:08:04,000 - INFO -     - Mean : 0.062439
+2025-05-13 16:08:04,000 - INFO -     - Mean : 0.062439
+2025-05-13 16:08:04,000 - INFO -     - Mean : 0.062439
+2025-05-13 16:08:04,000 - INFO -     - Median : 0.061460
+2025-05-13 16:08:04,000 - INFO -     - Median : 0.061460
+2025-05-13 16:08:04,000 - INFO -     - Median : 0.061460
+2025-05-13 16:08:04,001 - INFO -     - Min : 0.058543
+2025-05-13 16:08:04,001 - INFO -     - Min : 0.058543
+2025-05-13 16:08:04,001 - INFO -     - Min : 0.058543
+2025-05-13 16:08:04,028 - INFO - Checkpoints MSE artefact file found. Loading it.
+2025-05-13 16:08:04,028 - INFO - Checkpoints MSE artefact file found. Loading it.
+2025-05-13 16:08:04,028 - INFO - Checkpoints MSE artefact file found. Loading it.
+2025-05-13 16:08:04,202 - INFO - Best model found at epoch 290 with MSE: 0.047145
+2025-05-13 16:08:04,202 - INFO - Best model found at epoch 290 with MSE: 0.047145
+2025-05-13 16:08:04,202 - INFO - Best model found at epoch 290 with MSE: 0.047145

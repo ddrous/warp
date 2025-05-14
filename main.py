@@ -224,7 +224,7 @@ plt.savefig(plots_folder+"samples_train.png", dpi=100, bbox_inches='tight')
 model_key, train_key = jax.random.split(main_key, num=2)
 if not classification:
     nb_classes = None
-model = make_model(model_key, data_size, nb_classes, config)
+model = make_model(model_key, data_size, nb_classes, config, logger)
 untrained_model = model
 
 nb_recons_loss_steps = config['training']['nb_recons_loss_steps']
@@ -741,16 +741,24 @@ if not classification:
     batch = next(iter(eval_loader))
     (xs_true, times), labels = batch
 
+
+    print("Inferance starts at: ", inference_start)
     xs_recons = eval_step(model=best_model, 
                         X=xs_true, 
                         times=times, 
                         key=test_key, 
                         inference_start=inference_start)
 
-    xs_true = xs_true[:, inference_start:, :]
-    xs_recons = xs_recons[:, inference_start:, :data_size]
+    # xs_true = xs_true[:, inference_start:, :]
+    # xs_recons = xs_recons[:, inference_start:, :data_size]
+    xs_recons = xs_recons[:, :, :data_size]
 
     def metrics(pred, true):
+
+        ## Calculate the metrics after inference start
+        pred = pred[:, inference_start:, :]
+        true = true[:, inference_start:, :]
+
         mse = jnp.mean((pred - true)**2)
         rmse = jnp.sqrt(mse)
         mae = jnp.mean(jnp.abs(pred - true))
@@ -766,6 +774,80 @@ if not classification:
     logger.info(f"    - MAPE : {mape:.6f}")
     logger.info(f"    - MSPE : {mspe:.6f}")
 
+
+
+## %% Now dealing with classification tasks
+## Unormalize the test data and the predictions before computing the metrics
+if not classification and config['data']['normalize']:
+    def unormalize_data(y, min_max):
+        """ Unnormalize the data using the min and max values of the dataset. """
+
+        ## We assume y was obtained as
+        # y = (x - min_max[0]) / (min_max[1] - min_max[0])
+        # y = (y - 0.5) * 2
+
+        ## We want to get back to the original data
+        x = (y + 1) / 2
+        x = x * (min_max[1] - min_max[0]) + min_max[0]
+
+        return x
+
+    min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
+    xs_recons_unorm = unormalize_data(xs_recons, min_max)
+    xs_true_unorm = unormalize_data(xs_true, min_max)
+
+    ## Plot a few samples of the unormalized data
+    plot_dim = np.random.randint(0, data_size, size=2)[0]
+    plot_id = np.random.randint(0, len(xs_true_unorm), size=1)[0]
+    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(10, 5), sharex=True)
+    ax.plot(xs_true_unorm[plot_id, :, plot_dim], "r-", lw=1, label="True")
+    ax.plot(xs_recons_unorm[plot_id, :, plot_dim], "r-", lw=3, label="Recons")
+    ax.set_title(f"Unormalised - Dim {plot_dim}")
+
+    ## Plot on ax2 the normalized
+    ax2.plot(xs_true[plot_id, :, plot_dim], "b-", lw=1, label="True")
+    ax2.plot(xs_recons[plot_id, :, plot_dim], "b-", lw=3, label="Recons")
+    ax2.set_title(f"Normalised - Dim {plot_dim}")
+
+    ax.legend()
+    # ax2.legend()
+
+    plt.tight_layout()
+
+    mse, rmse, mae, mape, mspe = metrics(xs_recons_unorm, xs_true_unorm)
+    logger.info("Evaluation of forecast MSE on the full test set in inference mode - UNORMALISED DATA:")
+    logger.info(f"    - MSE : {mse:.6f}")
+    logger.info(f"    - RMSE : {rmse:.6f}")
+    logger.info(f"    - MAE : {mae:.6f}")
+    logger.info(f"    - MAPE : {mape:.6f}")
+    logger.info(f"    - MSPE : {mspe:.6f}")
+
+
+
+# # %% Let's plot the prediction and groundth, while graying our the context, for just one example
+# if not classification:
+#     fig, ax = plt.subplots(1, 1, figsize=(10, 5))
+#     time_steps = np.arange(xs_true_unorm.shape[1])
+#     ax.plot(xs_true_unorm[plot_id, :, plot_dim], "r-", lw=2, label="Ground Truth")
+#     ax.plot(xs_true_unorm[plot_id, :inference_start, plot_dim], color="yellow", lw=2)
+#     ax.plot(time_steps[inference_start:], xs_recons_unorm[plot_id, inference_start:, plot_dim], lw=6, label="Prediction", color="orange")
+
+#     ## PLot a vertical line for the inference start
+#     ax.axvline(x=inference_start, color='k', linestyle='--', lw=3, label="Inference Start")
+
+#     ax.legend(fontsize=14, loc="lower left")
+    
+#     ## Set xticks and yticks
+#     ticks = [0, 32, 64, 96, 128, 160, 192]
+#     ax.set_xticks(ticks)
+#     ax.set_xticklabels(ticks)
+
+#     ax.set_xlabel("Time Step $t$", fontsize=20)
+
+#     plt.tight_layout()
+#     plt.draw();
+#     plt.savefig(plots_folder+"prediction.png", dpi=100, bbox_inches='tight')
+#     plt.savefig(plots_folder+"prediction.pdf", dpi=100, bbox_inches='tight')
 
 
 
@@ -879,8 +961,8 @@ if classification:
     logger.info(f"Best model found at epoch {best_cce_epoch} with {val_criterion}: {best_cce:.6f}")
 
 
-### ===== Very importtant: Set the best model on test set as the model for visualisation ? ==== TODO
-model = best_model
+    ### ===== Very importtant: Set the best model on test set as the model for visualisation ? ==== TODO
+    model = best_model
 
 
 # %% Now dealing with classification tasks

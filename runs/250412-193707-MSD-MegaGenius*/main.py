@@ -914,44 +914,86 @@ plt.xlabel(r"$t$")
 plt.legend()
 plt.draw();
 
-#%% Lets analyse eigen values of the matrix A
-
-A = model.As[0]
-print(f"Shape of A: {A.shape}")
-eigs = np.linalg.eigvals(A)
 
 
-## Check if the eigen values are complex
-complex_eigs = np.iscomplex(eigs)
-print(f"Number of complex eigen values: {np.sum(complex_eigs)}")
-print(f"Number of real eigen values: {np.sum(~complex_eigs)}")
-## Print the real and imaginary parts of the complex eigen values
-print(f"Real part of complex eigen values: {np.real(eigs[complex_eigs])}")
-print(f"Imaginary part of complex eigen values: {np.imag(eigs[complex_eigs])}")
 
-## Plot the real against the  complex parts of the eigen values 
-# real_eigs = np.real(eigs[~complex_eigs])
-real_part = np.real(eigs[complex_eigs])
-complex_part = np.imag(eigs[complex_eigs])
+# #%% Lets analyse eigen values of the matrix A
 
-fig, axs = plt.subplots(1, 1, figsize=(10, 10))
-plt.plot(real_part, complex_part, 'bo', lw=2)
-plt.title("Eigen values of A")
-plt.xlabel("Real part")
-plt.ylabel("Imaginary part")
+# A = model.As[0]
+# print(f"Shape of A: {A.shape}")
+# eigs = np.linalg.eigvals(A)
+
+
+# ## Check if the eigen values are complex
+# complex_eigs = np.iscomplex(eigs)
+# print(f"Number of complex eigen values: {np.sum(complex_eigs)}")
+# print(f"Number of real eigen values: {np.sum(~complex_eigs)}")
+# ## Print the real and imaginary parts of the complex eigen values
+# print(f"Real part of complex eigen values: {np.real(eigs[complex_eigs])}")
+# print(f"Imaginary part of complex eigen values: {np.imag(eigs[complex_eigs])}")
+
+# ## Plot the real against the  complex parts of the eigen values 
+# # real_eigs = np.real(eigs[~complex_eigs])
+# real_part = np.real(eigs[complex_eigs])
+# complex_part = np.imag(eigs[complex_eigs])
+
+# fig, axs = plt.subplots(1, 1, figsize=(10, 10))
+# plt.plot(real_part, complex_part, 'bo', lw=2)
+# plt.title("Eigen values of A")
+# plt.xlabel("Real part")
+# plt.ylabel("Imaginary part")
+# plt.draw();
+
+
+# ## Check whether the matrix is stable
+# stable = np.all(np.abs(eigs) < 1)
+# print(f"Matrix is stable: {stable}")
+# if stable:
+#     print("Matrix is stable")
+# else:
+#     print("Matrix is not stable")
+#     print(f"Eigen values: {eigs}")
+#     print(f"Max eigen value: {np.max(np.abs(eigs))}")
+#     print(f"Min eigen value: {np.min(np.abs(eigs))}")
+#     print(f"Mean eigen value: {np.mean(np.abs(eigs))}")
+#     print(f"Median eigen value: {np.median(np.abs(eigs))}")
+#     print(f"Std eigen value: {np.std(np.abs(eigs))}")
+
+
+
+#%% Lets check the correlation between the weights (256, 4098) and time (256, 1). 
+
+@eqx.filter_vmap
+@eqx.filter_vmap(in_axes=(1))
+def correlation(a):
+    """ Calculate the correlation between two arrays. """
+    b = jnp.linspace(0, 1, a.shape[0])
+    a = a - jnp.mean(a)
+    b = b - jnp.mean(b)
+    return jnp.sum(a*b) / (jnp.sqrt(jnp.sum(a**2)) * jnp.sqrt(jnp.sum(b**2)))
+
+# corr_coeffs = eqx.filter_vmap(correlation)(thetas[0, :, :].T)
+corr_coeffs = correlation(thetas[:5, :, :])
+print(f"Shape of correlation coeffs: {corr_coeffs.shape}")
+fig, ax = plt.subplots(1, 1, figsize=(10, 5))
+ax.plot(corr_coeffs.T, '.', lw=2, alpha=0.5, markersize=5)
+ax.set_title("Correlation between weights and time")
+ax.set_xlabel("Weight Dimension")
+ax.set_ylabel("Correlation Coefficient")
 plt.draw();
+plt.savefig(plots_folder+"correlation.png", dpi=100, bbox_inches='tight')
 
 
-## Check whether the matrix is stable
-stable = np.all(np.abs(eigs) < 1)
-print(f"Matrix is stable: {stable}")
-if stable:
-    print("Matrix is stable")
-else:
-    print("Matrix is not stable")
-    print(f"Eigen values: {eigs}")
-    print(f"Max eigen value: {np.max(np.abs(eigs))}")
-    print(f"Min eigen value: {np.min(np.abs(eigs))}")
-    print(f"Mean eigen value: {np.mean(np.abs(eigs))}")
-    print(f"Median eigen value: {np.median(np.abs(eigs))}")
-    print(f"Std eigen value: {np.std(np.abs(eigs))}")
+## Plot the correlation coeffs as a histogram
+fig, ax = plt.subplots(1, 1, figsize=(10, 5))
+
+## Histogram with normalisation
+ax.hist(corr_coeffs.flatten(), bins=100, color='purple', alpha=0.75, density=True)
+
+# ax.set_title("Correlation Coefficients Histogram")
+ax.set_xlabel("Correlation Coefficient")
+ax.set_ylabel("Density")
+plt.draw();
+plt.savefig(plots_folder+"correlation_hist.pdf", dpi=100, bbox_inches='tight')
+
+#%% Visualise the correlation between the weights and time
