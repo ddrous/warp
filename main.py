@@ -117,7 +117,8 @@ if train:
     if save_path is not None:
         run_folder = save_path
     else:
-        run_folder = make_run_folder('./runs/')
+        # run_folder = make_run_folder('./runs/')
+        run_folder = make_run_folder(f'./runs/{config["general"]["dataset"]}/')
     data_folder = data_path
 else:
     run_folder = "./"
