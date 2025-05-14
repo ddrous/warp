@@ -336,8 +336,10 @@ ax = sbplot(t, X[i, :,:], "+", color="grey", label='Ground Truth', x_label='Time
 print("Metrics on the test set ...")
 mse = jnp.mean((X - X_hat)**2)
 mae = jnp.mean(jnp.abs(X - X_hat))
+mape = jnp.mean(jnp.abs(X - X_hat) / (jnp.abs(X) + 0.))
 print(f"    - MSE: {mse:.8f}")
 print(f"    - MAE: {mae:.8f}")
+print(f"    - MAPE: {mape:.8f}")
 
 
 # %% [markdown]
@@ -346,3 +348,116 @@ print(f"    - MAE: {mae:.8f}")
 # 
 # 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from matplotlib.ticker import ScalarFormatter, LogLocator
+
+import matplotlib as mpl
+sb = sns
+sb.set_theme(context='poster', 
+             style='ticks',
+             font='sans-serif', 
+             font_scale=1, 
+             color_codes=True, 
+             rc={"lines.linewidth": 1})
+mpl.rcParams['savefig.facecolor'] = 'w'
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['mathtext.fontset'] = 'dejavuserif'
+plt.rcParams['savefig.bbox'] = 'tight'
+
+
+
+# Data from the table
+nb_samples = np.array([1, 10, 100, 1000, 10000])
+wsm_mse = np.array([0.030636, 0.000277, 0.000951, 0.000474, 0.000615])
+wsm_mape = np.array([2.186242, 0.123913, 0.278747, 0.227525, 0.280586])*1
+node_mse = np.array([0.81572676, 0.03518130, 0.03197455, 0.03197455, 0.03197455])
+node_mape = np.array([5.19721508, 1.27983057, 1.29165757, 1.29165757, 1.29165757])*1
+
+# Create a figure with 2 subplots side by side
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 6))
+
+# Define colors with a professional color palette
+colors = sns.color_palette("colorblind", 4)
+
+# Plot MSE on the first axis (left subplot)
+ax1.plot(np.log10(nb_samples), wsm_mse, 'o-', color=colors[0], linewidth=2.5, 
+         markersize=8, label='WSM', alpha=0.9)
+ax1.plot(np.log10(nb_samples), node_mse, 's-', color=colors[1], linewidth=2.5, 
+         markersize=8, label='Neural ODE', alpha=0.9)
+
+# Plot MAPE on the second axis (right subplot)
+ax2.plot(np.log10(nb_samples), wsm_mape, 'o-', color=colors[0], linewidth=2.5, 
+         markersize=8, label='WSM', alpha=0.9)
+ax2.plot(np.log10(nb_samples), node_mape, 's-', color=colors[1], linewidth=2.5, 
+         markersize=8, label='Neural ODE', alpha=0.9)
+
+# Set log scale for the MSE axis
+ax1.set_yscale('log')
+
+# Set y-axis labels
+ax1.set_ylabel('MSE', fontsize=24, fontweight='bold')
+ax2.set_ylabel('MAPE(%)', fontsize=24, fontweight='bold')
+
+# Set shared x-axis label
+# fig.text(0.5, 0.02, '# Samples', fontsize=14, fontweight='bold', ha='center')
+ax1.set_xlabel('# Samples', fontsize=14, fontweight='bold')
+ax2.set_xlabel('# Samples', fontsize=14, fontweight='bold')
+
+## Set horizon legend on ax1
+# ax1.legend(loc='upper center', bbox_to_anchor=(0.49, 1.15), ncol=2, fontsize=12, frameon=True, shadow=True)
+
+ax1.legend(loc='upper center', fontsize=14, frameon=True, shadow=True)
+
+# Set the title
+# fig.suptitle('Model Performance vs. Number of Training Samples', fontsize=16, fontweight='bold', y=0.98)
+
+# Set custom x-ticks for log scale of sample sizes
+for ax in [ax1, ax2]:
+    ax.set_xticks(np.log10(nb_samples))
+    ax.set_xticklabels([f'{int(x)}' for x in nb_samples])
+    ax.tick_params(axis='both', which='major', labelsize=12)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    
+    # Add a box around the plot
+    for spine in ax.spines.values():
+        spine.set_visible(True)
+        spine.set_linewidth(1.5)
+
+# Format the tick labels to avoid scientific notation
+ax1.yaxis.set_major_formatter(ScalarFormatter())
+ax2.yaxis.set_major_formatter(ScalarFormatter())
+
+# Move y-axis ticks to the right side for MAPE plot
+ax2.yaxis.set_label_position('right')
+ax2.yaxis.tick_right()
+
+
+# Adjust layout and save
+plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+# fig.savefig('data_efficiency.png', dpi=100, bbox_inches='tight')
+# fig.savefig('data_efficiency.pdf', dpi=100, bbox_inches='tight')
+
+# Show the plot
+plt.show()
