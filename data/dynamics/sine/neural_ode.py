@@ -422,24 +422,31 @@ ax2.set_ylabel('MAPE(%)', fontsize=24, fontweight='bold')
 
 # Set shared x-axis label
 # fig.text(0.5, 0.02, '# Samples', fontsize=14, fontweight='bold', ha='center')
-ax1.set_xlabel('# Samples', fontsize=14, fontweight='bold')
-ax2.set_xlabel('# Samples', fontsize=14, fontweight='bold')
+ax1.set_xlabel('# Samples', fontsize=20, fontweight='bold')
+ax2.set_xlabel('# Samples', fontsize=20, fontweight='bold')
 
 ## Set horizon legend on ax1
 # ax1.legend(loc='upper center', bbox_to_anchor=(0.49, 1.15), ncol=2, fontsize=12, frameon=True, shadow=True)
 
-ax1.legend(loc='upper center', fontsize=14, frameon=True, shadow=True)
+# ax1.legend(loc='upper center', fontsize=14, frameon=True, shadow=True)
+ax2.legend(loc='upper center', fontsize=15, frameon=True, shadow=True)
 
 # Set the title
 # fig.suptitle('Model Performance vs. Number of Training Samples', fontsize=16, fontweight='bold', y=0.98)
 
 # Set custom x-ticks for log scale of sample sizes
 for ax in [ax1, ax2]:
+    # ax.set_xticks(np.log10(nb_samples))
+    # ax.set_xticklabels([f'{int(x)}' for x in nb_samples])
+    # ax.tick_params(axis='both', which='major', labelsize=12)
+    # ax.grid(True, linestyle='--', alpha=0.7)
+    
     ax.set_xticks(np.log10(nb_samples))
-    ax.set_xticklabels([f'{int(x)}' for x in nb_samples])
-    ax.tick_params(axis='both', which='major', labelsize=12)
+    ax.set_xticklabels(["1", "10", "100", "1k", "10k"])
+    ax.tick_params(axis='both', which='major', labelsize=16)
     ax.grid(True, linestyle='--', alpha=0.7)
     
+
     # Add a box around the plot
     for spine in ax.spines.values():
         spine.set_visible(True)
@@ -457,7 +464,7 @@ ax2.yaxis.tick_right()
 # Adjust layout and save
 plt.tight_layout(rect=[0, 0.05, 1, 0.95])
 # fig.savefig('data_efficiency.png', dpi=100, bbox_inches='tight')
-# fig.savefig('data_efficiency.pdf', dpi=100, bbox_inches='tight')
+fig.savefig('data_efficiency.pdf', dpi=300, bbox_inches='tight')
 
 # Show the plot
 plt.show()

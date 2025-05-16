@@ -160,6 +160,9 @@ class RootMLP(eqx.Module):
 #         # out = ((out - min_x) / (max_x - min_x))*2 - 1
 
 
+#         # #####====== SECOND.5 APPROACH TO EMBEDDED PHYSICS - MSD, use Diffrax ======#####
+
+
 #         # #####====== THIRD APPROACH TO EMBEDDED PHYSICS - SINE ======#####
 #         # # freq, phase = self.network(tx)
 #         # # freq, phase = self.network
