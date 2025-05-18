@@ -403,13 +403,13 @@ colors = sns.color_palette("colorblind", 4)
 
 # Plot MSE on the first axis (left subplot)
 ax1.plot(np.log10(nb_samples), wsm_mse, 'o-', color=colors[0], linewidth=2.5, 
-         markersize=8, label='WSM', alpha=0.9)
+         markersize=8, label='WARP', alpha=0.9)
 ax1.plot(np.log10(nb_samples), node_mse, 's-', color=colors[1], linewidth=2.5, 
          markersize=8, label='Neural ODE', alpha=0.9)
 
 # Plot MAPE on the second axis (right subplot)
 ax2.plot(np.log10(nb_samples), wsm_mape, 'o-', color=colors[0], linewidth=2.5, 
-         markersize=8, label='WSM', alpha=0.9)
+         markersize=8, label='WARP', alpha=0.9)
 ax2.plot(np.log10(nb_samples), node_mape, 's-', color=colors[1], linewidth=2.5, 
          markersize=8, label='Neural ODE', alpha=0.9)
 

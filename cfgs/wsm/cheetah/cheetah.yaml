@@ -15,14 +15,14 @@ data:
   downsample_factor: 1
   resolution: [32, 32]         # For celebA
   traj_length: 1000
-  normalize: False
+  normalize: True
 
 # Model hyperparameters
 model:
-  root_width_size: 48
-  root_depth: 3
+  root_width_size: 128
+  root_depth: 1
   root_activation: "swish"
-  root_final_activation: 23.0
+  root_final_activation: 1.0
   init_state_layers: 2
   input_prev_data: False
   model_type: "wsm"
@@ -48,11 +48,14 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 2000
+  nb_epochs: 200
   batch_size: 300
   autoregressive: True
-  print_every: 100
-  checkpoint_every: 100
+  stochastic: True
+  print_every: 10
+  valid_every: 10
+  save_every: 10
+  val_criterion: "mse"
   nb_recons_loss_steps: null
-  use_nll_loss: False
+  use_nll_loss: True
   inference_start: 50

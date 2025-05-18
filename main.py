@@ -222,7 +222,7 @@ plt.savefig(plots_folder+"samples_train.png", dpi=100, bbox_inches='tight')
 
 # %% Define the model and loss function
 
-model_key, train_key = jax.random.split(main_key, num=2)
+model_key, train_key, test_key = jax.random.split(main_key, num=3)
 if not classification:
     nb_classes = None
 model = make_model(model_key, data_size, nb_classes, config, logger)
@@ -305,6 +305,61 @@ def train_step(model, batch, opt_state, key):
     return model, opt_state, loss, aux_data
 
 
+@eqx.filter_jit
+def forward_pass(model, X, times, key, inference_start=None):
+    """ Jitted forward pass. """
+    X_recons = model(X, times, key, inference_start)
+    return X_recons
+
+
+val_criterion = config['training']['val_criterion']
+logger.info(f"Validation criterion is: {val_criterion}")
+
+
+
+def eval_on_dataloader(model, dataloader, inference_start, key):
+    """ Evaluate the model on the designated set. """
+
+    cri_vals = []
+    new_key, _ = jax.random.split(key)
+
+    for i, batch in enumerate(dataloader):
+        new_key, _ = jax.random.split(new_key)
+        (X_true, times), X_labs_outs = batch
+
+        if not classification:
+            X_recons = forward_pass(model, X_true, times, new_key, inference_start=inference_start)
+            if use_nll_loss:
+                X_recons = X_recons[:, :, :data_size]
+            if dataset in repeat_datasets:
+                X_gt = X_labs_outs
+            else:
+                X_gt = X_true
+            if val_criterion == "mse":
+                loss_val = optax.l2_loss(X_recons, X_gt).mean()
+            elif val_criterion == "mae":
+                mloss_valse = optax.l1_loss(X_recons, X_gt).mean()
+            elif val_criterion == "rmse":
+                loss_val = optax.root_mean_squared_error(X_recons, X_gt).mean()
+            else:
+                raise ValueError(f"Unknown validation criterion for regression: {val_criterion}")
+
+        else:
+            Y_hat = forward_pass(model, X_true, times, new_key, inference_start=inference_start)
+            if val_criterion == "cce":
+                ## ==== Use the categorical cross-entropy loss for validation ====
+                loss_val = optax.softmax_cross_entropy_with_integer_labels(logits=Y_hat[:, -1], labels=X_labs_outs).mean()
+            elif val_criterion == "error_rate":
+                ## ==== Let "cce" be the complement accuracy instead (the lower the better) ===
+                loss_val = jnp.mean(jnp.argmax(Y_hat[:, -1], axis=-1) == X_labs_outs)
+                loss_val = 1 - loss_val
+            else:
+                raise ValueError(f"Unknown validation criterion for classification: {val_criterion}")
+
+        cri_vals.append(loss_val)
+
+    return np.mean(cri_vals), np.median(cri_vals), np.min(cri_vals)
+
 
 
 
@@ -344,8 +399,13 @@ if train:
     med_losses_per_epoch = []
     lr_scales = []
 
+    val_losses = []
+    best_val_loss = np.inf
+    best_val_loss_epoch = 0
+
     print_every = config['training']['print_every']
-    checkpoint_every = config['training']['checkpoint_every']
+    save_every = config['training']['save_every']
+    valid_every = config['training']['valid_every']
 
     nb_epochs = config['training']['nb_epochs']
     logger.info(f"\n\n=== Beginning training ... ===")
@@ -376,31 +436,57 @@ if train:
 
         if epoch%print_every==0 or epoch<=3 or epoch==nb_epochs-1:
             logger.info(
-                f"Epoch {epoch:-4d}/{nb_epochs:-4d}     Train Loss   -Mean: {mean_epoch:.6f},   -Median: {median_epoch:.6f},   -Latest: {loss:.6f},     -Time: {epoch_end_time:.2f} secs"
+                f"Epoch {epoch:-4d}/{nb_epochs:-4d}     Train Loss   -Mean: {mean_epoch:.6f},   -Median: {median_epoch:.6f},   -Latest: {loss:.6f},     -Epoch Wall Time: {epoch_end_time:.2f} secs"
             )
 
             if classification:
                 logger.info(f"Average classification accuracy: {np.mean(aux_epoch)*100:.2f}%")
 
-        if epoch%checkpoint_every==0 or epoch==nb_epochs-1:
-            eqx.tree_serialise_leaves(checkpoints_folder+f"model_{epoch}.eqx", model)
+        if epoch%save_every==0 or epoch==nb_epochs-1:
+            if epoch==nb_epochs-1:  ## @TODO: to save space !
+                eqx.tree_serialise_leaves(checkpoints_folder+f"model_{epoch}.eqx", model)
             np.save(artefacts_folder+"losses.npy", np.array(losses))
             np.save(artefacts_folder+"lr_scales.npy", np.array(lr_scales))
+            np.savez(artefacts_folder+"val_losses.npz", losses=np.array(val_losses), best_epoch=best_val_loss_epoch, best_loss=best_val_loss)
 
             ## Only save the best model with the lowest mean loss
             med_losses_per_epoch.append(median_epoch)
             if epoch==0 or median_epoch<=np.min(med_losses_per_epoch[:-1]):
-                eqx.tree_serialise_leaves(artefacts_folder+"model.eqx", model)
+                eqx.tree_serialise_leaves(artefacts_folder+"model_train.eqx", model)
                 with open(artefacts_folder+"opt_state.pkl", 'wb') as f:
                     pickle.dump(opt_state, f)
                 logger.info("Best model saved ...")
 
+        if epoch%valid_every==0 or epoch==nb_epochs-1:
+            val_mean_loss, val_median_loss, _ = eval_on_dataloader(model, validloader, inference_start=None, key=test_key)
+            val_losses.append(val_mean_loss)
+
+            logger.info(
+                f"Epoch {epoch:-4d}/{nb_epochs:-4d}     Valid Loss   -Mean: {val_mean_loss:.6f},   -Median: {val_median_loss:.6f}"
+            )
+
+            ## Save the model with the lowest validation loss
+            if epoch==0 or val_mean_loss<=np.min(val_losses[:-1]):
+                eqx.tree_serialise_leaves(artefacts_folder+"model.eqx", model)
+                logger.info("Best validation model saved at epoch %d" % epoch)
+                best_val_loss = val_mean_loss
+                best_val_loss_epoch = epoch
+
         if epoch==3:     ## Print the output of nvidia-smi to check VRAM usage
             os.system("nvidia-smi")
-            os.system("nvidia-smi >> "+artefacts_folder+"training.log")
+            os.system("nvidia-smi >> "+artefacts_folder+"training.log") 
 
     wall_time = time.time() - start_time
     logger.info("\nTraining complete. Total time: %d hours %d mins %d secs" %seconds_to_hours(wall_time))
+
+    ## Restore the best model
+    if os.path.exists(artefacts_folder+"model.eqx"):
+        model = eqx.tree_deserialise_leaves(artefacts_folder+"model.eqx", model)
+        logger.info(f"Best model form epoch {best_val_loss_epoch} restored.")
+    else:
+        logger.info("No 'best' model found. Using the last model.")
+
+
 
 else:
     model = eqx.tree_deserialise_leaves(artefacts_folder+"model.eqx", model)
@@ -408,11 +494,15 @@ else:
     try:
         losses = np.load(artefacts_folder+"losses.npy")
         lr_scales = np.load(artefacts_folder+"lr_scales.npy")
+        val_losses_raw = np.load(artefacts_folder+"val_losses.npy")
+        val_losses = val_losses_raw['losses']
+        best_val_loss_epoch = val_losses_raw['best_epoch'].item()
+        best_val_loss = val_losses_raw['best_loss'].item()
     except:
         losses = []
+        val_losses = []
 
     logger.info(f"Model loaded from {run_folder}model.eqx")
-
 
 
 
@@ -463,6 +553,15 @@ if os.path.exists(artefacts_folder+"lr_scales.npy"):
 
 
 
+## Plot the validation losses
+val_ids = (np.arange(0, nb_epochs, valid_every).tolist() + [nb_epochs-1])[:len(val_losses)]
+fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+ax = sbplot(val_ids, val_losses, title=f"{val_criterion.upper()} on Valid Set at Various Epochs", x_label='Epoch', y_label=f'{val_criterion}', ax=ax, y_scale="log", linewidth=3);
+plt.axvline(x=best_val_loss_epoch, color='r', linestyle='--', linewidth=3, label=f"Best {val_criterion.upper()}: {best_val_loss:.6f} at Epoch {best_val_loss_epoch}")
+plt.legend(fontsize=16)
+plt.draw();
+plt.savefig(plots_folder+f"checkpoints_{val_criterion.lower()}.png", dpi=100, bbox_inches='tight')
+logger.info(f"Best model found at epoch {best_val_loss_epoch} with {val_criterion}: {best_val_loss:.6f}")
 
 
 
@@ -534,105 +633,6 @@ if config["model"]["model_type"] == "wsm":
         plt.savefig(plots_folder+"dynamic_tanh.png", dpi=100, bbox_inches='tight')
 
 
-# %% Evaluate the model on the test set
-if not classification:
-    @eqx.filter_jit
-    def eval_step(model, X, times, key, inference_start=None):
-        """ Evaluate the model on a batch of data. """
-        X_recons = model(X, times, key, inference_start)
-        return X_recons
-
-    def eval_on_valid_set(model, key):
-        mses = []
-        new_key, _ = jax.random.split(key)
-        for i, batch in enumerate(validloader):
-            new_key, _ = jax.random.split(new_key)
-            (X_true, times), X_labs_outs = batch
-
-            if not classification:
-                X_recons = eval_step(model, X_true, times, new_key, inference_start=None)
-                if use_nll_loss:
-                    X_recons = X_recons[:, :, :data_size]
-                if dataset in repeat_datasets:
-                    mse = jnp.mean((X_recons - X_labs_outs)**2)
-                else:
-                    mse = jnp.mean((X_recons - X_true)**2)
-
-            else:
-                Y_hat = model(X_true, times, new_key, inference_start=None)
-                mse = jnp.mean((jnp.argmax(Y_hat[:, -1], axis=-1) - X_labs_outs)**2)
-
-            mses.append(mse)
-
-        return np.mean(mses), np.median(mses), np.min(mses)
-
-    test_key, _ = jax.random.split(train_key)
-    mean_mse, median_mse, min_mse = eval_on_valid_set(model, test_key)
-
-    logger.info("Evaluation of MSE on the test set, at the end of the training (Current Best Model):")
-    logger.info(f"    - Mean : {mean_mse:.6f}")
-    logger.info(f"    - Median : {median_mse:.6f}")
-    logger.info(f"    - Min : {min_mse:.6f}")
-
-    nb_epochs = config['training']['nb_epochs']
-    checkpoint_every = config['training']['checkpoint_every']
-
-    best_model = model
-    best_mse = mean_mse
-
-    ## Parse the checkpoints folder to know when training ended ==
-    all_files = [f for f in os.listdir(checkpoints_folder) if f.endswith(".eqx")]
-    all_epochs = [int(f.split("_")[1].split(".")[0]) for f in all_files]
-    best_mse_epoch = sorted(all_epochs)[-1] if len(all_epochs)>0 else nb_epochs-1
-
-    if os.path.exists(artefacts_folder+"test_mses.npz"):
-        checkpoints_data = np.load(artefacts_folder+"test_mses.npz")
-        mses_chekpoints = checkpoints_data['data']
-        best_mse_epoch = checkpoints_data['best_epoch'].item()
-        best_mse = checkpoints_data['best_mse'].item()
-        best_model = eqx.tree_deserialise_leaves(checkpoints_folder+f"model_{best_mse_epoch}.eqx", model)
-        id_checkpoints = (np.arange(0, nb_epochs, checkpoint_every).tolist() + [nb_epochs-1])[:len(mses_chekpoints)]
-        logger.info("Checkpoints MSE artefact file found. Loading it.")
-
-    else:
-        mses_chekpoints = [] 
-        id_checkpoints = []
-
-        ## Lead the model at each checkpoint and evaluate it
-        for i in list(range(0, nb_epochs, checkpoint_every))+[nb_epochs-1]:
-            try:
-                model = eqx.tree_deserialise_leaves(checkpoints_folder+f"model_{i}.eqx", model)
-            except:
-                logger.info(f"Checkpoint {i} not found. Skipping.")
-                continue
-
-            mean, med, min_ = eval_on_valid_set(model, test_key)
-            mses_chekpoints.append(mean)
-            id_checkpoints.append(i)
-
-            if mean<best_mse:
-                best_model = model
-                best_mse = mean
-                best_mse_epoch = i
-                logger.info(f"New best model found at epoch {i} with MSE: {best_mse:.6f}")
-            # logger.info(f"Checkpoint {i} MSE: {mean:.6f} (Mean), {med:.6f} (Median), {min_:.6f} (Min)")
-
-        ## Save the checkpoints MSEs artefacts
-        np.savez(artefacts_folder+"test_mses.npz", data=np.array(mses_chekpoints), best_epoch=best_mse_epoch, best_mse=best_mse)
-
-    ## Plot the MSE of the checkpoints
-    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
-    ax = sbplot(id_checkpoints, mses_chekpoints, title="MSE on Test Set at Various Checkpoints", x_label='Epoch', y_label='MSE', ax=ax, y_scale="log", linewidth=3);
-    plt.axvline(x=best_mse_epoch, color='r', linestyle='--', linewidth=3, label=f"Best MSE: {best_mse:.6f} at Epoch {best_mse_epoch}")
-    plt.legend(fontsize=16)
-    plt.draw();
-    plt.savefig(plots_folder+"checkpoints_mse.png", dpi=100, bbox_inches='tight')
-    logger.info(f"Best model found at epoch {best_mse_epoch} with MSE: {best_mse:.6f}")
-
-
-### ===== Very importtant: Set the best model on test set as the model for visualisation ? ==== TODO
-model = best_model
-
 # %% Visualising a few reconstruction samples
 
 if not classification:
@@ -647,7 +647,7 @@ if not classification:
     (xs_true, times), labels = batch
 
     inference_start = config['training']['inference_start']
-    xs_recons = eval_step(model=model, 
+    xs_recons = forward_pass(model=model, 
                         X=xs_true, 
                         times=times, 
                         key=test_key, 
@@ -744,7 +744,7 @@ if not classification:
 
 
     print("Inferance starts at: ", inference_start)
-    xs_recons = eval_step(model=best_model, 
+    xs_recons = forward_pass(model=model, 
                         X=xs_true, 
                         times=times, 
                         key=test_key, 
@@ -861,110 +861,6 @@ if not classification and config['data']['normalize']:
 
 
 
-#%% Now dealing with classification tasks
-
-if classification:
-    @eqx.filter_jit
-    def eval_step(model, X, times, key, inference_start=None):
-        """ Evaluate the model on a batch of data. """
-        Y_hat = model(X, times, key, inference_start)
-        return Y_hat
-
-    val_criterion = "ErrorRate"       ## could be "CCE" or "ErrorRate"
-
-    def eval_on_valid_set(model, key):
-        cces = []
-        new_key, _ = jax.random.split(key)
-        for i, batch in enumerate(validloader):
-            new_key, _ = jax.random.split(new_key)
-            (X_true, times), X_labs_outs = batch
-
-            Y_hat = model(X_true, times, new_key, inference_start=None)
-
-            if val_criterion == "CCE":
-                ## ==== Use the categorical cross entropy loss for validation ====
-                cce = optax.softmax_cross_entropy_with_integer_labels(logits=Y_hat[:, -1], labels=X_labs_outs).mean()
-            else:
-                ## ==== Let "cce" be the complement accuracy instead (the lower the better) ===
-                cce = jnp.mean(jnp.argmax(Y_hat[:, -1], axis=-1) == X_labs_outs)
-                cce = 1 - cce
-
-            cces.append(cce)
-
-        return np.mean(cces), np.median(cces), np.min(cces)
-
-    test_key, _ = jax.random.split(train_key)
-    mean_cce, median_cce, min_cce = eval_on_valid_set(model, test_key)
-
-    if val_criterion == "CCE":
-        logger.info("Validation criterion is the Categorical Cross Entropy (CCE)")
-    else:
-        logger.info("Validation criterion is the Error Rate (1 - ACC)")
-
-    logger.info(f"Evaluation on the validation set, at the end of the training (Current Best Model):")
-    logger.info(f"    - Mean : {mean_cce:.6f}")
-    logger.info(f"    - Median : {median_cce:.6f}")
-    logger.info(f"    - Min : {min_cce:.6f}")
-
-    nb_epochs = config['training']['nb_epochs']
-    checkpoint_every = config['training']['checkpoint_every']
-
-    best_model = model
-    best_cce = mean_cce
-
-    ## Parse the checkpoint folder to get the latest checpoint epoch ==
-    all_files = [f for f in os.listdir(checkpoints_folder) if f.endswith(".eqx")]
-    all_epochs = [int(f.split("_")[1].split(".")[0]) for f in all_files]
-    best_cce_epoch = sorted(all_epochs)[-1] if len(all_epochs)>0 else nb_epochs-1
-
-    if os.path.exists(artefacts_folder+"checkpoints_cces.npz"):
-        checkpoints_data = np.load(artefacts_folder+"checkpoints_cces.npz")
-        cces_chekpoints = checkpoints_data['data']
-        best_cce_epoch = checkpoints_data['best_epoch'].item()
-        best_cce = checkpoints_data['best_cce'].item()
-        best_model = eqx.tree_deserialise_leaves(checkpoints_folder+f"model_{best_cce_epoch}.eqx", model)
-        id_checkpoints = (np.arange(0, nb_epochs, checkpoint_every).tolist() + [nb_epochs-1])[:len(cces_chekpoints)]
-        logger.info(f"Checkpoints {val_criterion} artefact file found. Loading it.")
-
-    else:
-        cces_chekpoints = [] 
-        id_checkpoints = []
-
-        ## Lead the model at each checkpoint and evaluate it
-        for i in list(range(0, nb_epochs, checkpoint_every))+[nb_epochs-1]:
-            try:
-                model = eqx.tree_deserialise_leaves(checkpoints_folder+f"model_{i}.eqx", model)
-            except:
-                logger.info(f"Checkpoint {i} not found. Skipping.")
-                continue
-
-            mean, med, min_ = eval_on_valid_set(model, test_key)
-            cces_chekpoints.append(mean)
-            id_checkpoints.append(i)
-
-            if mean<best_cce:
-                best_model = model
-                best_cce = mean
-                best_cce_epoch = i
-                logger.info(f"New best model found at epoch {i} with {val_criterion}: {best_cce:.6f}")
-            # logger.info(f"Checkpoint {i} MSE: {mean:.6f} (Mean), {med:.6f} (Median), {min_:.6f} (Min)")
-
-        ## Save the checkpoints MSEs artefacts
-        np.savez(artefacts_folder+"checkpoints_cces.npz", data=np.array(cces_chekpoints), best_epoch=best_cce_epoch, best_cce=best_cce)
-
-    ## Plot the CCE of the checkpoints
-    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
-    ax = sbplot(id_checkpoints, cces_chekpoints, title=f"{val_criterion} on Test Set at Various Checkpoints", x_label='Epoch', y_label=f'{val_criterion}', ax=ax, y_scale="log", linewidth=3);
-    plt.axvline(x=best_cce_epoch, color='r', linestyle='--', linewidth=3, label=f"Best {val_criterion}: {best_cce:.6f} at Epoch {best_cce_epoch}")
-    plt.legend(fontsize=16)
-    plt.draw();
-    plt.savefig(plots_folder+f"checkpoints_{val_criterion.lower()}.png", dpi=100, bbox_inches='tight')
-    logger.info(f"Best model found at epoch {best_cce_epoch} with {val_criterion}: {best_cce:.6f}")
-
-
-    ### ===== Very importtant: Set the best model on test set as the model for visualisation ? ==== TODO
-    model = best_model
-
 
 # %% Now dealing with classification tasks
 
@@ -980,7 +876,7 @@ if classification:
     accs = []
     for i, batch in enumerate(evalloader):
         (in_sequence, times), output = batch
-        Y_hat_raw = eval_step(model, in_sequence, times, main_key)
+        Y_hat_raw = forward_pass(model, in_sequence, times, main_key)
         Y_hat = jnp.argmax(Y_hat_raw, axis=-1)
         print("\nY_hat shape:", Y_hat.shape, "Y shape:", output.shape)
         acc = jnp.mean(Y_hat[:, -1] == output)
@@ -989,8 +885,6 @@ if classification:
 
     accuracy = np.mean(accs)
     logger.info(f"Test set accuracy: {accuracy:.4f}")
-
-
 
 
     #### ## Visualise the model on the test set
