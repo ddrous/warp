@@ -468,3 +468,93 @@ fig.savefig('data_efficiency.pdf', dpi=300, bbox_inches='tight')
 
 # Show the plot
 plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from matplotlib.ticker import ScalarFormatter, LogLocator
+
+import matplotlib as mpl
+sb = sns
+sb.set_theme(context='poster', 
+             style='ticks',
+             font='sans-serif', 
+             font_scale=1, 
+             color_codes=True, 
+             rc={"lines.linewidth": 1})
+mpl.rcParams['savefig.facecolor'] = 'w'
+plt.rcParams['font.family'] = 'serif'
+plt.rcParams['mathtext.fontset'] = 'dejavuserif'
+plt.rcParams['savefig.bbox'] = 'tight'
+
+
+# Data from the table
+nb_samples = np.array([1, 10, 100, 1000, 10000])
+node_mse = np.array([0.81572676, 0.03518130, 0.03197455, 0.03197455, 0.03197455])
+warp_mse = np.array([0.030636, 0.000277, 0.000951, 0.000474, 0.000615])
+warp_phys_mse = np.array([0.075092, 0.62e-4, 0.000067, 0.000055, 0.000048])     ## Small has 0.000520, and Large has: 0.000095
+# warp_phys2_mse = np.array([0.092860, 0.036147, 0.034745, 0.034328, 0.034367])     # forecast mses
+warp_phys2_mse = np.array([0.050905, 0.025146, 0.023724, 0.023257, 0.023300])
+
+
+## Make the plot like the aone above, but with one axis just for MSEs
+fig, ax = plt.subplots(1, 1, figsize=(8, 6))
+# Define colors with a professional color palette
+colors = sns.color_palette("colorblind", 4)
+# Plot MSE on the first axis (left subplot)
+
+ax.plot(np.log10(nb_samples), node_mse, 'o-', color=colors[0], linewidth=2.5, markersize=8, label='Neural ODE', alpha=0.9)
+ax.plot(np.log10(nb_samples), warp_mse, 's-', color=colors[1], linewidth=2.5, markersize=8, label='WARP', alpha=0.9)
+ax.plot(np.log10(nb_samples), warp_phys_mse, 'o-', color=colors[2], linewidth=2.5, markersize=8, label='WARP-Phys', alpha=0.9)
+ax.plot(np.log10(nb_samples), warp_phys2_mse, 's-', color=colors[3], linewidth=2.5, markersize=8, label=f'WARP-Phys$^\dagger$', alpha=0.9)
+# Set log scale for the MSE axis
+ax.set_yscale('log')
+# Set y-axis labels
+# ax.set_ylabel('MSE', fontsize=24, fontweight='bold')
+# Set shared x-axis label
+ax.set_xlabel('# Samples', fontsize=20, fontweight='bold')
+# Set the title
+# fig.suptitle('Model Performance vs. Number of Training Samples', fontsize=16, fontweight='bold', y=0.98)
+# Set custom x-ticks for log scale of sample sizes
+ax.set_xticks(np.log10(nb_samples))
+ax.set_xticklabels(["1", "10", "100", "1k", "10k"])
+ax.tick_params(axis='both', which='major', labelsize=16)
+ax.grid(True, linestyle='--', alpha=0.7)
+
+# # Add a box around the plot
+# for spine in ax.spines.values():
+#     spine.set_visible(True)
+#     spine.set_linewidth(1.5)
+
+# # Format the tick labels to avoid scientific notation
+# ax.yaxis.set_major_formatter(ScalarFormatter())
+# # Move y-axis ticks to the right side for MAPE plot
+# ax.yaxis.set_label_position('right')
+# ax.yaxis.tick_right()
+
+
+plt.legend(loc='upper right', fontsize=12, frameon=True, shadow=True)
+
+# Adjust layout and save
+plt.tight_layout(rect=[0, 0.05, 1, 0.95])
+# fig.savefig('data_efficiency.png', dpi=100, bbox_inches='tight')
+fig.savefig('root_network_physics.pdf', dpi=300, bbox_inches='tight')
+# Show the plot
+plt.show()

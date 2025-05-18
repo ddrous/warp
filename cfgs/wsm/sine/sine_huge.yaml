@@ -50,8 +50,11 @@ training:
   nb_epochs: 1000
   batch_size: 10000
   autoregressive: True
-  print_every: 10
-  checkpoint_every: 10
+  stochastic: False
+  print_every: 100
+  save_every: 100
+  valid_every: 100
+  val_criterion: "mse"
   nb_recons_loss_steps: null
   use_nll_loss: False
   inference_start: 1

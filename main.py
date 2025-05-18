@@ -436,7 +436,7 @@ if train:
 
         if epoch%print_every==0 or epoch<=3 or epoch==nb_epochs-1:
             logger.info(
-                f"Epoch {epoch:-4d}/{nb_epochs:-4d}     Train Loss   -Mean: {mean_epoch:.6f},   -Median: {median_epoch:.6f},   -Latest: {loss:.6f},     -Epoch Wall Time: {epoch_end_time:.2f} secs"
+                f"Epoch {epoch:-4d}/{nb_epochs:-4d}     Train Loss   -Mean: {mean_epoch:.6f},   -Median: {median_epoch:.6f},   -Latest: {loss:.6f},     -WallTime: {epoch_end_time:.2f} secs"
             )
 
             if classification:
@@ -455,7 +455,7 @@ if train:
                 eqx.tree_serialise_leaves(artefacts_folder+"model_train.eqx", model)
                 with open(artefacts_folder+"opt_state.pkl", 'wb') as f:
                     pickle.dump(opt_state, f)
-                logger.info("Best model saved ...")
+                logger.info("Best model on training set saved ...")
 
         if epoch%valid_every==0 or epoch==nb_epochs-1:
             val_mean_loss, val_median_loss, _ = eval_on_dataloader(model, validloader, inference_start=None, key=test_key)
@@ -468,7 +468,8 @@ if train:
             ## Save the model with the lowest validation loss
             if epoch==0 or val_mean_loss<=np.min(val_losses[:-1]):
                 eqx.tree_serialise_leaves(artefacts_folder+"model.eqx", model)
-                logger.info("Best validation model saved at epoch %d" % epoch)
+                # logger.info("Best model on validation set saved at epoch %d" % epoch)
+                logger.info("Best model on validation set saved ...")
                 best_val_loss = val_mean_loss
                 best_val_loss_epoch = epoch
 
