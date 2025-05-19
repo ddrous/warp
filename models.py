@@ -137,6 +137,7 @@ class GradualMLP(eqx.Module):
 
 
 
+# import diffrax
 # class RootMLP(eqx.Module):      ## TODO: Physics-Informed - Remove Later- Use only on Sine/MSD problems
 #     """ Root network f: t -> x_t, whose weights are the latent space of the WSM """
 #     network: eqx.Module
@@ -170,8 +171,10 @@ class GradualMLP(eqx.Module):
 #         # self.network = jnp.array([0.03, 10, 0.1])     ## TRUE range
 #         # self.network = jnp.array([0.03, 0.01, 0.01])
 #         # self.network = jnp.array([1.0, 0.0, 0.0])
-#         # self.network = eqx.nn.MLP(input_dim, 3, width_size, depth, activation, final_activation=lambda X: jnp.clip(X, 0.005, None), key=key)
-#         self.network = eqx.nn.MLP(input_dim, 1, width_size, depth, activation, key=key)
+#         # self.network = eqx.nn.MLP(1, 3, width_size, depth, activation, final_activation=lambda X: jnp.clip(X, 1e-6, 1), key=key)
+#         self.network = eqx.nn.MLP(1+2, 3, width_size, depth, activation, final_activation=jax.nn.relu, key=key)
+#         # self.network = eqx.nn.MLP(input_dim, 1, width_size, depth, activation, key=key)
+#         # self.network = eqx.nn.MLP(0+1, 2, width_size, depth, activation, key=key)
 #         # self.network = jnp.array([0.0])
 
 #         self.props = (input_dim, output_dim, width_size, depth, activation)
@@ -193,55 +196,100 @@ class GradualMLP(eqx.Module):
 #         # c = 10*c
 
 #         #####====== FIRST APPROACH TO EMBEDDED PHYSICS ======#####
-#         # m, k, c = self.network(tx)
-#         # delta_t = 1.0/256
-#         # t, x_prev = tx[0], tx[1:]
+#         m, k, c = self.network(tx)
+#         m = m+1e-6
+#         k= 1000*k
+#         c = 10*c
 
-#         # ## Unnormalise the x_prev input with min-max scaling: -27.25527482165262, 26.14404933694852
-#         # min_x, max_x = -27.25527482165262, 26.14404933694852
-#         # # x_prev = ((x_prev - min_x) / (max_x - min_x))*2 - 1
+#         delta_t = 1.0/256
+#         t, x_prev = tx[0], tx[1:]
+
+#         ## Unnormalise the x_prev input with min-max scaling: -27.25527482165262, 26.14404933694852
+#         min_x, max_x = -27.25527482165262, 26.14404933694852
+#         # x_prev = ((x_prev - min_x) / (max_x - min_x))*2 - 1
 #         # x_prev = ((x_prev + 1)/2)*(max_x - min_x) + min_x
 
-#         # ## Calculating the next step
-#         # pos, vel = jnp.split(x_prev, 2)
-#         # acc = -k/m*pos - c/m*vel
-#         # vel_next = vel + acc*delta_t        ## Euler approximation of the next step
-#         # pos_next = pos + vel*delta_t
-#         # out = jnp.concatenate([pos_next, vel_next], axis=-1)
+#         ## Calculating the next step
+#         pos, vel = jnp.split(x_prev, 2)
+#         acc = -k/m*pos - c/m*vel
+#         vel_next = vel + acc*delta_t        ## Euler approximation of the next step. @TODO Implement a more sophisticated method (But not diffrax) @TODO
+#         pos_next = pos + vel*delta_t
+#         out = jnp.concatenate([pos_next, vel_next], axis=-1)
 
-#         # ## Unormalize the input
-#         # # out = ((out + 1)/2)*(max_x - min_x) + min_x
+#         ## Unormalize the input
+#         # out = ((out + 1)/2)*(max_x - min_x) + min_x
 #         # out = ((out - min_x) / (max_x - min_x))*2 - 1
 
 
-#         # #####====== SECOND APPROACH TO EMBEDDED PHYSICS - MSD, general solution ======#####
+#         #####====== SECOND APPROACH TO EMBEDDED PHYSICS - MSD, general solution ======#####
 #         # m, k, c = self.network(tx)
+#         # # a, b = self.network(tx)
 #         # # Scale k and c
-#         # # k = 1000*k
-#         # # c = 10*c
+#         # k = 1000*k
+#         # c = 10*c
 #         # min_x, max_x = -27.25527482165262, 26.14404933694852
 #         # ## construct the matrix E
 #         # E = jnp.array([[0.0, 1.0], [-k/m, -c/m]])
+#         # # E = jnp.array([[0.0, 1.0], [a, b]])
+#         # E = jnp.clip(E, -1, 1.)
 #         # Y0 = jnp.array([1.0, 0.0])
 #         # out = jax.scipy.linalg.expm(tx[0]*E, max_squarings=8) @ Y0
 
 #         # ## Normalize the output
 #         # out = ((out - min_x) / (max_x - min_x))*2 - 1
 
+#         # # E = self.network(tx).reshape((2, 2))    
+#         # # E = E.at[0, :].set(jnp.array([0.0, 1.0]))
+#         # Y0 = jnp.array([1.0, 0.0])
+#         # out = jax.scipy.linalg.expm(tx[0]*E, max_squarings=8) @ Y0
 
-#         # #####====== SECOND.5 APPROACH TO EMBEDDED PHYSICS - MSD, use Diffrax ======#####
+#         ## Normalize the output
+#         # out = ((out - min_x) / (max_x - min_x))*2 - 1
 
+
+
+#         # # #####====== SECOND.5 APPROACH TO EMBEDDED PHYSICS - MSD, use Diffrax ======#####
+#         # def vectorfield(t, y, args):
+#         #     t = jnp.expand_dims(t, axis=-1)
+#         #     m, k, c = self.network(jnp.concatenate([t, y], axis=-1))
+#         #     # Scale k and c
+#         #     # k = 1000*k
+#         #     # c = 10*c
+#         #     pos, vel = jnp.split(y, 2)
+#         #     acc = -k/m*pos - c/m*vel
+#         #     return jnp.concatenate([vel, acc], axis=-1)
+
+#         #     # ## Turn t, a scalar, into a vector
+#         #     # t = jnp.expand_dims(t, axis=-1)
+#         #     # # jax.debug.print("Shapes: {} {}", t.shape, y.shape)
+#         #     # # out =  self.network(jnp.concatenate([jnp.array([t]), y], axis=-1))
+#         #     # out =  self.network(jnp.concatenate([t, y], axis=-1))
+#         #     # # jax.debug.print("Shapes: {} {} {}", out.shape, t.shape, y.shape)
+#         #     # return out
+
+#         # out = diffrax.diffeqsolve(
+#         #     diffrax.ODETerm(vectorfield),
+#         #     diffrax.Tsit5(),
+#         #     t0=0.,
+#         #     # t1=1,
+#         #     t1=tx[0]+(1/256),
+#         #     dt0=1e-3,
+#         #     y0=jnp.array([1.0, 0.0]),
+#         #     stepsize_controller=diffrax.PIDController(rtol=1e-3, atol=1e-6),
+#         #     # saveat=diffrax.SaveAt(ts=ts),
+#         #     max_steps=4096*1,    ## 4096//200 for debugging
+#         # ).ys.squeeze()
 
 #         # #####====== THIRD APPROACH TO EMBEDDED PHYSICS - SINE ======#####
-#         # freq, phase = self.network(tx)
-#         # freq, phase = self.network
-#         # freq, phase = 1.0, self.network[0]
-#         freq, phase = 1.0, self.network(tx)
-#         t = tx
-#         ## freq initialiased at 1.
-#         ## freq in range np.random.uniform(-np.pi/6, np.pi/6, size=nb_samples)
-#         ## Calculate the sine function
-#         out = jnp.sin(2*jnp.pi*freq*t + phase)
+#         # # freq, phase = self.network(tx)
+#         # # freq, phase = self.network
+#         # # freq, phase = 1.0, self.network[0]
+#         # freq, phase = 1.0, self.network(tx)
+#         # t = tx
+#         # ## freq initialiased at 1.
+#         # ## freq in range np.random.uniform(-np.pi/6, np.pi/6, size=nb_samples)
+#         # ## Calculate the sine function
+#         # out = jnp.sin(2*jnp.pi*freq*t + phase)
 
 #         # #####====== THIRD.5 APPROACH TO EMBEDDED PHYSICS - SINE without a network ======#####
 #         # phase = self.network

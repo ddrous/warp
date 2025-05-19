@@ -15,7 +15,7 @@ import jax
 print("\n\nAvailable devices:", jax.devices())
 
 from jax import config
-# config.update("jax_debug_nans", True)
+config.update("jax_debug_nans", True)
 # config.update("jax_disable_jit", True)
 # config.update("jax_enable_x64", True)
 # from jax.experimental import checkify
@@ -457,7 +457,7 @@ if train:
                     pickle.dump(opt_state, f)
                 logger.info("Best model on training set saved ...")
 
-        if epoch%valid_every==0 or epoch==nb_epochs-1:
+        if (valid_every is not None) and (epoch%valid_every==0) or (epoch==nb_epochs-1):
             val_mean_loss, val_median_loss, _ = eval_on_dataloader(model, validloader, inference_start=None, key=test_key)
             val_losses.append(val_mean_loss)
 
