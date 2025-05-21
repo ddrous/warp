@@ -4,6 +4,7 @@
 general:
   seed: 2024
   train: True
+  classification: False
   dataset: "celeba"  # Options: mnist, cifar, lorentz, dynamics
   data_path: "./data/"
   # save_path: "./runs/250404-175026-Test/"
@@ -14,17 +15,19 @@ data:
   downsample_factor: 1
   resolution: [32, 32]         # For celebA
   traj_length: 1000
+  normalize: False
 
 # Model hyperparameters
 model:
-  mlp_width_size: 24
-  mlp_depth: 3
-  activation: "relu"
+  root_width_size: 24
+  root_depth: 3
+  root_activation: "relu"
+  root_final_activation: 1.0
+  init_state_layers: null
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
-  apply_dynamic_tanh: True
   time_as_channel: False
   forcing_prob: 0.15
   noise_theta_init: null
@@ -47,7 +50,11 @@ training:
   nb_epochs: 250
   batch_size: 1256
   print_every: 10
-  checkpoint_every: 10
+  save_every: 10
+  valid_every: 10
+  val_criterion: "mse"
+  autoregressive: True
+  stochastic: False
   nb_recons_loss_steps: null
   use_nll_loss: True
-  inference_start: 500
+  inference_start: 600

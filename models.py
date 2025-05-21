@@ -945,6 +945,7 @@ class GRU(eqx.Module):
                 if inference_start is not None:
                     x_t = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
                 else:
+                    # x_t = x_true
                     x_t = jnp.where(jax.random.bernoulli(key, self.forcing_prob), x_true, x_hat)
 
                 if self.time_as_channel:
@@ -976,7 +977,7 @@ class GRU(eqx.Module):
 
 
 
-class LSTM(eqx.Module):
+class LSTM_(eqx.Module):
     """ Gated Recurrent Unit """
     cell: eqx.Module
     decoder: eqx.Module
@@ -1054,6 +1055,81 @@ class LSTM(eqx.Module):
         ## Batched version of the forward pass
         ks = jax.random.split(k, xs.shape[0])
         return eqx.filter_vmap(forward)(xs, ts, ks)
+
+
+
+
+class LSTM(eqx.Module):
+    """ Gated Recurrent Unit """
+    cell: eqx.Module
+    decoder: eqx.Module
+
+    data_size: int
+    time_as_channel: bool
+    forcing_prob: float
+    time_as_channel: bool
+
+    predict_uncertainty: bool
+    std_lower_bound: float
+
+    def __init__(self, 
+                 data_size, 
+                 hidden_size, 
+                 predict_uncertainty=True,
+                 time_as_channel=True,
+                 forcing_prob=1.0,
+                 std_lower_bound=None,
+                 key=None):
+
+        self.time_as_channel = time_as_channel
+        input_dim = 1+data_size if time_as_channel else data_size
+
+        self.cell = eqx.nn.LSTMCell(input_dim, hidden_size, use_bias=True, key=key)
+        self.decoder = eqx.nn.Linear(hidden_size, 2*data_size if predict_uncertainty else data_size, use_bias=True, key=key)
+
+        self.data_size = data_size
+        self.time_as_channel = time_as_channel
+        self.forcing_prob = forcing_prob
+
+        self.predict_uncertainty = predict_uncertainty
+        self.std_lower_bound = std_lower_bound
+
+    def __call__(self, xs, ts, k, inference_start=None):
+        """ Forward pass of the model on batch of sequences
+            xs: (batch, time, data_size)
+            ts: (batch, time)
+            k:  (key_dim)
+            inference_start: whether/when to use the model in autoregressive mode
+            """
+
+        def forward(xs_, ts_, k_):
+            """ Forward pass on a single sequence """
+
+            def f(carry, input_signal):
+                hc, t_prev = carry
+                x_true, t_curr, key = input_signal
+
+                x_t = x_true
+
+                if self.time_as_channel:
+                    x_t = jnp.concatenate([t_curr, x_t], axis=-1)
+
+                hc_next = self.cell(x_t, hc)
+                y_next = self.decoder(hc_next[0])
+
+                return (hc_next, t_curr), (y_next, )
+
+            keys = jax.random.split(k_, xs_.shape[0])
+
+            _, (ys_hat, ) = jax.lax.scan(f, ((jnp.zeros(self.cell.hidden_size), jnp.zeros(self.cell.hidden_size)), ts_[0:1]), (xs_, ts_[:, None], keys))
+
+            return ys_hat
+
+        ## Batched version of the forward pass
+        ks = jax.random.split(k, xs.shape[0])
+        return eqx.filter_vmap(forward)(xs, ts, ks)
+
+
 
 
 

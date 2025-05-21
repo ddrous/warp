@@ -2,7 +2,7 @@
 
 # General settings
 general:
-  seed: 2024
+  seed: 2028
   classification: True
   train: True
   dataset: "spirals"  # Options: mnist, cifar, lorentz, dynamics
@@ -17,9 +17,10 @@ data:
 
 # Model hyperparameters
 model:
-  mlp_width_size: 24
-  mlp_depth: 3
-  activation: "swish"
+  root_width_size: 24
+  root_depth: 1
+  root_activation: "swish"
+  root_final_activation: null
   init_state_layers: 2      ## null to directly learn the initial state
   input_prev_data: False
   model_type: "wsm"
@@ -30,6 +31,7 @@ model:
   forcing_prob: 0.25
   noise_theta_init: null
   std_lower_bound: 1.0e-4
+  rnn_hidden_size: 32
 
 # Optimizer hyperparameters
 optimizer:
@@ -45,11 +47,14 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 4000
+  nb_epochs: 2000
   batch_size: 10000
   autoregressive: False
+  stochastic: False
   print_every: 100
-  checkpoint_every: 100
+  save_every: 100
+  valid_every: 100
   nb_recons_loss_steps: null
   use_nll_loss: False
   inference_start: 100
+  val_criterion: "error_rate"

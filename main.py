@@ -161,6 +161,8 @@ for key, value in config.items():
 trainloader, validloader, testloader, data_props = make_dataloaders(data_folder, config)
 nb_classes, seq_length, data_size, width = data_props
 
+print("Total number training samples:", len(trainloader.dataset))
+
 batch = next(iter(trainloader))
 (in_sequence, times), output = batch
 logger.info(f"Input sequence shape: {in_sequence.shape}")
@@ -278,6 +280,7 @@ def loss_fn(model, batch, key):
 
         Y_hat = model(X_true, times, key, inference_start=None)
 
+        # print("\n\nPrint shapes of pred and true:", Y_hat.shape, Ys.shape, "\n\n")
         # Compute the cross entropy loss using Optax
         loss = optax.softmax_cross_entropy_with_integer_labels(logits=Y_hat[:, -1], labels=Ys)
 
@@ -879,7 +882,7 @@ if classification:
         (in_sequence, times), output = batch
         Y_hat_raw = forward_pass(model, in_sequence, times, main_key)
         Y_hat = jnp.argmax(Y_hat_raw, axis=-1)
-        print("\nY_hat shape:", Y_hat.shape, "Y shape:", output.shape)
+        # print("\nY_hat shape:", Y_hat.shape, "Y shape:", output.shape)
         acc = jnp.mean(Y_hat[:, -1] == output)
 
         accs.append(acc)
