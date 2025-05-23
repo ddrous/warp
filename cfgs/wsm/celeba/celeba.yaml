@@ -15,20 +15,20 @@ data:
   downsample_factor: 1
   resolution: [32, 32]         # For celebA
   traj_length: 1000
-  normalize: False
+  normalize: True
 
 # Model hyperparameters
 model:
-  root_width_size: 24
-  root_depth: 3
+  root_width_size: 20
+  root_depth: 4
   root_activation: "relu"
-  root_final_activation: 1.0
+  root_final_activation: "tanh"
   init_state_layers: null
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
-  time_as_channel: False
+  time_as_channel: True
   forcing_prob: 0.15
   noise_theta_init: null
   std_lower_bound: 1.0e-4

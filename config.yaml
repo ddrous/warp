@@ -2,32 +2,33 @@
 
 # General settings
 general:
-  seed: 2024
+  seed: 2028
   train: True
-  dataset: "spirals"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/spirals/"
-  # save_path: "./runs/250404-175026-Test/"
+  classification: False
+  dataset: "celeba"
+  data_path: "./data/"
   save_path: null
 
 # Data hyperparameters (dependent on the dataset)
 data:
   downsample_factor: 1
-  resolution: [32, 32]         # For celebA
-  traj_length: 1000
+  resolution: [32, 32]
+  # traj_length: 1000
+  normalize: True
 
 # Model hyperparameters
 model:
-  mlp_width_size: 24
-  mlp_depth: 3
-  activation: "swish"
-  init_state_layers: 2
+  root_width_size: 24
+  root_depth: 3
+  root_activation: "relu"
+  root_final_activation: "tanh"
+  init_state_layers: null
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
-  dynamic_tanh_init: [1.1, 0.0, 1.1, 0.0]     ## a, b, alpha, beta
-  time_as_channel: False
-  forcing_prob: 0.25
+  time_as_channel: True
+  forcing_prob: 0.15
   noise_theta_init: null
   std_lower_bound: 1.0e-4
 
@@ -45,10 +46,14 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 100
-  batch_size: 10000
+  nb_epochs: 250
+  batch_size: 1256
   print_every: 10
-  checkpoint_every: 10
+  save_every: 10
+  valid_every: 10
+  val_criterion: "mse"
+  autoregressive: True
+  stochastic: False
   nb_recons_loss_steps: null
-  use_nll_loss: False
-  inference_start: 100
+  use_nll_loss: True
+  inference_start: 600

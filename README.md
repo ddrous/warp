@@ -1,19 +1,21 @@
-# Weight Space Models
+# WARP: Weight-space Adaptive Recurrent Prediction
+
 
 # How to use
-- Edit the config
-- run the train script
-
-Backups are created in a special folder. If inference is required, those files should be run instead.
-
-
+1. Install the requirements: `pip install -r requirements.txt`
+2. Edit the config.yaml (see below)
+3. Run the main script: `python main.py config.yaml`
+4. Navigate to the (newly created) save folder, and analyze the results in `runs/`, e.g. rerun the main script
 
 
+> Several configuration files corresponding to the experiments presented in the paper can be found in `cfgs/`
 
 
 
-# Hyperparameters
-This section outlines the configuration parameters used for training and running the model.
+
+
+# Configuration
+This section outlines the configuration parameters used for training and evaluating the models.
 
 ## General Parameters
 
@@ -21,23 +23,37 @@ This section outlines the configuration parameters used for training and running
 |-------------------|----------------------------------------------------------------|
 | `seed`            | Random seed for reproducibility.                               |
 | `train`           | Whether to train the model or not.                               |
-| `dataset`         | Dataset to use (mnist, cifar, trends, mnist_fashion, dynamics). |
+| `dataset`         | Dataset to use (mnist, celeba, uea, etc.). |
 | `data_folder`     | Path to the data folder.                                        |
-| `supervision_task`| Type of task (classification, reconstruction).                  |
+| `classification`  | Whether this is a classification or a forecasting task.       |
+
+
+## Data Parameters
+
+| Parameter          | Description                          |
+|-------------------|--------------------------------------|
+| `resolution`      | Resolution of input images (for CelebA).             |
+| `downsample_factor`  | Resolution downsampling factor for MNIST.             |
+| `traj_length`  | Unused !     |
+| `normalize`  | Whether to place the data in the [-1,1].     |
 
 ## Model Parameters
 
 | Parameter                    | Description                                                              |
 |-----------------------------|--------------------------------------------------------------------------|
-| `mlp_hidden_size`           | Size of hidden layers in MLP.                                           |
-| `mlp_depth`                 | Number of layers in MLP.                                               |
-| `rnn_inner_dims`            | Dimensions of inner RNN layers.                                          |
-| `full_matrix_A`             | Whether to use a full matrix A or a diagonal one.                           |
-| `use_theta_prev`            | Whether to use the previous theta in computing the next one.                 |
+| `model_type`            | 'wsm' for WARP, 'lstm', or 'gru'                 |
+| `root_hidden_size`           | Size of hidden layers in the root network.                                           |
+| `root_depth`                 | Number of layers in the root network.                                               |
+| `root_activation`                 | Activation function for the root MLP.                                               |
+| `root_final_activation`                 | Final activation function for the root MLP's output mean.                                               |
+| `std_lower_bound`                 | Lower bound for clipping the standard deviation.                                               |
+| `nb_rnn_layers`            | Number of RNN layers (fixed at 1 for now !).                                          |
+| `init_state_layers`             | Number of layers in the initial hypernetwork (null if sidestepping it completely).                           |
+| `input_prev_data`            | Whether the root network uses the previous observation as input.                 |
 | `weights_lim`               | Limit for the weights of the root model.                                  |
-| `mean_tanh_activation`      | Whether to apply tanh to mean activations.                               |
-| `std_additional_tanh`       | Whether to apply additional tanh to standard deviation activations.         |
-| `include_canonical_coords`  | Whether to include canonical coordinates in root network input.           |
+| `time_as_channel`      | Whether to time as an additional input channel.                               |
+| `forcing_prob`       | Probability of using the true input during teacher-forcing.         |
+| `noise_theta_init`  | Whether to add noise the theta_0 at the start of the recurrence.           |
 
 ## Optimizer Parameters
 
@@ -45,7 +61,8 @@ This section outlines the configuration parameters used for training and running
 |----------------------|-----------------------------------------------|
 | `init_lr`            | Initial learning rate.                           |
 | `gradient_lim`       | Gradient limit for clipping.                          |
-| `lr_decrease_factor` | Factor to reduce learning rate on plateau.        |
+| `on_plateau` | Set of parameters for the 'reduce_on_pleatau' strategy in Optax.        |
+
 
 ## Training Parameters
 
@@ -54,20 +71,11 @@ This section outlines the configuration parameters used for training and running
 | `nb_epochs`                | Number of training epochs.                                                |
 | `batch_size`               | Batch size for training.                                                  |
 | `print_every`              | How often to print training progress.                                       |
-| `unit_normalise`           | Whether to normalize units.                                                |
-| `grounding_length`         | Length of grounding pixel for autoregressive digit generation.             |
-| `autoregressive_inference` | Type of inference (True for autoregressive, False for memory-based).       |
-| `traj_train_prop`          | Proportion of steps to sample for training each time series.             |
+| `save_every`           | How often to save artefacts, e.g. losses.                                                |
+| `valid_every`           | How often to validate on the validation set                                                |
+| `val_criterion`           | Metric for choosing the best model                     |
+| `inference_start`         | Length of context length for autoregressive digit generation.             |
+| `autoregressive`          | Wether to train in AR mode or convolution mode       |
+| `stochastic`          | Wether to use the reparametrization trick, or simply take the mean             |
 | `nb_recons_loss_steps`     | Number of steps to sample for reconstruction loss.                        |
-| `train_strategy`           | Training strategy (flip_coin, teacher_forcing, always_true).               |
-| `use_mse_loss`             | Whether to use MSE loss.                                                  |
-| `forcing_prob`             | Probability for teacher forcing.                                         |
-| `std_lower_bound`          | Lower bound for standard deviation.                                      |
-
-## Data Parameters
-
-| Parameter          | Description                          |
-|-------------------|--------------------------------------|
-| `resolution`      | Resolution of input images.             |
-| `mini_res_mnist`  | Mini resolution for MNIST.             |
-| `image_datasets`  | List of available image datasets.     |
+| `use_nll_loss`             | Whether to use NLL or MSE loss for forecasting.                                                  |

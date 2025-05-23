@@ -15,7 +15,7 @@ import jax
 print("\n\nAvailable devices:", jax.devices())
 
 from jax import config
-config.update("jax_debug_nans", True)
+# config.update("jax_debug_nans", True)
 # config.update("jax_disable_jit", True)
 # config.update("jax_enable_x64", True)
 # from jax.experimental import checkify
@@ -486,7 +486,10 @@ if train:
     ## Restore the best model
     if os.path.exists(artefacts_folder+"model.eqx"):
         model = eqx.tree_deserialise_leaves(artefacts_folder+"model.eqx", model)
-        logger.info(f"Best model form epoch {best_val_loss_epoch} restored.")
+        logger.info(f"Best model from epoch {best_val_loss_epoch} restored.")
+    elif os.path.exists(artefacts_folder+"model_train.eqx"):
+        model = eqx.tree_deserialise_leaves(artefacts_folder+"model_train.eqx", model)
+        logger.info(f"Best model on 'training set' restored.")
     else:
         logger.info("No 'best' model found. Using the last model.")
 
@@ -498,7 +501,7 @@ else:
     try:
         losses = np.load(artefacts_folder+"losses.npy")
         lr_scales = np.load(artefacts_folder+"lr_scales.npy")
-        val_losses_raw = np.load(artefacts_folder+"val_losses.npy")
+        val_losses_raw = np.load(artefacts_folder+"val_losses.npz")
         val_losses = val_losses_raw['losses']
         best_val_loss_epoch = val_losses_raw['best_epoch'].item()
         best_val_loss = val_losses_raw['best_loss'].item()
@@ -558,6 +561,8 @@ if os.path.exists(artefacts_folder+"lr_scales.npy"):
 
 
 ## Plot the validation losses
+nb_epochs = config['training']['nb_epochs']
+valid_every = config['training']['valid_every']
 val_ids = (np.arange(0, nb_epochs, valid_every).tolist() + [nb_epochs-1])[:len(val_losses)]
 fig, ax = plt.subplots(1, 1, figsize=(10, 6))
 ax = sbplot(val_ids, val_losses, title=f"{val_criterion.upper()} on Valid Set at Various Epochs", x_label='Epoch', y_label=f'{val_criterion}', ax=ax, y_scale="log", linewidth=3);
@@ -735,6 +740,7 @@ if not classification:
     plt.suptitle(f"Reconstruction using {inference_start} initial steps", fontsize=65)
     plt.draw();
     plt.savefig(plots_folder+"samples_generated.png", dpi=100, bbox_inches='tight')
+    plt.savefig(plots_folder+"samples_generated.pdf", dpi=300, bbox_inches='tight')
 
 
 
@@ -797,35 +803,36 @@ if not classification and config['data']['normalize']:
 
         return x
 
-    min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
-    xs_recons_unorm = unormalize_data(xs_recons, min_max)
-    xs_true_unorm = unormalize_data(xs_true, min_max)
+    if hasattr(testloader.dataset, "min_data") and hasattr(testloader.dataset, "max_data"):
+        min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
+        xs_recons_unorm = unormalize_data(xs_recons, min_max)
+        xs_true_unorm = unormalize_data(xs_true, min_max)
 
-    ## Plot a few samples of the unormalized data
-    plot_dim = np.random.randint(0, data_size, size=2)[0]
-    plot_id = np.random.randint(0, len(xs_true_unorm), size=1)[0]
-    fig, (ax, ax2) = plt.subplots(1, 2, figsize=(10, 5), sharex=True)
-    ax.plot(xs_true_unorm[plot_id, :, plot_dim], "r-", lw=1, label="True")
-    ax.plot(xs_recons_unorm[plot_id, :, plot_dim], "r-", lw=3, label="Recons")
-    ax.set_title(f"Unormalised - Dim {plot_dim}")
+        ## Plot a few samples of the unormalized data
+        plot_dim = np.random.randint(0, data_size, size=2)[0]
+        plot_id = np.random.randint(0, len(xs_true_unorm), size=1)[0]
+        fig, (ax, ax2) = plt.subplots(1, 2, figsize=(10, 5), sharex=True)
+        ax.plot(xs_true_unorm[plot_id, :, plot_dim], "r-", lw=1, label="True")
+        ax.plot(xs_recons_unorm[plot_id, :, plot_dim], "r-", lw=3, label="Recons")
+        ax.set_title(f"Unormalised - Dim {plot_dim}")
 
-    ## Plot on ax2 the normalized
-    ax2.plot(xs_true[plot_id, :, plot_dim], "b-", lw=1, label="True")
-    ax2.plot(xs_recons[plot_id, :, plot_dim], "b-", lw=3, label="Recons")
-    ax2.set_title(f"Normalised - Dim {plot_dim}")
+        ## Plot on ax2 the normalized
+        ax2.plot(xs_true[plot_id, :, plot_dim], "b-", lw=1, label="True")
+        ax2.plot(xs_recons[plot_id, :, plot_dim], "b-", lw=3, label="Recons")
+        ax2.set_title(f"Normalised - Dim {plot_dim}")
 
-    ax.legend()
-    # ax2.legend()
+        ax.legend()
+        # ax2.legend()
 
-    plt.tight_layout()
+        plt.tight_layout()
 
-    mse, rmse, mae, mape, mspe = metrics(xs_recons_unorm, xs_true_unorm)
-    logger.info("Evaluation of forecast MSE on the full test set in inference mode - UNORMALISED DATA:")
-    logger.info(f"    - MSE : {mse:.6f}")
-    logger.info(f"    - RMSE : {rmse:.6f}")
-    logger.info(f"    - MAE : {mae:.6f}")
-    logger.info(f"    - MAPE : {mape:.6f}")
-    logger.info(f"    - MSPE : {mspe:.6f}")
+        mse, rmse, mae, mape, mspe = metrics(xs_recons_unorm, xs_true_unorm)
+        logger.info("Evaluation of forecast MSE on the full test set in inference mode - UNORMALISED DATA:")
+        logger.info(f"    - MSE : {mse:.6f}")
+        logger.info(f"    - RMSE : {rmse:.6f}")
+        logger.info(f"    - MAE : {mae:.6f}")
+        logger.info(f"    - MAPE : {mape:.6f}")
+        logger.info(f"    - MSPE : {mspe:.6f}")
 
 
 

@@ -3,7 +3,7 @@
 import os
 
 # configs = ["small"]
-configs = ["cfgs/wsm/celeba/celeba.yaml", "cfgs/wsm/mnist/fashion_mnist.yaml"]
+configs = ["cfgs/wsm/celeba/celeba.yaml"]
 
 for config in configs:
     print(f"\n\n=========== Running {config}... ===========", flush=True)
