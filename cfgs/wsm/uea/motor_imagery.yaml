@@ -18,9 +18,10 @@ data:
 
 # Model hyperparameters
 model:
-  mlp_width_size: 32
-  mlp_depth: 2
-  activation: "relu"
+  root_width_size: 32
+  root_depth: 2
+  root_activation: "relu"
+  root_final_activation: null
   init_state_layers: 2      ## null to directly learn the initial state
   input_prev_data: False
   model_type: "wsm"
@@ -34,7 +35,7 @@ model:
 
 # Optimizer hyperparameters
 optimizer:
-  init_lr: 1.0e-5
+  init_lr: 1.0e-6
   gradients_lim: 1.0e-7
   on_plateau:
     factor: 0.5
@@ -46,11 +47,14 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 5000
-  batch_size: 300
+  nb_epochs: 100
+  batch_size: 128
   autoregressive: False
-  print_every: 100
-  checkpoint_every: 100
+  stochastic: False
+  print_every: 10
+  save_every: 10
+  valid_every: 10
+  val_criterion: "error_rate"
   nb_recons_loss_steps: null
   use_nll_loss: False
   inference_start: 100

@@ -375,6 +375,7 @@ if train:
     opt = optax.chain(
         optax.clip(config['optimizer']['gradients_lim']),
         optax.adabelief(config['optimizer']['init_lr']),
+        # optax.adam(config['optimizer']['init_lr']),
         optax.contrib.reduce_on_plateau(
             patience= config['optimizer']['on_plateau']['patience'],
             cooldown=config['optimizer']['on_plateau']['cooldown'],
@@ -443,7 +444,7 @@ if train:
             )
 
             if classification:
-                logger.info(f"Average classification accuracy: {np.mean(aux_epoch)*100:.2f}%")
+                logger.info(f"Average train classification accuracy: {np.mean(aux_epoch)*100:.2f}%")
 
         if epoch%save_every==0 or epoch==nb_epochs-1:
             if epoch==nb_epochs-1:  ## @TODO: to save space !
@@ -537,13 +538,30 @@ if not os.path.exists(artefacts_folder+"losses.npy"):
 fig, (ax, ax2) = plt.subplots(1, 2, figsize=(16, 5))
 
 clean_losses = np.array(losses)
-epochs = np.arange(len(losses))
+train_steps = np.arange(len(losses))
 loss_name = "NLL" if use_nll_loss else r"$L_2$"
-ax = sbplot(epochs, clean_losses, title="Loss History", x_label='Train Steps', y_label=loss_name, ax=ax, y_scale="linear" if use_nll_loss else "log");
+ax = sbplot(train_steps, clean_losses, color="purple", title="Loss History", x_label='Train Steps', y_label=loss_name, ax=ax, y_scale="linear" if use_nll_loss else "log", label="Train");
+ax.legend(fontsize=16, loc='upper left')
+ax.yaxis.label.set_color('purple')
+
+## Make a twin axis for the validation losses
+nb_epochs = config['training']['nb_epochs']
+valid_every = config['training']['valid_every']
+if len(val_losses) > 0:
+    val_col = "teal"
+    ax_ = ax.twinx()
+    epochs_ids = (np.arange(0, nb_epochs, valid_every).tolist() + [nb_epochs-1])[:len(val_losses)]
+    ## Convert epochs to train steps
+    val_steps_ids = (np.array(epochs_ids)+1) * trainloader.num_batches
+    ax_ = sbplot(val_steps_ids, val_losses, ".-", color=val_col, label=f"Valid", y_label=f'{val_criterion}', ax=ax_, y_scale="linear", linewidth=3);
+    # plt.axvline(x=best_val_loss_epoch, color='r', linestyle='--', linewidth=3, label=f"Best {val_criterion.upper()}: {best_val_loss:.6f} at Epoch {best_val_loss_epoch}")
+    ax_.legend(fontsize=16, loc='upper right')
+    ## Set the label color to orange
+    ax_.yaxis.label.set_color(val_col)
 
 clean_losses = np.where(clean_losses<np.percentile(clean_losses, 96), clean_losses, np.nan)
 ## Plot a second plot with the outliers removed
-ax2 = sbplot(epochs, clean_losses, title="Loss History (96th Percentile)", x_label='Train Steps', y_label=loss_name, ax=ax2, y_scale="linear" if use_nll_loss else "log");
+ax2 = sbplot(train_steps, clean_losses, title="Loss History (96th Percentile)", x_label='Train Steps', y_label=loss_name, ax=ax2, y_scale="linear" if use_nll_loss else "log");
 
 plt.draw();
 plt.savefig(plots_folder+"loss.png", dpi=100, bbox_inches='tight')

@@ -1,5 +1,5 @@
 #%%
-from utils import flatten_pytree, unflatten_pytree, count_params
+from utils import flatten_pytree, unflatten_pytree, count_params, compute_kernel
 
 import jax
 import jax.numpy as jnp
@@ -462,7 +462,8 @@ class WSM(eqx.Module):
         self.std_lower_bound = std_lower_bound
 
         if isinstance(final_activation, list):      ## and len(final_activation) == 4
-            self.dtanh_params = jnp.array(final_activation, dtype=jnp.float32)
+            # self.dtanh_params = jnp.array(final_activation, dtype=jnp.float32)
+            self.dtanh_params = jnp.array(final_activation)
         else:
             self.dtanh_params = None
 
@@ -475,6 +476,8 @@ class WSM(eqx.Module):
             k:  (key_dim)
             inference_start: whether/when to use the model in autoregressive mode
             """
+
+        # return self.conv_call(xs, ts, k)
 
         if self.classification:
             return self.non_ar_call(xs, ts, k)
@@ -624,8 +627,7 @@ class WSM(eqx.Module):
         return eqx.filter_vmap(forward)(xs, ts, ks)
 
 
-
-    # def ar_call_stochastic(self, xs, ts, k, inference_start=None):  ## TODO: feeding directly into matrix B
+    def ar_call_stochastic_direct(self, xs, ts, k, inference_start=None):  ## TODO: feeding directly into matrix B
     #     """ Forward pass of the model on batch of sequences, ==autoregressively and stochastically==
     #         xs: (batch, time, data_size)
     #         ts: (batch, time)
@@ -695,10 +697,11 @@ class WSM(eqx.Module):
     #     ## Batched version of the forward pass
     #     ks = jax.random.split(k, xs.shape[0])
     #     return eqx.filter_vmap(forward)(xs, ts, ks)
+        pass
 
 
     def non_ar_call(self, xs, ts, k):
-        """ Forward pass of the model on batch of sequences, ==non-autoregressively==
+        """ Forward pass of the model on batch of sequences, ==recurrent, but non-autoregressively==
             xs: (batch, time, data_size)
             ts: (batch, time)
             k:  (key_dim)
@@ -880,9 +883,67 @@ class WSM(eqx.Module):
         return eqx.filter_vmap(forward_tbptt)(xs, ts, ks)
 
 
+    def conv_call(self, xs, ts, k):
+        """ Forward pass of the model on batch of sequences, ==convolutional==
+            xs: (batch, time, data_size)
+            ts: (batch, time)
+            k:  (key_dim)
+            """
 
+        fft = False
+        seq_len = xs.shape[1]
+        input_signal = xs[:, 1:] - xs[:, :-1]  ## Calculate the difference between consecutive time steps
 
+        ##### THEORETICALLY GROUNDED APPROACH FOR COMPUTING \DELTA X_0 ? #####
+        # ## Call the scan function
+        # if self.init_state_layers is None:
+        #     theta_init = self.thetas_init[0]
+        # else:
+        #     theta_init = self.thetas_init[0](xs_[0])
 
+        # if self.noise_theta_init is not None:
+        #     theta_init += jax.random.normal(k_, theta_init.shape)*self.noise_theta_init
+
+        input_signal = jnp.concatenate([xs[:, 0:1], input_signal], axis=1)  ## Add the first time step back to the input signal
+        K_conv = compute_kernel(self.As[0], self.Bs[0], seq_len)  ## Compute the convolution kernel: (time, output_size, data_size)
+
+        if not fft:
+            ## Apply the Jax.lax convolution
+            thetas = jax.lax.conv_general_dilated(lhs=input_signal.transpose(0, 2, 1),             ## (batch, data_size, time)
+                                                    rhs=K_conv.transpose(1, 2, 0),          ## (output_size, data_size, time)
+                                                    window_strides=(1,), 
+                                                    padding="SAME").transpose(0, 2, 1)  ## Reshape to original (batch, time, output_size)
+        else:
+            ## Use the convolution theorem
+            input_fft = jnp.fft.fft(input_signal[:, :, None, :], axis=1)                    ## (batch, time, 1, data_size)
+            K_conv_fft = jnp.fft.fft(K_conv[None, :, :, :], axis=1)                          ## (1, time, out_size, data_size)
+            theta_fft = jnp.sum(K_conv_fft * input_fft, axis=-1)                             ## (batch, time, out_size)
+            thetas = jnp.fft.ifft(theta_fft, axis=1).real
+
+        @eqx.filter_vmap
+        @eqx.filter_vmap
+        def apply_theta(theta, t_curr, x_curr):
+            delta_t = ts[0, 1] - ts[0, 0]  ## Assuming uniform time steps
+            ## Applying theta for a single time step
+            root_utils = self.root_utils[0]
+            shapes, treedef, static, _ = root_utils
+            params = unflatten_pytree(theta, shapes, treedef)
+            root_fun = eqx.combine(params, static)
+            root_in = t_curr+delta_t
+
+            if self.input_prev_data:
+                root_in = jnp.concatenate([root_in, x_curr], axis=-1)
+
+            if not self.classification:
+                x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                                 ## Evaluated at the next time step
+            else:
+                x_next = root_fun(root_in)                                      ## Evaluated at the next time step
+            return x_next
+
+        print("SHAPES", thetas.shape, ts.shape, xs.shape)
+        xs_hat = apply_theta(thetas, ts[...,None], xs)
+
+        return xs_hat
 
 
 

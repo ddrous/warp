@@ -168,3 +168,51 @@ def sbplot(*args,
         ax.set_xlim(xlim)
     plt.tight_layout()
     return ax
+
+
+
+def compute_all_powers(A, n):
+    m = A.shape[0]
+    power_dict = {1: A.copy()}
+    max_bit = n.bit_length()
+
+    # Step 1: Precompute powers of 2
+    current = A.copy()
+    for i in range(1, max_bit):
+        current = current @ current
+        power_dict[2**i] = current
+
+    # Step 2: Compose powers from binary expansion
+    results = [jnp.eye(m)]
+    for k in range(1, n):
+        bits = [2**i for i in range(k.bit_length()) if (k >> i) & 1]
+        prod = power_dict[bits[0]]
+        for b in bits[1:]:
+            prod = prod @ power_dict[b]
+        results.append(prod)
+
+    return results  # returns [A^0, A^1, ..., A^n-1]
+
+
+def compute_kernel(A, B, T):
+    d = A.shape[0]
+    power_dict = {1: A}
+    max_bit = T.bit_length()
+
+    # Step 1: Precompute powers of 2
+    current = A
+    for i in range(1, max_bit):
+        current = current @ current
+        power_dict[2**i] = current
+
+    # Step 2: Compose powers from binary expansion
+    results = [jnp.eye(d)@B]
+    for k in range(1, T):
+        bits = [2**i for i in range(k.bit_length()) if (k >> i) & 1]
+        prod = power_dict[bits[0]]
+        for b in bits[1:]:
+            prod = prod @ power_dict[b]
+    
+        results.append(prod @ B)
+
+    return jnp.stack(results)  # returns [A^0@B, A^1@B, ..., A^n-1@B]
