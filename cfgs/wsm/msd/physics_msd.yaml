@@ -2,7 +2,7 @@
 
 # General settings
 general:
-  seed: 2028
+  seed: 2026
   classification: False
   train: True
   dataset: "mass_spring_damper"  # Options: mnist, cifar, lorentz, dynamics
@@ -19,10 +19,10 @@ data:
 
 # Model hyperparameters
 model:
-  root_width_size: 24
+  root_width_size: 48
   root_depth: 3
   root_activation: "swish"
-  root_final_activation: null
+  root_final_activation: 39.0
   init_state_layers: 2
   input_prev_data: True
   model_type: "wsm"
@@ -47,15 +47,16 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 100
+  nb_epochs: 2500
   batch_size: 1024
-  # batch_size: 20480
   autoregressive: True
-  print_every: 1
-  valid_every: null
-  save_every: 1
+  print_every: 10
+  valid_every: 10
+  save_every: 10
   nb_recons_loss_steps: null
   use_nll_loss: False
   inference_start: 100
   stochastic: False
+  smooth_inference: True
+  # teacher_forced_prev: True
   val_criterion: "mse"

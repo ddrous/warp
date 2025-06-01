@@ -161,6 +161,7 @@ for key, value in config.items():
 trainloader, validloader, testloader, data_props = make_dataloaders(data_folder, config)
 nb_classes, seq_length, data_size, width = data_props
 
+
 print("Total number training samples:", len(trainloader.dataset))
 
 batch = next(iter(trainloader))
@@ -316,6 +317,12 @@ def forward_pass(model, X, times, key, inference_start=None):
 
 
 val_criterion = config['training']['val_criterion']
+if val_criterion == "nll":
+    if not config['training']['stochastic']:
+        raise ValueError("NLL val loss can only be used if trained in stochastic mode.")
+    elif "smooth_inference" in config['training'] and config['training']['smooth_inference']:
+        raise ValueError("NLL val loss cannot be used in smooth inference mode (since only the mean is predicted).")
+
 logger.info(f"Validation criterion is: {val_criterion}")
 
 
@@ -332,18 +339,23 @@ def eval_on_dataloader(model, dataloader, inference_start, key):
 
         if not classification:
             X_recons = forward_pass(model, X_true, times, new_key, inference_start=inference_start)
-            if use_nll_loss:
-                X_recons = X_recons[:, :, :data_size]
+
             if dataset in repeat_datasets:
                 X_gt = X_labs_outs
             else:
                 X_gt = X_true
+
             if val_criterion == "mse":
-                loss_val = optax.l2_loss(X_recons, X_gt).mean()
+                loss_val = optax.l2_loss(X_recons[..., :data_size], X_gt).mean()
             elif val_criterion == "mae":
-                mloss_valse = optax.l1_loss(X_recons, X_gt).mean()
+                mloss_valse = optax.l1_loss(X_recons[..., :data_size], X_gt).mean()
             elif val_criterion == "rmse":
-                loss_val = optax.root_mean_squared_error(X_recons, X_gt).mean()
+                loss_val = optax.root_mean_squared_error(X_recons[..., :data_size], X_gt).mean()
+            elif val_criterion == "nll":
+                means_ = X_recons[:, :, :data_size]
+                stds_ = X_recons[:, :, data_size:]
+                loss_val = jnp.log(stds_) + 0.5*((X_gt - means_)/stds_)**2
+                loss_val = jnp.mean(loss_val)
             else:
                 raise ValueError(f"Unknown validation criterion for regression: {val_criterion}")
 
@@ -410,6 +422,7 @@ if train:
     print_every = config['training']['print_every']
     save_every = config['training']['save_every']
     valid_every = config['training']['valid_every']
+    inf_start = config["training"]["inference_start"]
 
     nb_epochs = config['training']['nb_epochs']
     logger.info(f"\n\n=== Beginning training ... ===")
@@ -462,11 +475,11 @@ if train:
                 logger.info("Best model on training set saved ...")
 
         if (valid_every is not None) and (epoch%valid_every==0) or (epoch==nb_epochs-1):
-            val_mean_loss, val_median_loss, _ = eval_on_dataloader(model, validloader, inference_start=None, key=test_key)
+            val_mean_loss, val_median_loss, _ = eval_on_dataloader(model, validloader, inference_start=inf_start, key=test_key)
             val_losses.append(val_mean_loss)
 
             logger.info(
-                f"Epoch {epoch:-4d}/{nb_epochs:-4d}     Valid Loss   -Mean: {val_mean_loss:.6f},   -Median: {val_median_loss:.6f}"
+                f"Epoch {epoch:-4d}/{nb_epochs:-4d}     Validation Loss   +Mean: {val_mean_loss:.6f},   +Median: {val_median_loss:.6f}"
             )
 
             ## Save the model with the lowest validation loss
@@ -497,7 +510,14 @@ if train:
 
 
 else:
-    model = eqx.tree_deserialise_leaves(artefacts_folder+"model.eqx", model)
+    if os.path.exists(artefacts_folder+"model.eqx"):
+        model = eqx.tree_deserialise_leaves(artefacts_folder+"model.eqx", model)
+        logger.info(f"Best validation model restored.")
+    elif os.path.exists(artefacts_folder+"model_train.eqx"):
+        model = eqx.tree_deserialise_leaves(artefacts_folder+"model_train.eqx", model)
+        logger.info(f"Best model on 'training set' restored.")
+    else:
+        raise ValueError("No model found to load. You might want to use one from a checkpoint.")
 
     try:
         losses = np.load(artefacts_folder+"losses.npy")
@@ -553,7 +573,7 @@ if len(val_losses) > 0:
     epochs_ids = (np.arange(0, nb_epochs, valid_every).tolist() + [nb_epochs-1])[:len(val_losses)]
     ## Convert epochs to train steps
     val_steps_ids = (np.array(epochs_ids)+1) * trainloader.num_batches
-    ax_ = sbplot(val_steps_ids, val_losses, ".-", color=val_col, label=f"Valid", y_label=f'{val_criterion}', ax=ax_, y_scale="linear", linewidth=3);
+    ax_ = sbplot(val_steps_ids, val_losses, ".-", color=val_col, label=f"Valid", y_label=f'{val_criterion.upper()}', ax=ax_, y_scale="linear", linewidth=3);
     # plt.axvline(x=best_val_loss_epoch, color='r', linestyle='--', linewidth=3, label=f"Best {val_criterion.upper()}: {best_val_loss:.6f} at Epoch {best_val_loss_epoch}")
     ax_.legend(fontsize=16, loc='upper right')
     ## Set the label color to orange
@@ -623,8 +643,8 @@ if config["model"]["model_type"] == "wsm":
 
     ## Print the untrained and trained matrices A as imshows with same range
     fig, axs = plt.subplots(1, 2, figsize=(20, 10))
-    min_val = -0.00
-    max_val = 0.000003
+    min_val = -0.0000
+    max_val = 0.00003
 
     img = axs[0].imshow(untrained_model.As[0], cmap='viridis', vmin=min_val, vmax=max_val)
     axs[0].set_title("Untrained A")
@@ -770,7 +790,6 @@ if not classification:
     batch = next(iter(eval_loader))
     (xs_true, times), labels = batch
 
-
     print("Inferance starts at: ", inference_start)
     xs_recons = forward_pass(model=model, 
                         X=xs_true, 
@@ -783,7 +802,6 @@ if not classification:
     xs_recons = xs_recons[:, :, :data_size]
 
     def metrics(pred, true):
-
         ## Calculate the metrics after inference start
         pred = pred[:, inference_start:, :]
         true = true[:, inference_start:, :]
@@ -801,7 +819,7 @@ if not classification:
     logger.info(f"    - RMSE : {rmse:.6f}")
     logger.info(f"    - MAE : {mae:.6f}")
     logger.info(f"    - MAPE : {mape:.6f}")
-    logger.info(f"    - MSPE : {mspe:.6f}")
+    # logger.info(f"    - MSPE : {mspe:.6f}")
 
 
 
@@ -850,7 +868,7 @@ if not classification and config['data']['normalize']:
         logger.info(f"    - RMSE : {rmse:.6f}")
         logger.info(f"    - MAE : {mae:.6f}")
         logger.info(f"    - MAPE : {mape:.6f}")
-        logger.info(f"    - MSPE : {mspe:.6f}")
+        # logger.info(f"    - MSPE : {mspe:.6f}")
 
 
 

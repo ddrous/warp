@@ -73,6 +73,7 @@ def setup_logger(folder_path, training):
 
     # Configure logger
     logger = logging.getLogger('training')
+    logger.handlers.clear()
     logger.setLevel(logging.INFO)
 
     # Create file handler

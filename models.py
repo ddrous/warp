@@ -137,219 +137,6 @@ class GradualMLP(eqx.Module):
 
 
 
-# import diffrax
-# class RootMLP(eqx.Module):      ## TODO: Physics-Informed - Remove Later- Use only on Sine/MSD problems
-#     """ Root network f: t -> x_t, whose weights are the latent space of the WSM """
-#     network: eqx.Module
-#     props: any              ## Properties of the root network
-#     predict_uncertainty: bool
-#     final_activation: any
-
-#     def __init__(self, 
-#                  data_size, 
-#                  width_size, 
-#                  depth, 
-#                  activation=jax.nn.relu,
-#                  final_activation=jax.nn.tanh,
-#                  input_prev_data=False,              ## Whether to inlude as input the previous data point
-#                  predict_uncertainty=True,           ## Predict the std in addition to the mean
-#                  key=None):
-
-#         input_dim = 1+data_size if input_prev_data else 1
-#         output_dim = 2*data_size if predict_uncertainty else data_size
-
-#         # Y0 = jnp.array([1.0, 0.0])
-#         # E = jnp.zeros((2, 2))
-#         # self.network = (E, Y0)
-
-#         # Y0 = jnp.array([1.0, 0.0])
-#         # scaling = jnp.array([1.0, 1.0])
-#         # E = jnp.zeros((2, 2))
-#         # self.network = (E, scaling)
-
-#         ## Define mass, spring, damping
-#         # self.network = jnp.array([0.03, 10, 0.1])     ## TRUE range
-#         # self.network = jnp.array([0.03, 0.01, 0.01])
-#         # self.network = jnp.array([1.0, 0.0, 0.0])
-#         # self.network = eqx.nn.MLP(1, 3, width_size, depth, activation, final_activation=lambda X: jnp.clip(X, 1e-6, 1), key=key)
-#         self.network = eqx.nn.MLP(1+2, 3, width_size, depth, activation, final_activation=jax.nn.relu, key=key)
-#         # self.network = eqx.nn.MLP(input_dim, 1, width_size, depth, activation, key=key)
-#         # self.network = eqx.nn.MLP(0+1, 2, width_size, depth, activation, key=key)
-#         # self.network = jnp.array([0.0])
-
-#         self.props = (input_dim, output_dim, width_size, depth, activation)
-#         self.predict_uncertainty = predict_uncertainty
-#         self.final_activation = final_activation
-
-#     def __call__(self, tx, std_lb=None, dtanh=None):
-#         # out = self.network(tx)
-
-#         # Y0 = jnp.array([1.0, 0.0])
-#         # ## Detine out = exp(t*E) @ Y0
-#         # E = self.network[0]
-#         # tE = tx*E
-#         # out = jax.scipy.linalg.expm(tE) @ Y0
-
-#         # m, k, c = self.network(tx)
-#         ## Scale k and c
-#         # k = 1000*k
-#         # c = 10*c
-
-#         #####====== FIRST APPROACH TO EMBEDDED PHYSICS ======#####
-#         m, k, c = self.network(tx)
-#         m = m+1e-6
-#         k= 1000*k
-#         c = 10*c
-
-#         delta_t = 1.0/256
-#         t, x_prev = tx[0], tx[1:]
-
-#         ## Unnormalise the x_prev input with min-max scaling: -27.25527482165262, 26.14404933694852
-#         min_x, max_x = -27.25527482165262, 26.14404933694852
-#         # x_prev = ((x_prev - min_x) / (max_x - min_x))*2 - 1
-#         # x_prev = ((x_prev + 1)/2)*(max_x - min_x) + min_x
-
-#         ## Calculating the next step
-#         pos, vel = jnp.split(x_prev, 2)
-#         acc = -k/m*pos - c/m*vel
-#         vel_next = vel + acc*delta_t        ## Euler approximation of the next step. @TODO Implement a more sophisticated method (But not diffrax) @TODO
-#         pos_next = pos + vel*delta_t
-#         out = jnp.concatenate([pos_next, vel_next], axis=-1)
-
-#         ## Unormalize the input
-#         # out = ((out + 1)/2)*(max_x - min_x) + min_x
-#         # out = ((out - min_x) / (max_x - min_x))*2 - 1
-
-
-#         #####====== SECOND APPROACH TO EMBEDDED PHYSICS - MSD, general solution ======#####
-#         # m, k, c = self.network(tx)
-#         # # a, b = self.network(tx)
-#         # # Scale k and c
-#         # k = 1000*k
-#         # c = 10*c
-#         # min_x, max_x = -27.25527482165262, 26.14404933694852
-#         # ## construct the matrix E
-#         # E = jnp.array([[0.0, 1.0], [-k/m, -c/m]])
-#         # # E = jnp.array([[0.0, 1.0], [a, b]])
-#         # E = jnp.clip(E, -1, 1.)
-#         # Y0 = jnp.array([1.0, 0.0])
-#         # out = jax.scipy.linalg.expm(tx[0]*E, max_squarings=8) @ Y0
-
-#         # ## Normalize the output
-#         # out = ((out - min_x) / (max_x - min_x))*2 - 1
-
-#         # # E = self.network(tx).reshape((2, 2))    
-#         # # E = E.at[0, :].set(jnp.array([0.0, 1.0]))
-#         # Y0 = jnp.array([1.0, 0.0])
-#         # out = jax.scipy.linalg.expm(tx[0]*E, max_squarings=8) @ Y0
-
-#         ## Normalize the output
-#         # out = ((out - min_x) / (max_x - min_x))*2 - 1
-
-
-
-#         # # #####====== SECOND.5 APPROACH TO EMBEDDED PHYSICS - MSD, use Diffrax ======#####
-#         # def vectorfield(t, y, args):
-#         #     t = jnp.expand_dims(t, axis=-1)
-#         #     m, k, c = self.network(jnp.concatenate([t, y], axis=-1))
-#         #     # Scale k and c
-#         #     # k = 1000*k
-#         #     # c = 10*c
-#         #     pos, vel = jnp.split(y, 2)
-#         #     acc = -k/m*pos - c/m*vel
-#         #     return jnp.concatenate([vel, acc], axis=-1)
-
-#         #     # ## Turn t, a scalar, into a vector
-#         #     # t = jnp.expand_dims(t, axis=-1)
-#         #     # # jax.debug.print("Shapes: {} {}", t.shape, y.shape)
-#         #     # # out =  self.network(jnp.concatenate([jnp.array([t]), y], axis=-1))
-#         #     # out =  self.network(jnp.concatenate([t, y], axis=-1))
-#         #     # # jax.debug.print("Shapes: {} {} {}", out.shape, t.shape, y.shape)
-#         #     # return out
-
-#         # out = diffrax.diffeqsolve(
-#         #     diffrax.ODETerm(vectorfield),
-#         #     diffrax.Tsit5(),
-#         #     t0=0.,
-#         #     # t1=1,
-#         #     t1=tx[0]+(1/256),
-#         #     dt0=1e-3,
-#         #     y0=jnp.array([1.0, 0.0]),
-#         #     stepsize_controller=diffrax.PIDController(rtol=1e-3, atol=1e-6),
-#         #     # saveat=diffrax.SaveAt(ts=ts),
-#         #     max_steps=4096*1,    ## 4096//200 for debugging
-#         # ).ys.squeeze()
-
-#         # #####====== THIRD APPROACH TO EMBEDDED PHYSICS - SINE ======#####
-#         # # freq, phase = self.network(tx)
-#         # # freq, phase = self.network
-#         # # freq, phase = 1.0, self.network[0]
-#         # freq, phase = 1.0, self.network(tx)
-#         # t = tx
-#         # ## freq initialiased at 1.
-#         # ## freq in range np.random.uniform(-np.pi/6, np.pi/6, size=nb_samples)
-#         # ## Calculate the sine function
-#         # out = jnp.sin(2*jnp.pi*freq*t + phase)
-
-#         # #####====== THIRD.5 APPROACH TO EMBEDDED PHYSICS - SINE without a network ======#####
-#         # phase = self.network
-#         # out = jnp.sin(2*jnp.pi*1*tx + phase)
-
-
-#         if not self.predict_uncertainty:
-#             if self.final_activation is not None:
-#                 out = self.final_activation(out)
-#             elif dtanh is not None:
-#                 a, b, alpha, beta = dtanh
-#                 out = alpha*jnp.tanh((out - b) / a) + beta
-#             else:
-#                 pass
-
-#             return out
-
-#         else:
-#             mean, std = jnp.split(out, 2, axis=-1)
-
-#             if self.final_activation is not None:
-#                 mean = self.final_activation(mean)
-#             elif dtanh is not None:
-#                 a, b, alpha, beta = dtanh
-#                 mean = alpha*jnp.tanh((mean - b) / a) + beta
-#             else:
-#                 pass
-
-#             std = jax.nn.softplus(std)
-#             if std_lb is not None:
-#                 std = jnp.clip(std, std_lb, None)
-
-#             return jnp.concatenate([mean, std], axis=-1)
-
-
-# class GradualMLP(eqx.Module):       ## TODO: Physics-Informed - Remove Later - Use with the corresponding RootMLP
-#     layers: list
-
-#     def __init__(self, input_dim, output_dim, hidden_layers=2, activation=jax.nn.tanh, key=None):
-#         key = key if key is not None else jax.random.PRNGKey(0)
-#         keys = jax.random.split(key, 3)
-#         hidden_size1 = hidden_size2 = 128
-
-#         in_layer = eqx.nn.Linear(input_dim, hidden_size1, key=keys[0])
-#         hidden_layer = eqx.nn.Linear(hidden_size1, hidden_size2, key=keys[1])
-#         out_layer = eqx.nn.Linear(hidden_size2, output_dim, key=keys[2])
-#         self.layers = [in_layer, activation, hidden_layer, activation, out_layer]
-
-#     def __call__(self, x):
-#         y = x
-#         for layer in self.layers:
-#             y = layer(y)
-#         return y
-
-
-
-
-
-
-
 class WSM(eqx.Module):
     """ Weight Space Seq2Seq Model, with RNN transition function """
     As: jnp.ndarray
@@ -371,6 +158,7 @@ class WSM(eqx.Module):
     std_lower_bound: float
     dtanh_params: jnp.ndarray
     stochastic_ar: bool
+    smooth_inference: bool
 
     def __init__(self, 
                  data_size, 
@@ -390,6 +178,7 @@ class WSM(eqx.Module):
                  nb_wsm_layers=1,                  ## TODO, to be implemented as in Fig 2. of https://arxiv.org/abs/2202.07022
                  autoregressive_train=True,
                  stochastic_ar=True,
+                 smooth_inference=None,         ## Whether to use smooth inference (i.e. no reparametrization trick at inference)
                  key=None):
 
         keys = jax.random.split(key, num=nb_wsm_layers)
@@ -455,6 +244,7 @@ class WSM(eqx.Module):
         self.classification = nb_classes is not None
         self.ar_train = autoregressive_train
         self.stochastic_ar = stochastic_ar
+        self.smooth_inference = smooth_inference if smooth_inference is not None else (not stochastic_ar)
 
         if self.classification and self.ar_train:
             raise ValueError("The WSM model is not compatible with autoregressive training for classification tasks.")
@@ -514,6 +304,7 @@ class WSM(eqx.Module):
                 if inference_start is not None:
                     x_t = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
                 else:
+                    # key1, key2 = jax.random.split(key)
                     x_t = jnp.where(jax.random.bernoulli(key, self.forcing_prob), x_true, x_hat)
 
                 if self.time_as_channel:
@@ -534,6 +325,13 @@ class WSM(eqx.Module):
                 x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                  ## Evaluated at the next time step
 
                 x_next_mean = x_next[:x_true.shape[0]]
+
+                # if inference_start is not None:           ## @TODO: Teacher-forced x_prev
+                #     x_prev_next = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
+                # else:
+                #     x_prev_next = jnp.where(jax.random.bernoulli(key2, self.forcing_prob*1.0), x_true, x_hat)
+                #     # x_prev_next = x_true
+                # return (thet_next, x_next_mean, x_prev_next, t_curr), (x_next, )
 
                 return (thet_next, x_next_mean, x_hat, t_curr), (x_next, )
 
@@ -579,8 +377,10 @@ class WSM(eqx.Module):
                 root_utils = self.root_utils[0]
 
                 if inference_start is not None:
-                    # x_hat = x_hat_mean
-                    x_hat = jax.random.normal(key, x_hat_mean.shape)*x_hat_std + x_hat_mean
+                    if self.smooth_inference:
+                        x_hat = x_hat_mean
+                    else:
+                        x_hat = jax.random.normal(key, x_hat_mean.shape)*x_hat_std + x_hat_mean
                     x_t = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
                 else:
                     x_hat = jax.random.normal(key, x_hat_mean.shape)*x_hat_std + x_hat_mean
@@ -602,8 +402,6 @@ class WSM(eqx.Module):
                 if self.input_prev_data:
                     root_in = jnp.concatenate([root_in, x_prev[:x_true.shape[0]]], axis=-1)
                 x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                  ## Evaluated at the next time step
-
-                # x_next_mean = x_next[:x_true.shape[0]]
 
                 return (thet_next, x_next, x_hat, t_curr), (x_next, )
 
@@ -1220,9 +1018,16 @@ def make_model(key, data_size, nb_classes, config, logger):
             "stochastic_ar": config['training']['stochastic'],
         }
 
+        if 'smooth_inference' in config['training']:
+            model_args['smooth_inference'] = config['training']['smooth_inference']
+
         ## Chechk if mode params are ok
         if model_args['autoregressive_train'] and model_args['stochastic_ar'] and not config['training']['use_nll_loss']:
             raise ValueError("The WSM model is not compatible with stochastic autoregressive training without NLL loss.")
+
+        ## Check that non-smooth inference can only be used with autoregressive training and stochastic ar
+        if not model_args['smooth_inference'] and not model_args['stochastic_ar']:
+            raise ValueError("Non-smooth (stochastic, reparametrization trick) inference cannot be used without stochastic training.")
 
         model = WSM(key=key, **model_args)
         if not isinstance(model.thetas_init[0], GradualMLP):

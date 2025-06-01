@@ -77,5 +77,6 @@ This section outlines the configuration parameters used for training and evaluat
 | `inference_start`         | Length of context length for autoregressive digit generation.             |
 | `autoregressive`          | Wether to train in AR mode or convolution mode       |
 | `stochastic`          | Wether to use the reparametrization trick, or simply take the mean             |
+| `smooth_inference`             | Whether not to use the the reparametrization trick during inference.                                                  |
 | `nb_recons_loss_steps`     | Number of steps to sample for reconstruction loss.                        |
 | `use_nll_loss`             | Whether to use NLL or MSE loss for forecasting.                                                  |
