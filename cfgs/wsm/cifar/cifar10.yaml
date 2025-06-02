@@ -1,20 +1,15 @@
-# Base configuration file
-
 # General settings
 general:
   seed: 2024
   classification: False
   train: True
-  dataset: "cifar"  # Options: mnist, cifar, lorentz, dynamics
+  dataset: "cifar"
   data_path: "./data/"
-  # save_path: "./runs/250404-175026-Test/"
   save_path: null
 
-# Data hyperparameters (dependent on the dataset)
+# Data hyperparameters
 data:
-  downsample_factor: 1
-  resolution: [32, 32]         # For celebA
-  traj_length: 1000
+  resolution: [32, 32]
   normalize: True
 
 # Model hyperparameters
@@ -52,7 +47,10 @@ training:
   autoregressive: True
   stochastic: True
   print_every: 10
-  checkpoint_every: 10
+  save_every: 10
+  valid_every: 10
+  val_criterion: "mse"
+  smooth_inference: True
   nb_recons_loss_steps: null
   use_nll_loss: True
   inference_start: 500

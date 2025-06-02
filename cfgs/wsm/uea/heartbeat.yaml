@@ -1,28 +1,23 @@
-# Base configuration file
-
 # General settings
 general:
   seed: 2024
   classification: True
   train: True
-  dataset: "uea"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/uea/processed/UEA/SelfRegulationSCP1/"
+  dataset: "uea"
+  data_path: "./data/uea/processed/UEA/Heartbeat/"
   save_path: null
 
-# Data hyperparameters (dependent on the dataset)
+# Data hyperparameters
 data:
-  downsample_factor: 1
-  resolution: [32, 32]         # For celebA
-  traj_length: 1000
   normalize: True
 
 # Model hyperparameters
 model:
-  root_width_size: 48
+  root_width_size: 72
   root_depth: 2
   root_activation: "relu"
-  root_dynamic_tanh_init: null     ## a, b, alpha, beta
-  init_state_layers: 2      ## null to directly learn the initial state
+  root_final_activation: null
+  init_state_layers: 2
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
@@ -44,13 +39,16 @@ optimizer:
     rtol: 1.0e-4
     accum_size: 50
 
-# Training/Inference hyperparameters
+# Training/Inference configurations
 training:
-  nb_epochs: 5000
-  batch_size: 561
+  nb_epochs: 1500
+  batch_size: 286
   autoregressive: False
   print_every: 100
-  checkpoint_every: 100
+  save_every: 100
+  valid_every: 100
+  val_criterion: "error_rate"
   nb_recons_loss_steps: null
   use_nll_loss: False
   inference_start: 100
+  smooth_inference: True

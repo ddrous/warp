@@ -1,20 +1,14 @@
-# Base configuration file
-
 # General settings
 general:
-  seed: 2026
+  seed: 2028
   classification: False
   train: True
-  dataset: "mass_spring_damper"  # Options: mnist, cifar, lorentz, dynamics
+  dataset: "mass_spring_damper"
   data_path: "./data/dynamics/mass-spring-damper/"
-  # save_path: "./runs/250404-175026-Test/"
   save_path: null
 
-# Data hyperparameters (dependent on the dataset)
+# Data hyperparameters
 data:
-  downsample_factor: 1
-  resolution: [32, 32]         # For celebA
-  traj_length: 1000
   normalize: False
 
 # Model hyperparameters
@@ -22,9 +16,9 @@ model:
   root_width_size: 48
   root_depth: 3
   root_activation: "swish"
-  root_final_activation: 39.0
+  root_final_activation: 38.0
   init_state_layers: 2
-  input_prev_data: True
+  input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
@@ -45,18 +39,17 @@ optimizer:
     rtol: 1.0e-4
     accum_size: 50
 
-# Training/Inference hyperparameters
+# Training/Inference configurations
 training:
-  nb_epochs: 2500
+  nb_epochs: 1000
   batch_size: 1024
   autoregressive: True
+  stochastic: False
   print_every: 10
-  valid_every: 10
   save_every: 10
+  valid_every: 10
+  val_criterion: "mse"
   nb_recons_loss_steps: null
   use_nll_loss: False
   inference_start: 100
-  stochastic: False
   smooth_inference: True
-  # teacher_forced_prev: True
-  val_criterion: "mse"

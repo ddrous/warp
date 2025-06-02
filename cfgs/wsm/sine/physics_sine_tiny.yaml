@@ -1,20 +1,16 @@
-# Base configuration file
+## WARNING: The desired pysics must still be implemented in the model's root network.
 
 # General settings
 general:
   seed: 2028
   train: True
-  dataset: "sine"  # Options: mnist, cifar, lorentz, dynamics
+  dataset: "sine"
   data_path: "./data/dynamics/sine/tiny/"
-  # save_path: "./runs/250404-175026-Test/"
   save_path: null
   classification: False
 
-# Data hyperparameters (dependent on the dataset)
+# Data hyperparameters
 data:
-  downsample_factor: 1
-  resolution: [32, 32]         # For celebA
-  traj_length: 1000
   normalize: False
 
 # Model hyperparameters
@@ -22,7 +18,7 @@ model:
   root_width_size: 48
   root_depth: 3
   root_activation: "swish"
-  root_final_activation: null       ## Only applies to the mean !
+  root_final_activation: null
   init_state_layers: 2
   input_prev_data: False
   model_type: "wsm"
@@ -30,7 +26,6 @@ model:
   weights_lim: null
   time_as_channel: False
   forcing_prob: 0.25
-  # noise_theta_init: 1.0e-4
   noise_theta_init: null
   std_lower_bound: 1.0e-4
 
@@ -46,13 +41,17 @@ optimizer:
     rtol: 1.0e-4
     accum_size: 50
 
-# Training/Inference hyperparameters
+# Training/Inference configurations
 training:
   nb_epochs: 1000
   batch_size: 10000
   autoregressive: True
   print_every: 10
-  checkpoint_every: 10
+  save_every: 10
+  valid_every: 10
+  stochastic: False
+  val_criterion: "mse"
+  smooth_inference: True
   nb_recons_loss_steps: null
   use_nll_loss: False
   inference_start: 1

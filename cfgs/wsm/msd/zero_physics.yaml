@@ -1,20 +1,15 @@
-# Base configuration file
-
+## WARNING: The desired pysics must still be implemented in the model's root network.
 # General settings
 general:
   seed: 2026
   classification: False
   train: True
-  dataset: "mass_spring_damper"  # Options: mnist, cifar, lorentz, dynamics
+  dataset: "mass_spring_damper"
   data_path: "./data/dynamics/mass-spring-damper-2/"
-  # save_path: "./runs/250404-175026-Test/"
   save_path: null
 
-# Data hyperparameters (dependent on the dataset)
+# Data hyperparameters
 data:
-  downsample_factor: 1
-  resolution: [32, 32]         # For celebA
-  traj_length: 1000
   normalize: False
 
 # Model hyperparameters
@@ -45,7 +40,7 @@ optimizer:
     rtol: 1.0e-4
     accum_size: 50
 
-# Training/Inference hyperparameters
+# Training/Inference configurations
 training:
   nb_epochs: 5000
   batch_size: 1024
@@ -58,3 +53,4 @@ training:
   inference_start: 100
   stochastic: False
   val_criterion: "mse"
+  smooth_inference: True

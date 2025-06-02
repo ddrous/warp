@@ -1,27 +1,23 @@
-# Base configuration file
-
 # General settings
 general:
   seed: 2028
   classification: True
   train: True
-  dataset: "pathfinder"  # Options: mnist, cifar, lorentz, dynamics
+  dataset: "pathfinder"
   data_path: "./data/pathfinder/32/"
-  # save_path: "./runs/250404-175026-Test/"
   save_path: null
 
-# Data hyperparameters (dependent on the dataset)
+# Data hyperparameters
 data:
-  downsample_factor: 1
-  resolution: [32, 32]         # For celebA
-  traj_length: 1000
+  resolution: [32, 32]
+  normalize: True
 
 # Model hyperparameters
 model:
   mlp_width_size: 512
   mlp_depth: 1
   activation: "relu"
-  init_state_layers: 2          ## null to directly learn the initial state
+  init_state_layers: 2
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
@@ -44,13 +40,17 @@ optimizer:
     rtol: 1.0e-4
     accum_size: 50
 
-# Training/Inference hyperparameters
+# Training/Inference configurations
 training:
   nb_epochs: 120
   batch_size: 920
   autoregressive: False
+  stochastic: True
   print_every: 10
-  checkpoint_every: 10
+  save_every: 10
+  valid_every: 10
+  val_criterion: "error_rate"
+  smooth_inference: True
   nb_recons_loss_steps: 400
   use_nll_loss: True
   inference_start: 300

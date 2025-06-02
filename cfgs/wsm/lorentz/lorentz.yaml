@@ -1,19 +1,15 @@
-# Base configuration file
-
 # General settings
 general:
   seed: 2024
   train: True
   classification: False
-  dataset: "lorentz63"  # Options: mnist, cifar, lorentz, dynamics
+  dataset: "lorentz63"
   data_path: "./data/dynamics/lorentz-63/"
   save_path: null
 
-# Data hyperparameters (dependent on the dataset)
+# Data hyperparameters
 data:
-  downsample_factor: 1
-  resolution: [32, 32]         # For celebA
-  traj_length: 1000
+  # traj_length: 32
   normalize: False
 
 # Model hyperparameters
@@ -31,7 +27,6 @@ model:
   forcing_prob: 0.25
   noise_theta_init: null
   std_lower_bound: 1.0e-4
-  rnn_hidden_size: 128          # For GRUs and LSTMs
 
 # Optimizer hyperparameters
 optimizer:
@@ -52,8 +47,10 @@ training:
   print_every: 100
   save_every: 100
   valid_every: 100
+  val_criterion: "mse"
   autoregressive: True
   stochastic: True
   nb_recons_loss_steps: null
   use_nll_loss: True
   inference_start: 500
+  smooth_inference: False

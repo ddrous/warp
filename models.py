@@ -11,10 +11,10 @@ import equinox as eqx
 
 
 
-
+##################### WARP (OR "WSM" FOR WEIGHT-SPACE MODEL) MODEL DEFINITION(S) ########################
 
 class RootMLP(eqx.Module):
-    """ Root network f: t -> x_t, whose weights are the latent space of the WSM """
+    """ Root network \theta: t -> x_t, whose weights are the latent space of the WSM """
     network: eqx.Module
     props: any              ## Properties of the root network
     predict_uncertainty: bool
@@ -72,7 +72,7 @@ class RootMLP(eqx.Module):
 
 
 class RootMLP_Classif(eqx.Module):
-    """ Root network f: t -> y_t, whose weights are the latent space of the WSM """
+    """ Root network \theta: t -> y_t, whose weights are the WSM hidden space for classification """
     network: eqx.Module
     props: any              ## Properties of the root network
 
@@ -96,6 +96,7 @@ class RootMLP_Classif(eqx.Module):
 
 
 class GradualMLP(eqx.Module):
+    """ Gradual MLP, with input neurons gradually increasing to output_dim """
     layers: list
 
     def __init__(self, input_dim, output_dim, hidden_layers=2, activation=jax.nn.tanh, key=None):
@@ -103,7 +104,7 @@ class GradualMLP(eqx.Module):
         keys = jax.random.split(key, 3)
 
         if hidden_layers == 2:
-            ## We want two intermediate layers: with input neurons gradually decreasing to output_dim
+            ## one thirds an two thirds
             hidden_size1 = int(2/3*input_dim + 1/3*output_dim)
             hidden_size2 = int(1/3*input_dim + 2/3*output_dim)
             in_layer = eqx.nn.Linear(input_dim, hidden_size1, key=keys[0])
@@ -112,7 +113,7 @@ class GradualMLP(eqx.Module):
             self.layers = [in_layer, activation, hidden_layer, activation, out_layer]
 
         elif hidden_layers == 1:
-            ## We want one intermediate layer: with input neurons gradually decreasing to output_dim
+            ## half
             hidden_size = int(0.5*input_dim + 0.5*output_dim)
             in_layer = eqx.nn.Linear(input_dim, hidden_size, key=keys[0])
             out_layer = eqx.nn.Linear(hidden_size, output_dim, key=keys[1])
@@ -138,7 +139,7 @@ class GradualMLP(eqx.Module):
 
 
 class WSM(eqx.Module):
-    """ Weight Space Seq2Seq Model, with RNN transition function """
+    """ WARP: Weight Space Seq2Seq Model, with RNN transition function """
     As: jnp.ndarray
     Bs: jnp.ndarray
     thetas_init: eqx.Module
@@ -174,11 +175,11 @@ class WSM(eqx.Module):
                  forcing_prob=1.0,
                  std_lower_bound=None,
                  weights_lim=None,
-                 noise_theta_init=None,             ## Noise to be added to the initial theta 
-                 nb_wsm_layers=1,                  ## TODO, to be implemented as in Fig 2. of https://arxiv.org/abs/2202.07022
+                 noise_theta_init=None,             ## Potential noise to be added to the initial theta 
+                 nb_wsm_layers=1,                   ## TODO to be used as in Fig 2. of https://arxiv.org/abs/2202.07022
                  autoregressive_train=True,
                  stochastic_ar=True,
-                 smooth_inference=None,         ## Whether to use smooth inference (i.e. no reparametrization trick at inference)
+                 smooth_inference=None,             ## Whether to use smooth inference (i.e. no reparametrization trick at inference)
                  key=None):
 
         keys = jax.random.split(key, num=nb_wsm_layers)
@@ -221,11 +222,11 @@ class WSM(eqx.Module):
                 thetas_init.append(GradualMLP(data_size, weights.shape[0], init_state_layers, builtin_fns[activation], key=keys[0]))
 
             latent_size = weights.shape[0]
-            As.append(jnp.eye(latent_size))                     ## The most stable matrix: identity
+            As.append(jnp.eye(latent_size))                             ## The most stable matrix: identity
 
             B_out_dim = data_size+1 if time_as_channel else data_size
             B = jnp.zeros((latent_size, B_out_dim))
-            # B += jax.random.normal(keys[i], B.shape)*1e-3         ## Initial perturbation to avoid getting stuck TODO
+            # B += jax.random.normal(keys[i], B.shape)*1e-3             ## TODO Initial perturbation to avoid getting stuck at 0 ?
             Bs.append(B)
 
         self.root_utils = root_utils
@@ -280,7 +281,6 @@ class WSM(eqx.Module):
             else:
                 return self.non_ar_call(xs, ts, k)
 
-
     def ar_call(self, xs, ts, k, inference_start=None):
         """ Forward pass of the model on batch of sequences, ==autoregressively==
             xs: (batch, time, data_size)
@@ -326,7 +326,7 @@ class WSM(eqx.Module):
 
                 x_next_mean = x_next[:x_true.shape[0]]
 
-                # if inference_start is not None:           ## @TODO: Teacher-forced x_prev
+                # if inference_start is not None:           ## @TODO: Teacher-forced x_prev ?
                 #     x_prev_next = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
                 # else:
                 #     x_prev_next = jnp.where(jax.random.bernoulli(key2, self.forcing_prob*1.0), x_true, x_hat)
@@ -352,7 +352,6 @@ class WSM(eqx.Module):
         ## Batched version of the forward pass
         ks = jax.random.split(k, xs.shape[0])
         return eqx.filter_vmap(forward)(xs, ts, ks)
-
 
     def ar_call_stochastic(self, xs, ts, k, inference_start=None):
         """ Forward pass of the model on batch of sequences, ==autoregressively and stochastically==
@@ -424,80 +423,6 @@ class WSM(eqx.Module):
         ks = jax.random.split(k, xs.shape[0])
         return eqx.filter_vmap(forward)(xs, ts, ks)
 
-
-    def ar_call_stochastic_direct(self, xs, ts, k, inference_start=None):  ## TODO: feeding directly into matrix B
-    #     """ Forward pass of the model on batch of sequences, ==autoregressively and stochastically==
-    #         xs: (batch, time, data_size)
-    #         ts: (batch, time)
-    #         k:  (key_dim)
-    #         inference_start: whether/when to use the model in autoregressive mode
-    #         """
-
-    #     def forward(xs_, ts_, k_):
-    #         """ Forward pass on a single sequence """
-
-    #         def f(carry, input_signal):
-    #             thet, x_mu_sigma, x_prev, t_prev = carry
-    #             x_true, t_curr, key = input_signal
-    #             delta_t = t_curr - t_prev
-
-    #             x_hat_mean, x_hat_std = jnp.split(x_mu_sigma, 2, axis=-1)
-
-    #             A = self.As[0]
-    #             B = self.Bs[0]
-    #             root_utils = self.root_utils[0]
-
-    #             if inference_start is not None:
-    #                 x_hat = x_hat_mean
-    #                 x_t = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
-    #             else:
-    #                 x_hat = x_mu_sigma
-    #                 # x_hat = jax.random.normal(key, x_hat_mean.shape)*x_hat_std + x_hat_mean
-    #                 x_true = jnp.concatenate([x_true, x_hat_std], axis=-1)
-    #                 x_t = jnp.where(jax.random.bernoulli(key, self.forcing_prob), x_true, x_hat)        ## Sample x_hat from the normal distribution
-
-    #             if self.time_as_channel:
-    #                 x_t = jnp.concatenate([x_t, t_curr], axis=-1)
-    #                 x_prev = jnp.concatenate([x_prev, t_prev], axis=-1)
-
-    #             thet_next = A@thet + B@(x_t - x_prev)     ## Key step
-
-    #             if self.weights_lim is not None:
-    #                 thet_next = jnp.clip(thet_next, -self.weights_lim, self.weights_lim)
-
-    #             shapes, treedef, static, _ = root_utils
-    #             params = unflatten_pytree(thet_next, shapes, treedef)
-    #             root_fun = eqx.combine(params, static)
-    #             root_in = t_curr+delta_t
-    #             if self.input_prev_data:
-    #                 root_in = jnp.concatenate([root_in, x_prev[:x_true.shape[0]]], axis=-1)
-    #             x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                  ## Evaluated at the next time step
-
-    #             # x_next_mean = x_next[:x_true.shape[0]]
-
-    #             return (thet_next, x_next, x_hat, t_curr), (x_next, )
-
-    #         if self.init_state_layers is None:
-    #             theta_init = self.thetas_init[0]
-    #         else:
-    #             theta_init = self.thetas_init[0](xs_[0])
-
-    #         if self.noise_theta_init is not None:
-    #             theta_init += jax.random.normal(k_, theta_init.shape)*self.noise_theta_init
-
-    #         keys = jax.random.split(k_, xs_.shape[0])
-    #         mu_sigma_init = jnp.concatenate([xs_[0], jnp.zeros_like(xs_[0])], axis=-1)        ## Initial mean and std
-
-    #         _, (xs_hat, ) = jax.lax.scan(f, (theta_init, mu_sigma_init, mu_sigma_init, ts_[0:1]), (xs_, ts_[:, None], keys))
-
-    #         return xs_hat
-
-    #     ## Batched version of the forward pass
-    #     ks = jax.random.split(k, xs.shape[0])
-    #     return eqx.filter_vmap(forward)(xs, ts, ks)
-        pass
-
-
     def non_ar_call(self, xs, ts, k):
         """ Forward pass of the model on batch of sequences, ==recurrent, but non-autoregressively==
             xs: (batch, time, data_size)
@@ -563,7 +488,6 @@ class WSM(eqx.Module):
         ## Batched version of the forward pass
         ks = jax.random.split(k, xs.shape[0])
         return eqx.filter_vmap(forward)(xs, ts, ks)
-
 
     def tbptt_non_ar_call(self, xs, ts, k):
         """ Forward pass of the model on batch of sequences with truncated backpropagation through time
@@ -680,7 +604,6 @@ class WSM(eqx.Module):
         ks = jax.random.split(k, xs.shape[0])
         return eqx.filter_vmap(forward_tbptt)(xs, ts, ks)
 
-
     def conv_call(self, xs, ts, k):
         """ Forward pass of the model on batch of sequences, ==convolutional==
             xs: (batch, time, data_size)
@@ -749,6 +672,7 @@ class WSM(eqx.Module):
 
 
 
+##################### GRU MODEL DEFINITION ########################
 
 
 class GRU(eqx.Module):
@@ -834,10 +758,11 @@ class GRU(eqx.Module):
 
 
 
+##################### LSTM MODEL DEFINITION ########################
 
 
-class LSTM_(eqx.Module):
-    """ Gated Recurrent Unit """
+class LSTM(eqx.Module):
+    """ Long Short-Term Memory """
     cell: eqx.Module
     decoder: eqx.Module
 
@@ -918,85 +843,19 @@ class LSTM_(eqx.Module):
 
 
 
-class LSTM(eqx.Module):
-    """ Gated Recurrent Unit """
-    cell: eqx.Module
-    decoder: eqx.Module
-
-    data_size: int
-    time_as_channel: bool
-    forcing_prob: float
-    time_as_channel: bool
-
-    predict_uncertainty: bool
-    std_lower_bound: float
-
-    def __init__(self, 
-                 data_size, 
-                 hidden_size, 
-                 predict_uncertainty=True,
-                 time_as_channel=True,
-                 forcing_prob=1.0,
-                 std_lower_bound=None,
-                 key=None):
-
-        self.time_as_channel = time_as_channel
-        input_dim = 1+data_size if time_as_channel else data_size
-
-        self.cell = eqx.nn.LSTMCell(input_dim, hidden_size, use_bias=True, key=key)
-        self.decoder = eqx.nn.Linear(hidden_size, 2*data_size if predict_uncertainty else data_size, use_bias=True, key=key)
-
-        self.data_size = data_size
-        self.time_as_channel = time_as_channel
-        self.forcing_prob = forcing_prob
-
-        self.predict_uncertainty = predict_uncertainty
-        self.std_lower_bound = std_lower_bound
-
-    def __call__(self, xs, ts, k, inference_start=None):
-        """ Forward pass of the model on batch of sequences
-            xs: (batch, time, data_size)
-            ts: (batch, time)
-            k:  (key_dim)
-            inference_start: whether/when to use the model in autoregressive mode
-            """
-
-        def forward(xs_, ts_, k_):
-            """ Forward pass on a single sequence """
-
-            def f(carry, input_signal):
-                hc, t_prev = carry
-                x_true, t_curr, key = input_signal
-
-                x_t = x_true
-
-                if self.time_as_channel:
-                    x_t = jnp.concatenate([t_curr, x_t], axis=-1)
-
-                hc_next = self.cell(x_t, hc)
-                y_next = self.decoder(hc_next[0])
-
-                return (hc_next, t_curr), (y_next, )
-
-            keys = jax.random.split(k_, xs_.shape[0])
-
-            _, (ys_hat, ) = jax.lax.scan(f, ((jnp.zeros(self.cell.hidden_size), jnp.zeros(self.cell.hidden_size)), ts_[0:1]), (xs_, ts_[:, None], keys))
-
-            return ys_hat
-
-        ## Batched version of the forward pass
-        ks = jax.random.split(k, xs.shape[0])
-        return eqx.filter_vmap(forward)(xs, ts, ks)
 
 
 
 
 
+
+##################### PUTTING THINGS TOGETHER ########################
 
 def make_model(key, data_size, nb_classes, config, logger):
     """ Make a model using the given key and kwargs """
 
     model_type = config['model']['model_type']
+
 
     if model_type == "wsm":
         model_args = {
@@ -1021,11 +880,9 @@ def make_model(key, data_size, nb_classes, config, logger):
         if 'smooth_inference' in config['training']:
             model_args['smooth_inference'] = config['training']['smooth_inference']
 
-        ## Chechk if mode params are ok
         if model_args['autoregressive_train'] and model_args['stochastic_ar'] and not config['training']['use_nll_loss']:
             raise ValueError("The WSM model is not compatible with stochastic autoregressive training without NLL loss.")
 
-        ## Check that non-smooth inference can only be used with autoregressive training and stochastic ar
         if not model_args['smooth_inference'] and not model_args['stochastic_ar']:
             raise ValueError("Non-smooth (stochastic, reparametrization trick) inference cannot be used without stochastic training.")
 
@@ -1038,12 +895,7 @@ def make_model(key, data_size, nb_classes, config, logger):
 
         logger.info(f"Number of learnable parameters for the recurrent transition: {count_params((model.As, model.Bs))/1000:3.1f} k")
 
-    elif model_type == "wsm-lstm":
-        raise NotImplementedError("LSTM transition model not implemented yet")
-    elif model_type == "wsm-gru":
-        raise NotImplementedError("GRU transition model not implemented yet")
-    elif model_type == "rnn":
-        raise NotImplementedError("Standard RNN not implemented yet")
+
     elif model_type == "lstm":
         model_args = {
             "data_size": data_size,
@@ -1054,6 +906,8 @@ def make_model(key, data_size, nb_classes, config, logger):
             "hidden_size": config['model']['rnn_hidden_size'],
         }
         model = LSTM(key=key, **model_args)
+
+
     elif model_type == "gru":
         model_args = {
             "data_size": data_size,
@@ -1064,12 +918,7 @@ def make_model(key, data_size, nb_classes, config, logger):
             "hidden_size": config['model']['rnn_hidden_size'],
         }
         model = GRU(key=key, **model_args)
-    elif model_type == "s4":
-        raise NotImplementedError("S4 not implemented yet")     ## from https://github.com/ddrous/annotated-s4
-    elif model_type == "mamba":
-        raise NotImplementedError("Transformer not implemented yet")        ## https://github.com/ddrous/mamba-jax
-    elif model_type == "transformer":
-        raise NotImplementedError("Transformer not implemented yet")
+
 
     logger.info(f"Number of learnable parameters in the model: {count_params(model)/1000:3.1f} k")
 

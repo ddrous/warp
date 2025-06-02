@@ -1,8 +1,8 @@
 #%%[markdown]
 
-# ## Generative Recurrent Neural Networks in weight space
+# ## Recurrent Neural Networks
 
-#%%
+#%% Import the necessary modules
 
 # %load_ext autoreload
 # %autoreload 2
@@ -58,7 +58,7 @@ warnings.filterwarnings("ignore")
 
 
 
-#%%
+#%% # Parse the command line arguments or use the default config.yaml file
 
 try:
     __IPYTHON__
@@ -106,7 +106,7 @@ torch.manual_seed(seed)
 
 
 
-#%%
+#%% Setup the run folder and data folder
 train = config['general']['train']
 classification = config['general']['classification']
 data_path = config['general']['data_path']
@@ -117,7 +117,6 @@ if train:
     if save_path is not None:
         run_folder = save_path
     else:
-        # run_folder = make_run_folder('./runs/')
         run_folder = make_run_folder(f'./runs/{config["general"]["dataset"]}/')
     data_folder = data_path
 else:
@@ -130,18 +129,15 @@ logger, checkpoints_folder, plots_folder, artefacts_folder = setup_run_folder(ru
 
 ## Copy the config file to the run folder, renaming it as config.yaml
 if not os.path.exists(run_folder+"config.yaml"):
-    # os.system(f"cp {args.config_file} {run_folder}config.yaml")
     test_config = config.copy()
     test_config['general']['train'] = False             ## Set the train flag to False
     with open(run_folder+"config.yaml", 'w') as file:
         yaml.dump(test_config, file)
 
-## Print the config file using the logger and pprint
+## Print the config file using the logger
 logger.info(f"Config file: {args.config_file}")
 logger.info("==== Config file's contents ====")
-# pprint(config)
 
-## Log the config using the logger
 for key, value in config.items():
     if isinstance(value, dict):
         logger.info(f"{key}:")
@@ -154,13 +150,10 @@ for key, value in config.items():
 
 
 
-
-
-#%%
+#%% Create the data loaders and visualize a few samples
 
 trainloader, validloader, testloader, data_props = make_dataloaders(data_folder, config)
 nb_classes, seq_length, data_size, width = data_props
-
 
 print("Total number training samples:", len(trainloader.dataset))
 
@@ -202,9 +195,10 @@ for i in range(4):
         elif dataset=="trends":
             axs[i, j].plot(in_sequence[idx], color=colors[output[idx]])
         elif dataset in repeat_datasets:
+            ## Make 4 plots against each other dimensions
             # axs[i, j].plot(in_sequence[idx, :, dim0], in_sequence[idx, :, dim1], color=colors[(i*j)%len(colors)])
             # axs[i, j].plot(output[idx, :, dim0], output[idx, :, dim1], color=colors[(i*j)%len(colors)], linestyle='--')
-            ## Make 4 plots against time steps instead
+            ## Make 4 plots against time steps
             axs[i, j].plot(output[idx, :, dim0], color=colors[(i*j)%len(colors)], linestyle='-', lw=1, alpha=0.5)
             axs[i, j].plot(output[idx, :, dim1], color=colors[(i*j)%len(colors)], linestyle='--', lw=1, alpha=0.5)
             axs[i, j].plot(in_sequence[idx, :, dim0], color=colors[(i*j)%len(colors)], lw=3)
@@ -221,6 +215,7 @@ for i in range(4):
 plt.suptitle(f"{dataset.upper()} Training Samples", fontsize=20)
 plt.draw();
 plt.savefig(plots_folder+"samples_train.png", dpi=100, bbox_inches='tight')
+
 
 
 # %% Define the model and loss function
@@ -241,7 +236,7 @@ def loss_fn(model, batch, key):
     Ys: (batch, num_classes)
     """
 
-    if not classification:
+    if not classification:  ## Regression (forecasting) task
         (X_true, times), X_true_out = batch
 
         X_recons = model(X_true, times, key, inference_start=None)
@@ -281,14 +276,8 @@ def loss_fn(model, batch, key):
 
         Y_hat = model(X_true, times, key, inference_start=None)
 
-        # print("\n\nPrint shapes of pred and true:", Y_hat.shape, Ys.shape, "\n\n")
         # Compute the cross entropy loss using Optax
         loss = optax.softmax_cross_entropy_with_integer_labels(logits=Y_hat[:, -1], labels=Ys)
-
-        # ## Manual cross entropy loss
-        # Y_hat = jax.nn.softmax(Y_hat[:, -1], axis=-1)
-        # Y_onehot = jax.nn.one_hot(Ys, num_classes=nb_classes)
-        # loss = -jnp.sum(Y_onehot * jnp.log(Y_hat + 1e-10), axis=-1)
 
         loss = jnp.mean(loss)
 
@@ -303,7 +292,7 @@ def train_step(model, batch, opt_state, key):
 
     (loss, aux_data), grads = eqx.filter_value_and_grad(loss_fn, has_aux=True)(model, batch, key)
 
-    updates, opt_state = opt.update(grads, opt_state, model, value=loss)        ## For reduce on plateau loss accumulation
+    updates, opt_state = opt.update(grads, opt_state, model, value=loss)
     model = eqx.apply_updates(model, updates)
 
     return model, opt_state, loss, aux_data
@@ -380,14 +369,13 @@ def eval_on_dataloader(model, dataloader, inference_start, key):
 
 
 
-#%% Train the model
+#%% Train and validate the model
 
 if train:
 
     opt = optax.chain(
         optax.clip(config['optimizer']['gradients_lim']),
         optax.adabelief(config['optimizer']['init_lr']),
-        # optax.adam(config['optimizer']['init_lr']),
         optax.contrib.reduce_on_plateau(
             patience= config['optimizer']['on_plateau']['patience'],
             cooldown=config['optimizer']['on_plateau']['cooldown'],
@@ -485,7 +473,6 @@ if train:
             ## Save the model with the lowest validation loss
             if epoch==0 or val_mean_loss<=np.min(val_losses[:-1]):
                 eqx.tree_serialise_leaves(artefacts_folder+"model.eqx", model)
-                # logger.info("Best model on validation set saved at epoch %d" % epoch)
                 logger.info("Best model on validation set saved ...")
                 best_val_loss = val_mean_loss
                 best_val_loss_epoch = epoch
@@ -538,7 +525,7 @@ else:
 
 
 
-# %% Visualise the training losses
+# %% Visualise the training (and validation) losses
 
 if not os.path.exists(artefacts_folder+"losses.npy"):
     try:
@@ -571,16 +558,13 @@ if len(val_losses) > 0:
     val_col = "teal"
     ax_ = ax.twinx()
     epochs_ids = (np.arange(0, nb_epochs, valid_every).tolist() + [nb_epochs-1])[:len(val_losses)]
-    ## Convert epochs to train steps
-    val_steps_ids = (np.array(epochs_ids)+1) * trainloader.num_batches
+    val_steps_ids = (np.array(epochs_ids)+1) * trainloader.num_batches      ## Convert epochs to train steps
     ax_ = sbplot(val_steps_ids, val_losses, ".-", color=val_col, label=f"Valid", y_label=f'{val_criterion.upper()}', ax=ax_, y_scale="linear", linewidth=3);
-    # plt.axvline(x=best_val_loss_epoch, color='r', linestyle='--', linewidth=3, label=f"Best {val_criterion.upper()}: {best_val_loss:.6f} at Epoch {best_val_loss_epoch}")
     ax_.legend(fontsize=16, loc='upper right')
-    ## Set the label color to orange
     ax_.yaxis.label.set_color(val_col)
 
 clean_losses = np.where(clean_losses<np.percentile(clean_losses, 96), clean_losses, np.nan)
-## Plot a second plot with the outliers removed
+## Plot a second training loss plot with the outliers removed
 ax2 = sbplot(train_steps, clean_losses, title="Loss History (96th Percentile)", x_label='Train Steps', y_label=loss_name, ax=ax2, y_scale="linear" if use_nll_loss else "log");
 
 plt.draw();
@@ -597,8 +581,7 @@ if os.path.exists(artefacts_folder+"lr_scales.npy"):
 
 
 
-
-## Plot the validation losses
+## Plot the validation losses (in more details this time)
 nb_epochs = config['training']['nb_epochs']
 valid_every = config['training']['valid_every']
 val_ids = (np.arange(0, nb_epochs, valid_every).tolist() + [nb_epochs-1])[:len(val_losses)]
@@ -613,7 +596,7 @@ logger.info(f"Best model found at epoch {best_val_loss_epoch} with {val_criterio
 
 
 
-# %% Other visualisation of the model
+# %% Other visualisations of the model
 
 if config["model"]["model_type"] == "wsm":
 
@@ -627,8 +610,8 @@ if config["model"]["model_type"] == "wsm":
         axs[1].hist(model.thetas[0], bins=100, label="After Training")
         axs[1].hist(untrained_model.thetas[0], bins=100, alpha=0.5, label="Before Training", color='r')
         axs[1].set_title(r"Histogram of $\theta_0$ values")
+        plt.legend();
 
-    plt.legend();
     plt.draw();
     plt.savefig(plots_folder+"A_theta_histograms.png", dpi=100, bbox_inches='tight')
 
@@ -656,7 +639,7 @@ if config["model"]["model_type"] == "wsm":
     plt.draw();
     plt.savefig(plots_folder+"A_matrices.png", dpi=100, bbox_inches='tight')
 
-    ## Print the dynamic tanh_params attribute
+    ## Visualize the dynamic tanh attributes (if they exist)
     if isinstance(config['model']['root_final_activation'], list) and not classification:
         latex_string = r"y = \alpha \cdot \text{tanh} \left( \frac{x-b}{a} \right) + \beta"
         logger.info(f"Dynamic tanh params (final root network activation) : ${latex_string}$ ")
@@ -680,12 +663,11 @@ if config["model"]["model_type"] == "wsm":
         plt.savefig(plots_folder+"dynamic_tanh.png", dpi=100, bbox_inches='tight')
 
 
-# %% Visualising a few reconstruction samples
+# %% Visualising a few reconstruction samples (for regression tasks)
 
 if not classification:
-    ## Set inference mode to True
     visloader = NumpyLoader(testloader.dataset, batch_size=16, shuffle=True)
-    nb_examples = len(visloader.dataset)    ## Actualy number of examples in the dataset
+    nb_examples = len(visloader.dataset)    ## Actual number of examples in the dataset
 
     nb_cols = 3 if use_nll_loss else 2
     fig, axs = plt.subplots(4, 4*nb_cols, figsize=(16*3, 16), sharex=True, constrained_layout=True)
@@ -713,8 +695,6 @@ if not classification:
             x_recons = xs_recons[(i*4+j)%nb_examples]
             x_full = labels[(i*4+j)%nb_examples]
 
-            # if dataset in dynamics_datasets+repeat_datasets:
-            ## Min/max along dim0, for both x and x_recons
             min_0, max_0 = min(np.min(x[:, dim0]), np.min(x_recons[:, dim0])), max(np.max(x[:, dim0]), np.max(x_recons[:, dim0]))
             min_1, max_1 = min(np.min(x[:, dim1]), np.min(x_recons[:, dim1])), max(np.max(x[:, dim1]), np.max(x_recons[:, dim1]))
             eps = 0.04
@@ -731,7 +711,6 @@ if not classification:
                 axs[i, nb_cols*j].plot(x_full[:, dim0], color=colors[(i*4+j)%len(colors)])
                 axs[i, nb_cols*j].plot(x_full[:, dim1], color=colors[(i*4+j)%len(colors)], linestyle='-.')
             else:
-                # axs[i, nb_cols*j].set_xlim([min_0-eps, max_0+eps])
                 axs[i, nb_cols*j].set_ylim([min(min_0, min_1)-eps, max(max_0, max_1)+eps])
                 axs[i, nb_cols*j].plot(x[:, dim0], color=colors[int(labels[(i*4+j)%nb_examples])%len(colors)])
                 axs[i, nb_cols*j].plot(x[:, dim1], color=colors[int(labels[(i*4+j)%nb_examples])%len(colors)], linestyle='-.')
@@ -744,13 +723,11 @@ if not classification:
                 if dataset=="celeba":
                     to_plot = (to_plot + 1) / 2
                 axs[i, nb_cols*j+1].imshow(to_plot, cmap='gray')
-            # elif dataset in dynamics_datasets and dataset not in repeat_datasets:
             elif dataset in repeat_datasets:
                 axs[i, nb_cols*j+1].set_ylim([min(min_0, min_1)-eps, max(max_0, max_1)+eps])
                 axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[(i*4+j)%len(colors)])
                 axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[(i*4+j)%len(colors)], linestyle='-.')
             else:
-                # axs[i, nb_cols*j+1].plot(x_recons, color=colors[int(labels[i*4+j])])
                 axs[i, nb_cols*j+1].set_ylim([min(min_0, min_1)-eps, max(max_0, max_1)+eps])
                 axs[i, nb_cols*j+1].plot(x_recons[:, dim0], color=colors[labels[(i*4+j)%nb_examples]%len(colors)])
                 axs[i, nb_cols*j+1].plot(x_recons[:, dim1], color=colors[labels[(i*4+j)%nb_examples]%len(colors)], linestyle='-.')
@@ -764,8 +741,6 @@ if not classification:
                 if dataset in image_datasets:
                     to_plot = xs_uncert[i*4+j].reshape(res)
                     axs[i, nb_cols*j+2].imshow(to_plot, cmap='gray')
-                # elif dataset in dynamics_datasets:
-                    # axs[i, nb_cols*j+2].plot(to_plot[:, dim0], to_plot[:, dim1], color=colors[labels[i*4+j]%len(colors)])
                 else:
                     to_plot = xs_uncert[i*4+j]
                     axs[i, nb_cols*j+2].plot(to_plot[:, dim0], color=colors[labels[i*4+j]%len(colors)])
@@ -778,11 +753,11 @@ if not classification:
     plt.suptitle(f"Reconstruction using {inference_start} initial steps", fontsize=65)
     plt.draw();
     plt.savefig(plots_folder+"samples_generated.png", dpi=100, bbox_inches='tight')
-    plt.savefig(plots_folder+"samples_generated.pdf", dpi=300, bbox_inches='tight')
+    # plt.savefig(plots_folder+"samples_generated.pdf", dpi=300, bbox_inches='tight')
 
 
 
-#%% Get the MSE on the entire test set
+#%% Evaluate the model on the entire test set (for regression tasks)
 
 if not classification:
     eval_loader = NumpyLoader(testloader.dataset, batch_size=len(testloader.dataset), shuffle=False)
@@ -797,12 +772,10 @@ if not classification:
                         key=test_key, 
                         inference_start=inference_start)
 
-    # xs_true = xs_true[:, inference_start:, :]
-    # xs_recons = xs_recons[:, inference_start:, :data_size]
     xs_recons = xs_recons[:, :, :data_size]
 
     def metrics(pred, true):
-        ## Calculate the metrics after inference start
+        """ Calculate the metrics (after inference starts) for the predictions and the true values."""
         pred = pred[:, inference_start:, :]
         true = true[:, inference_start:, :]
 
@@ -819,12 +792,9 @@ if not classification:
     logger.info(f"    - RMSE : {rmse:.6f}")
     logger.info(f"    - MAE : {mae:.6f}")
     logger.info(f"    - MAPE : {mape:.6f}")
-    # logger.info(f"    - MSPE : {mspe:.6f}")
 
 
-
-## %% Now dealing with classification tasks
-## Unormalize the test data and the predictions before computing the metrics
+## If possible, unormalize the test data and the predictions before computing the metrics
 if not classification and config['data']['normalize']:
     def unormalize_data(y, min_max):
         """ Unnormalize the data using the min and max values of the dataset. """
@@ -868,34 +838,6 @@ if not classification and config['data']['normalize']:
         logger.info(f"    - RMSE : {rmse:.6f}")
         logger.info(f"    - MAE : {mae:.6f}")
         logger.info(f"    - MAPE : {mape:.6f}")
-        # logger.info(f"    - MSPE : {mspe:.6f}")
-
-
-
-# # %% Let's plot the prediction and groundth, while graying our the context, for just one example
-# if not classification:
-#     fig, ax = plt.subplots(1, 1, figsize=(10, 5))
-#     time_steps = np.arange(xs_true_unorm.shape[1])
-#     ax.plot(xs_true_unorm[plot_id, :, plot_dim], "r-", lw=2, label="Ground Truth")
-#     ax.plot(xs_true_unorm[plot_id, :inference_start, plot_dim], color="yellow", lw=2)
-#     ax.plot(time_steps[inference_start:], xs_recons_unorm[plot_id, inference_start:, plot_dim], lw=6, label="Prediction", color="orange")
-
-#     ## PLot a vertical line for the inference start
-#     ax.axvline(x=inference_start, color='k', linestyle='--', lw=3, label="Inference Start")
-
-#     ax.legend(fontsize=14, loc="lower left")
-    
-#     ## Set xticks and yticks
-#     ticks = [0, 32, 64, 96, 128, 160, 192]
-#     ax.set_xticks(ticks)
-#     ax.set_xticklabels(ticks)
-
-#     ax.set_xlabel("Time Step $t$", fontsize=20)
-
-#     plt.tight_layout()
-#     plt.draw();
-#     plt.savefig(plots_folder+"prediction.png", dpi=100, bbox_inches='tight')
-#     plt.savefig(plots_folder+"prediction.pdf", dpi=100, bbox_inches='tight')
 
 
 
@@ -909,23 +851,18 @@ if not classification and config['data']['normalize']:
 
 
 
-# %% Now dealing with classification tasks
+
+
+# %% Evaluate the model on the test set (for classification tasks)
 
 if classification:
-
-    ## Compute the accurary of the model on the test set in one go
     evalloader = NumpyLoader(testloader.dataset, batch_size=config["training"]["batch_size"], shuffle=False)
-    # evalloader = NumpyLoader(validloader.dataset, batch_size=16, shuffle=False)
-    
-    # batch = next(iter(evalloader))
-    # (in_sequence, times), output = batch
 
     accs = []
     for i, batch in enumerate(evalloader):
         (in_sequence, times), output = batch
         Y_hat_raw = forward_pass(model, in_sequence, times, main_key)
         Y_hat = jnp.argmax(Y_hat_raw, axis=-1)
-        # print("\nY_hat shape:", Y_hat.shape, "Y shape:", output.shape)
         acc = jnp.mean(Y_hat[:, -1] == output)
 
         accs.append(acc)
@@ -933,13 +870,11 @@ if classification:
     accuracy = np.mean(accs)
     logger.info(f"Test set accuracy: {accuracy:.4f}")
 
-
-    #### ## Visualise the model on the test set
+    ## Visualise a few model logits (the first 16 sequences)
     visloader = NumpyLoader(testloader.dataset, batch_size=16, shuffle=True)
     batch = next(iter(visloader))
     (in_sequence, times), output = batch
 
-    ## PLot the first 16 seqences, with the title as the predicted class
     fig, axs = plt.subplots(4, 4, figsize=(20, 15), sharex=True)
     colors = ['r', 'g', 'b', 'c', 'm', 'y']
 
@@ -954,10 +889,6 @@ if classification:
             else:
                 if dataset=="spirals":
                     axs[i, j].plot(in_sequence[idx, :, dim0], in_sequence[idx, :, dim1], color=colors[int(output[idx])%len(colors)], lw=3)
-
-                    # axs[i, j].plot(in_sequence[idx, :, dim0], color=colors[int(output[idx])%len(colors)], lw=3)
-                    # axs[i, j].plot(in_sequence[idx, :, dim1], color=colors[int(output[idx])%len(colors)], linestyle='--', lw=3)
-
                 else:
                     axs[i, j].plot(in_sequence[idx, :], color=colors[int(output[idx])%len(colors)], lw=3)
 
@@ -968,7 +899,6 @@ if classification:
 
     plt.draw();
     plt.savefig(plots_folder+"samples_test.png", dpi=100, bbox_inches='tight')
-
 
 
     ## PLot the first 16 seqences class over time, with the title as the predicted class
@@ -983,14 +913,11 @@ if classification:
             axs[i, j].set_title(f"Predicted Class: {Y_hat[idx, -1]}", fontsize=22)
             # axs[i, j].axis('off')
 
-            # axs[i, j].set_ylim([-0.1, 1.1])
             axs[i, j].set_ylim([-0.1, nb_classes-1+0.1])
 
-            ## Set the y ticks to be the class labels
             axs[i, j].set_yticks(np.arange(nb_classes))
             axs[i, j].set_yticklabels(np.arange(nb_classes))
 
-            ## Set the x label as time step
             if i==3:
                 axs[i, j].set_xlabel("Time Step", fontsize=22)
 

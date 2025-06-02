@@ -16,6 +16,10 @@ import jax.tree as jtree
 
 
 
+
+
+############################# DATASETS FOR TYPICAL TIME SERIES TASKS #############################
+
 class TimeSeriesDataset:
     """
     Base class for any time series dataset, from which the others will inherit
@@ -44,7 +48,7 @@ class TimeSeriesDataset:
         traj_len = self.traj_len
 
         if self.traj_prop == 1.0:
-            ### STRAIGHFORWARD APPROACH ###
+            ## Straightforward approach, no subsampling ###
             return (inputs, t_eval), outputs
         else:
             ## Select a random subset of traj_len-2 indices, then concatenate the start and end points
@@ -56,6 +60,67 @@ class TimeSeriesDataset:
 
     def __len__(self):
         return self.total_envs
+
+
+class DynamicsDataset(TimeSeriesDataset):
+    """
+    For dynamical systems datasets: MSD, Lorentz, etc.
+    """
+
+    def __init__(self, data_dir, traj_length=None, normalize=True, min_max=None):
+        """
+        Args:
+            data_dir (str): Path to the data file.
+            traj_length (int): Length of the sub-trajectores (long trajectories will be split in chunks before learning). Not used here.
+            normalize (bool, optional): Whether to normalize the data. Defaults to True.
+            min_max (tuple, optional): Tuple of (min, max) values for normalization. Defaults to None.
+        """
+        try:
+            raw_data = np.load(data_dir)
+        except:
+            raise ValueError(f"Data not loadable at {data_dir}")
+
+        if min_max is not None:
+            self.min_data = min_max[0]
+            self.max_data = min_max[1]
+        else:
+            try:
+                self.min_data = torch.min(raw_data)
+                self.max_data = torch.max(raw_data)
+            except:
+                self.min_data = np.min(raw_data)
+                self.max_data = np.max(raw_data)
+
+        ## Normalise the dataset between 0 and 1, then put it between -1 and 1
+        if normalize:
+            raw_data = (raw_data - self.min_data) / (self.max_data - self.min_data)
+            raw_data = (raw_data - 0.5) / 0.5
+
+        if traj_length is not None and traj_length > 0 and traj_length < raw_data.shape[1]:
+            # Tile the data into -1, traj_length, n_dimensions
+            _, raw_timesteps, _ = raw_data.shape
+            dataset = []
+            for e in range(raw_data.shape[0]):
+                for i in range(0, raw_timesteps, traj_length):
+                    dataset.append(raw_data[e:e+1, i:i+traj_length, :])
+            dataset = np.concatenate(dataset, axis=0)
+            n_envs, n_timesteps, n_dimensions = dataset.shape
+        else:
+            dataset = raw_data
+
+        ## One environment is a (new) sample
+        n_envs, n_timesteps, n_dimensions = dataset.shape
+
+        t_eval = np.linspace(0., 1., n_timesteps)
+        labels = np.arange(n_envs)
+
+        self.total_envs = n_envs
+        self.nb_classes = n_envs
+        self.num_steps = n_timesteps
+        self.data_size = n_dimensions
+
+        super().__init__(dataset, labels, t_eval, traj_prop=1.0)
+
 
 
 class TrendsDataset(TimeSeriesDataset):
@@ -98,151 +163,6 @@ class TrendsDataset(TimeSeriesDataset):
 
 
 
-class LorentzDataset(TimeSeriesDataset):
-    """
-    For the Lorentz dataset from https://arxiv.org/abs/2410.04814
-    """
-
-    def __init__(self, data_dir, traj_length):
-        try:
-            raw_data = torch.load(data_dir)
-            raw_t_eval = np.linspace(0, 1., raw_data.shape[1])
-        except:
-            try:
-                raw_data = np.load(data_dir)
-                raw_t_eval = np.linspace(0, 1., raw_data.shape[1])
-            except:
-                raise ValueError(f"Data not loadable at {data_dir}")
-
-        ## Normalise the dataset between 0 and 1
-        # raw_data = (raw_data - torch.mean(raw_data)) / torch.std(raw_data)
-        try:
-            raw_data = (raw_data - torch.min(raw_data)) / (torch.max(raw_data) - torch.min(raw_data))
-        except:
-            raw_data = (raw_data - np.min(raw_data)) / (np.max(raw_data) - np.min(raw_data))
-
-            ## Normalise each channel separately (take the min/max along everything by the last axis)
-            # raw_data = (raw_data - np.min(raw_data, axis=(0, 1), keepdims=True)) / (np.max(raw_data, axis=(0, 1), keepdims=True) - np.min(raw_data, axis=(0, 1), keepdims=True))
-
-        ## Put things between -1 and 1
-        raw_data = (raw_data - 0.5) / 0.5
-
-        ## Tile the data into -1, traj_length, n_dimensions
-        _, raw_timesteps, _ = raw_data.shape
-        dataset = []
-        for e in range(raw_data.shape[0]):
-        # for e in range(16):
-            for i in range(0, raw_timesteps, traj_length):
-                dataset.append(raw_data[e:e+1, i:i+traj_length, :])
-        dataset = np.concatenate(dataset, axis=0)
-        n_envs, n_timesteps, n_dimensions = dataset.shape
-
-        # t_eval = raw_t_eval[:traj_length]
-        t_eval = np.linspace(0, 1., n_timesteps)
-        labels = np.arange(n_envs)
-
-        self.total_envs = n_envs
-        self.nb_classes = n_envs
-        self.num_steps = n_timesteps
-        self.data_size = n_dimensions
-
-        super().__init__(dataset, labels, t_eval, traj_prop=1.0)
-
-
-
-
-class DynamicsDataset(TimeSeriesDataset):
-    """
-    For a dynamics dataset
-    """
-
-    def __init__(self, data_dir, traj_length, normalize=True, min_max=None):
-        try:
-            raw_data = np.load(data_dir)
-            raw_t_eval = np.linspace(0, 1., raw_data.shape[1])
-        except:
-            raise ValueError(f"Data not loadable at {data_dir}")
-
-        if min_max is not None:
-            self.min_data = min_max[0]
-            self.max_data = min_max[1]
-        else:
-            try:
-                self.min_data = torch.min(raw_data)
-                self.max_data = torch.max(raw_data)
-            except:
-                self.min_data = np.min(raw_data)
-                self.max_data = np.max(raw_data)
-
-        ## Normalise the dataset between 0 and 1
-        if normalize:
-            raw_data = (raw_data - self.min_data) / (self.max_data - self.min_data)
-
-            ## Put things between -1 and 1
-            raw_data = (raw_data - 0.5) / 0.5
-
-        ## Tile the data into -1, traj_length, n_dimensions
-        # _, raw_timesteps, _ = raw_data.shape
-        # dataset = []
-        # for e in range(raw_data.shape[0]):
-        # # for e in range(16):
-        #     for i in range(0, raw_timesteps, traj_length):
-        #         dataset.append(raw_data[e:e+1, i:i+traj_length, :])
-        # dataset = np.concatenate(dataset, axis=0)
-        # n_envs, n_timesteps, n_dimensions = dataset.shape
-
-        dataset = raw_data
-        n_envs, n_timesteps, n_dimensions = dataset.shape
-
-        t_eval = np.linspace(0., 1., n_timesteps)
-        labels = np.arange(n_envs)
-
-        self.total_envs = n_envs
-        self.nb_classes = n_envs
-        self.num_steps = n_timesteps
-        self.data_size = n_dimensions
-
-        super().__init__(dataset, labels, t_eval, traj_prop=1.0)
-
-
-
-class OldDynamicsDataset(TimeSeriesDataset):
-    """
-    For all dyanmics dataset as in Gen-Dynamics *TODO: deprecated*
-    """
-
-    def __init__(self, data_dir, traj_length=1000):
-        try:
-            raw = np.load(data_dir)
-            raw_data = raw["X"][:, :, :traj_length, :]
-            raw_t_eval = raw["t"][:traj_length]
-        except:
-            raise ValueError(f"Data not loadable at {data_dir}")
-
-        ## Normalise the dataset between 0 and 1
-        # raw_data = (raw_data - torch.mean(raw_data)) / torch.std(raw_data)
-        raw_data = (raw_data - np.min(raw_data)) / (np.max(raw_data) - np.min(raw_data))
-        ## Put things between -1 and 1
-        raw_data = (raw_data - 0.5) / 0.5
-
-        # dataset = raw_data[0, :]
-        dataset = raw_data.reshape(-1, traj_length, raw_data.shape[-1])
-        n_envs, n_timesteps, n_dimensions = dataset.shape
-
-        t_eval = raw_t_eval
-        # t_eval = np.linspace(0., 1., n_timesteps)
-        labels = np.arange(n_envs)
-
-        self.total_envs = n_envs
-        self.nb_classes = 64
-        self.num_steps = n_timesteps
-        self.data_size = n_dimensions
-
-        super().__init__(dataset, labels, t_eval, traj_prop=1.0)
-
-
-
-
 class MNISTDataset(TimeSeriesDataset):
     """
     For the MNIST dataset, where the time series is the flattened image, pixel-by-pixel
@@ -282,11 +202,118 @@ class MNISTDataset(TimeSeriesDataset):
 
         super().__init__(dataset.numpy(), labels.numpy(), t_eval, traj_prop=traj_prop)
 
-        # ## Limit the dataset to N samples (For debugging) TODO: Remove this
-        # N = 1024
-        # self.total_envs = N
-        # self.dataset = self.dataset[:N]
-        # self.labels = self.labels[:N]
+
+
+class CIFARDataset(TimeSeriesDataset):
+    """
+    For the CIFAR-10 dataset
+    """
+
+    def __init__(self, data_dir, data_split, mini_res=4, traj_prop=1.0, unit_normalise=False):
+        self.nb_classes = 10
+        self.num_steps = (32//mini_res)**2
+        self.data_size = 3
+        self.mini_res = mini_res
+
+        self.traj_prop = traj_prop
+
+        tf = transforms.Compose(
+            [
+                transforms.ToTensor(),
+                transforms.Normalize(mean=0.5, std=0.5) if not unit_normalise else transforms.Lambda(lambda x: x),
+                transforms.Lambda(lambda x: x[:, ::mini_res, ::mini_res]) if mini_res>1 else transforms.Lambda(lambda x: x),
+                transforms.Lambda(lambda x: x.reshape(self.data_size, self.num_steps).t()),
+            ]
+        )
+
+        data = torchvision.datasets.CIFAR10(
+            data_dir, train=True if data_split=="train" else False, download=True, transform=tf
+        )
+
+        ## Get all the data in one large batch (to apply the transform)
+        dataset, labels = next(iter(torch.utils.data.DataLoader(data, batch_size=len(data), shuffle=False)))
+
+        t_eval = np.linspace(0., 1., self.num_steps)
+        self.total_envs = dataset.shape[0]
+
+        super().__init__(dataset.numpy(), labels.numpy(), t_eval, traj_prop=traj_prop)
+
+
+
+class SpiralsDataset(TimeSeriesDataset):
+    """
+    For a spirals dataset: https://docs.kidger.site/diffrax/examples/neural_cde/
+    """
+
+    def __init__(self, data_dir, normalize=True, min_max=None):
+        try:
+            raw_data = np.load(data_dir)
+        except:
+            raise ValueError(f"Data not loadable at {data_dir}")
+
+        ## Normalise the dataset between 0 and 1
+        if normalize:
+            raw_data = (raw_data - self.min_data) / (self.max_data - self.min_data)
+
+        dataset = raw_data["xs"]
+        n_envs, n_timesteps, n_dimensions = dataset.shape
+
+        t_eval = np.linspace(0., 1., n_timesteps)
+        labels = raw_data["ys"].astype(int).squeeze()
+
+        self.total_envs = n_envs
+        self.nb_classes = 2
+        self.num_steps = n_timesteps
+        self.data_size = n_dimensions
+
+        super().__init__(dataset, labels, t_eval, traj_prop=1.0)
+
+
+class UEADataset(TimeSeriesDataset):
+    """
+    For a UEA dataset, with preprocessing done by https://github.com/Benjamin-Walker/log-neural-cdes
+    """
+
+    def __init__(self, data_dir, normalize=True, min_max=None):
+        try:
+            raw_data = np.load(data_dir)
+        except:
+            raise ValueError(f"Data not loadable at {data_dir}")
+
+        ## Normalise the dataset between 0 and 1
+        dataset = raw_data["data"].astype(np.float32)
+
+        if min_max is not None:
+            self.min_data = min_max[0]
+            self.max_data = min_max[1]
+        else:
+            self.min_data = np.min(dataset, axis=(0, 1), keepdims=True)
+            self.max_data = np.max(dataset, axis=(0, 1), keepdims=True)
+
+        if normalize:
+            dataset = (dataset - self.min_data) / (self.max_data - self.min_data)
+            ## Put things between -1 and 1
+            dataset = (dataset - 0.5) / 0.5
+
+        n_envs, n_timesteps, n_dimensions = dataset.shape
+
+        t_eval = np.linspace(0., 1., n_timesteps)
+        labels = raw_data["labels"].astype(np.int32).squeeze()
+
+        self.total_envs = n_envs
+        self.nb_classes = int(np.max(labels)) + 1
+        self.num_steps = n_timesteps
+        self.data_size = n_dimensions
+
+        super().__init__(dataset, labels, t_eval, traj_prop=1.0)
+
+
+class PathFinderDataset(UEADataset):
+    """
+    Alias for the UEADataset (useful  for clarity)
+    """
+    def __init__(self, data_dir, normalize=True, min_max=None):
+        super().__init__(data_dir, normalize=normalize, min_max=min_max)
 
 
 
@@ -296,11 +323,7 @@ class MNISTDataset(TimeSeriesDataset):
 
 
 
-
-
-
-
-
+############################# DATASETS FOR REPEAT-COPY TIME SERIES TASKS #############################
 
 class TimeSeriesRepeatDataset:
     """
@@ -309,7 +332,7 @@ class TimeSeriesRepeatDataset:
     def __init__(self, in_dataset, out_dataset, t_eval, traj_prop=1.0):
 
         self.in_dataset = in_dataset            ## Input sequences
-        self.out_datasets = out_dataset        ## Output sequences
+        self.out_datasets = out_dataset         ## Output sequences
         n_envs, n_timesteps, n_dimensions = in_dataset.shape
         self.t_eval = t_eval
         self.total_envs = n_envs
@@ -346,7 +369,7 @@ class TimeSeriesRepeatDataset:
 
 class DynamicsRepeatDataset(TimeSeriesRepeatDataset):
     """
-    For the a dynamical system dataset for repeat-copy tasks
+    For the a dynamical system dataset for repeat-copy tasks (e.g. Lotka-Volterra)
     """
 
     def __init__(self, data_dir, traj_length, min_max=None):
@@ -389,98 +412,15 @@ class DynamicsRepeatDataset(TimeSeriesRepeatDataset):
 
 
 
-# class CheetahDataset(TimeSeriesRepeatDataset):
-#     """
-#     For the a dynamical system dataset for repeat-copy tasks
-#     """
-
-#     def __init__(self, data_dir, traj_length, min_max=None):
-#         try:
-#             raw_data = np.load(data_dir)
-#             in_raw_data = raw_data["clipped"]
-#             out_raw_data = raw_data["full"]
-#         except:
-#             raise ValueError(f"Data not loadable at {data_dir}")
-
-#         ## Normalise the dataset between 0 and 1
-#         if min_max is not None:
-#             self.min_data = min_max[0]
-#             self.max_data = min_max[1]
-#         else:
-#             self.min_data = np.min(out_raw_data)
-#             self.max_data = np.max(out_raw_data)
-
-#         in_raw_data = (in_raw_data - self.min_data) / (self.max_data - self.min_data)
-#         out_raw_data = (out_raw_data - self.min_data) / (self.max_data - self.min_data)
-
-#         ## Put things between -1 and 1
-#         in_raw_data = (in_raw_data - 0.5) / 0.5
-#         out_raw_data = (out_raw_data - 0.5) / 0.5
-
-#         ## Replace the smallest value in in_raw_data with exactly -1 ?
-#         # in_raw_data[in_raw_data == np.min(in_raw_data)] = -1
-
-#         n_envs, n_timesteps, n_dimensions = in_raw_data.shape
-
-#         # t_eval = raw_t_eval[:traj_length]
-#         t_eval = np.linspace(0, 1., n_timesteps)
-
-#         self.total_envs = n_envs
-#         self.nb_classes = n_envs
-#         self.num_steps = n_timesteps
-#         self.data_size = n_dimensions
-
-#         super().__init__(in_raw_data, out_raw_data, t_eval, traj_prop=1.0)
-
-
-
-
-
-class CIFARDataset(TimeSeriesDataset):
-    """
-    For the CIFAR-10 dataset
-    """
-
-    def __init__(self, data_dir, data_split, mini_res=4, traj_prop=1.0, unit_normalise=False):
-        self.nb_classes = 10
-        self.num_steps = (32//mini_res)**2
-        self.data_size = 3
-        self.mini_res = mini_res
-
-        self.traj_prop = traj_prop
-
-        tf = transforms.Compose(
-            [
-                transforms.ToTensor(),
-                transforms.Normalize(mean=0.5, std=0.5) if not unit_normalise else transforms.Lambda(lambda x: x),
-                transforms.Lambda(lambda x: x[:, ::mini_res, ::mini_res]) if mini_res>1 else transforms.Lambda(lambda x: x),
-                transforms.Lambda(lambda x: x.reshape(self.data_size, self.num_steps).t()),
-            ]
-        )
-
-        data = torchvision.datasets.CIFAR10(
-            data_dir, train=True if data_split=="train" else False, download=True, transform=tf
-        )
-
-        ## Get all the data in one large batch (to apply the transform)
-        dataset, labels = next(iter(torch.utils.data.DataLoader(data, batch_size=len(data), shuffle=False)))
-        # dataset, labels = next(iter(torch.utils.data.DataLoader(data, batch_size=128, shuffle=True)))
-
-        ## Filter and return cats only: class 3 (to make the task easier)
-        # dataset = dataset[labels==3]
-        # labels = labels[labels==3]
-
-        t_eval = np.linspace(0., 1., self.num_steps)
-        self.total_envs = dataset.shape[0]
-
-        super().__init__(dataset.numpy(), labels.numpy(), t_eval, traj_prop=traj_prop)
 
 
 
 
 
 
-####### SPECIAL CLASSES NOT INHERITING FROM THE BASE TIMESERIES CLASS #######
+
+
+############## SPECIAL DATASETS NOT INHERITING FROM THE TIME SERIES CLASSES ##############
 
 class CelebADataset(torch.utils.data.Dataset):
     """
@@ -505,7 +445,6 @@ class CelebADataset(torch.utils.data.Dataset):
         self.output_dim = 3
         self.img_size = (*resolution, self.output_dim)
         self.order_pixels = order_pixels
-        ## Read the partitioning file: train(0), val(1), test(2)
 
         self.data_path = data_path
         partitions = pd.read_csv(self.data_path+'list_eval_partition.txt', 
@@ -532,9 +471,6 @@ class CelebADataset(torch.utils.data.Dataset):
             self.adaptation = True
         else:
             raise ValueError(f"Invalid data split provided. Got {data_split}")
-
-        ## A list of MVPs images (or the worst during self-modulation) - Useful for active learning
-        # self.mvp_files = self.files
 
         self.total_envs = len(self.files)
         if self.total_envs == 0:
@@ -565,7 +501,7 @@ class CelebADataset(torch.utils.data.Dataset):
         img = img.permute(1, 2, 0)
         return np.array(img)
 
-    def sample_pixels(self, img) -> Tuple[np.ndarray, np.ndarray]:        ## TODO: Stay in torch throughout this function!
+    def sample_pixels(self, img) -> Tuple[np.ndarray, np.ndarray]:
         total_pixels = self.img_size[0] * self.img_size[1]
 
         if self.order_pixels:
@@ -647,85 +583,6 @@ class MovingMNISTDataset(torch.utils.data.Dataset):
 
 
 
-class SpiralsDataset(TimeSeriesDataset):
-    """
-    For a spirals dataset
-    """
-
-    def __init__(self, data_dir, traj_length, normalize=True, min_max=None):
-        try:
-            raw_data = np.load(data_dir)
-        except:
-            raise ValueError(f"Data not loadable at {data_dir}")
-
-        ## Normalise the dataset between 0 and 1
-        if normalize:
-            raw_data = (raw_data - self.min_data) / (self.max_data - self.min_data)
-
-        dataset = raw_data["xs"]
-        n_envs, n_timesteps, n_dimensions = dataset.shape
-
-        t_eval = np.linspace(0., 1., n_timesteps)
-        labels = raw_data["ys"].astype(int).squeeze()
-
-        self.total_envs = n_envs
-        self.nb_classes = 2
-        self.num_steps = n_timesteps
-        self.data_size = n_dimensions
-
-        super().__init__(dataset, labels, t_eval, traj_prop=1.0)
-
-
-
-
-class UEADataset(TimeSeriesDataset):
-    """
-    For a UEA dataset, from https://github.com/Benjamin-Walker/log-neural-cdes
-    """
-
-    def __init__(self, data_dir, traj_length, normalize=True, min_max=None):
-        try:
-            raw_data = np.load(data_dir)
-        except:
-            raise ValueError(f"Data not loadable at {data_dir}")
-
-        ## Normalise the dataset between 0 and 1
-        dataset = raw_data["data"].astype(np.float32)
-
-        if min_max is not None:
-            self.min_data = min_max[0]
-            self.max_data = min_max[1]
-        else:
-            self.min_data = np.min(dataset, axis=(0, 1), keepdims=True)
-            self.max_data = np.max(dataset, axis=(0, 1), keepdims=True)
-
-        if normalize:
-            dataset = (dataset - self.min_data) / (self.max_data - self.min_data)
-            ## Put things between -1 and 1
-            dataset = (dataset - 0.5) / 0.5
-
-        n_envs, n_timesteps, n_dimensions = dataset.shape
-
-        t_eval = np.linspace(0., 1., n_timesteps)
-        labels = raw_data["labels"].astype(np.int32).squeeze()
-
-        self.total_envs = n_envs
-        self.nb_classes = int(np.max(labels)) + 1
-        self.num_steps = n_timesteps
-        self.data_size = n_dimensions
-
-        super().__init__(dataset, labels, t_eval, traj_prop=1.0)
-
-
-class PathFinderDataset(UEADataset):
-    """
-    Same as the UEADataset, exactly the same
-    """
-    def __init__(self, data_dir, traj_length, normalize=True, min_max=None):
-        super().__init__(data_dir, traj_length, normalize=normalize, min_max=min_max)
-
-
-########################################################################
 
 
 
@@ -734,6 +591,7 @@ class PathFinderDataset(UEADataset):
 
 
 
+################################ PUTTING IT ALL TOGETHER ########################################
 
 def numpy_collate(batch):
   return jtree.map(np.asarray, data.default_collate(batch))
@@ -816,13 +674,11 @@ def make_dataloaders(data_folder, config):
         nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
         min_res = min(resolution)
 
-
-    elif dataset in ["lorentz63", "mass_spring_damper", "cheetah", "electricity"]:        ##TODO: preprocess lorentz63
+    elif dataset in ["lorentz63", "mass_spring_damper", "cheetah", "electricity"]:
         print(" #### Dynamics Dataset ####")
-        traj_len = np.NaN
-        # normalize = False if dataset in ["cheetah", "electricity", "lorentz63"] else True       ## Cheetah dataset from https://github.com/raminmh/liquid_time_constant_networks
-        # normalize = False if dataset in ["cheetah", "electricity"] else True       ## Cheetah dataset from https://github.com/raminmh/liquid_time_constant_networks
         normalize = config["data"]["normalize"]
+        # traj_len = config["data"]["traj_length"]          ## @TODO: eventually make this parameter
+        traj_len = None
 
         trainloader = NumpyLoader(DynamicsDataset(data_folder+"train.npy", traj_length=traj_len, normalize=normalize, min_max=None), 
                                 batch_size=batch_size, 
@@ -837,10 +693,9 @@ def make_dataloaders(data_folder, config):
         print("Training sequence length:", seq_length)
         min_res = None
 
-
     elif dataset in ["lotka"]:
         print(" #### Dynamics-Repeat Dataset ####")
-        traj_len = np.NaN
+        traj_len = None
 
         trainloader = NumpyLoader(DynamicsRepeatDataset(data_folder+"train.npz", traj_length=traj_len, min_max=None), 
                                 batch_size=batch_size, 
@@ -856,13 +711,11 @@ def make_dataloaders(data_folder, config):
         min_res = None
 
     elif dataset in ["spirals"]:
-        traj_len = np.NaN
-
-        trainloader = NumpyLoader(SpiralsDataset(data_folder+"train.npz", traj_length=traj_len, normalize=False, min_max=None),
+        trainloader = NumpyLoader(SpiralsDataset(data_folder+"train.npz", normalize=False, min_max=None),
                                 batch_size=batch_size, 
                                 shuffle=True, 
                                 num_workers=24)
-        testloader = NumpyLoader(SpiralsDataset(data_folder+"test.npz", traj_length=traj_len, normalize=False, min_max=None),
+        testloader = NumpyLoader(SpiralsDataset(data_folder+"test.npz", normalize=False, min_max=None),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)
@@ -871,19 +724,18 @@ def make_dataloaders(data_folder, config):
         min_res = None
 
     elif dataset in ["uea"]:
-        traj_len = np.NaN
         normalize = config["data"]["normalize"]
 
-        trainloader = NumpyLoader(UEADataset(data_folder+"train.npz", traj_length=traj_len, normalize=normalize, min_max=None),
+        trainloader = NumpyLoader(UEADataset(data_folder+"train.npz", normalize=normalize, min_max=None),
                                 batch_size=batch_size, 
                                 shuffle=True, 
                                 num_workers=24)
         min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
-        valloader = NumpyLoader(UEADataset(data_folder+"val.npz", traj_length=traj_len, normalize=normalize, min_max=min_max),
+        valloader = NumpyLoader(UEADataset(data_folder+"val.npz", normalize=normalize, min_max=min_max),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)
-        testloader = NumpyLoader(UEADataset(data_folder+"test.npz", traj_length=traj_len, normalize=normalize, min_max=min_max),
+        testloader = NumpyLoader(UEADataset(data_folder+"test.npz", normalize=normalize, min_max=min_max),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)
@@ -892,17 +744,15 @@ def make_dataloaders(data_folder, config):
         min_res = None
 
     elif dataset in ["pathfinder"]:
-        traj_len = np.NaN
-
-        trainloader = NumpyLoader(PathFinderDataset(data_folder+"train.npz", traj_length=traj_len, normalize=False, min_max=None),
+        trainloader = NumpyLoader(PathFinderDataset(data_folder+"train.npz", normalize=False, min_max=None),
                                 batch_size=batch_size, 
                                 shuffle=True, 
                                 num_workers=24)
-        valloader = NumpyLoader(PathFinderDataset(data_folder+"val.npz", traj_length=traj_len, normalize=False, min_max=None),
+        valloader = NumpyLoader(PathFinderDataset(data_folder+"val.npz", normalize=False, min_max=None),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)
-        testloader = NumpyLoader(PathFinderDataset(data_folder+"test.npz", traj_length=traj_len, normalize=False, min_max=None),
+        testloader = NumpyLoader(PathFinderDataset(data_folder+"test.npz", normalize=False, min_max=None),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)
@@ -911,8 +761,8 @@ def make_dataloaders(data_folder, config):
         min_res = 32
 
     elif dataset in ["sine"]:
-        traj_len = np.NaN
         normalize = config["data"]["normalize"]
+        traj_len = None
 
         trainloader = NumpyLoader(DynamicsDataset(data_folder+"train.npy", traj_length=traj_len, normalize=normalize, min_max=None),
                                 batch_size=batch_size, 
@@ -931,10 +781,8 @@ def make_dataloaders(data_folder, config):
         print("Training sequence length:", seq_length)
         min_res = None
 
-
-    else:
+    elif dataset in ["trends"]:
         print(" #### Trends (Synthetic Control) Dataset ####")
-        ## ======= below to run the easy Trends dataset instead!
         trainloader = NumpyLoader(TrendsDataset(data_folder+"trends/", skip_steps=1, traj_prop=1.0), 
                                 batch_size=batch_size if batch_size<600 else 600, 
                                 shuffle=True)
@@ -944,6 +792,10 @@ def make_dataloaders(data_folder, config):
         nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
 
         min_res = None
+
+    else:
+        raise ValueError(f"Dataset {dataset} not recognised. Please check the configuration file.")
+
 
     ## Check if valloader is defined
     if "valloader" not in locals():
@@ -963,12 +815,10 @@ def make_dataloaders(data_folder, config):
 
 
 
+################################ TESTING THE FILES ########################################
 
 if __name__ == "__main__":
-    ### Test the MovingMNIST dataset
     import matplotlib.pyplot as plt
-    ## Reset numpy random seed
-    # np.random.seed(0)
 
     data_folder, batch_size = "data/", 1
     trainloader = NumpyLoader(MovingMNISTDataset(data_folder, data_split="train", mini_res=1, unit_normalise=False), 
@@ -984,7 +834,6 @@ if __name__ == "__main__":
 
     ## Plot the single video in the batch
     video = (images[0] + 1)/2       ## Shape: (T, C, H, W)
-    # video = (((images[0] + 1)/2) * 255).astype(int)       ## Shape: (T, C, H, W)
     print("Min an Max in the rescaled images:", np.min(video), np.max(video))
     T, C, H, W = video.shape
     nb_frames = video.shape[0]

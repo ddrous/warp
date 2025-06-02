@@ -1,20 +1,15 @@
-# Base configuration file
-
 # General settings
 general:
   seed: 2024
   train: True
   classification: False
-  dataset: "mnist_fashion"  # Options: mnist, cifar, lorentz, dynamics
+  dataset: "mnist_fashion"
   data_path: "./data/"
-  # save_path: "./runs/250404-175026-Test/"
   save_path: null
 
-# Data hyperparameters (dependent on the dataset)
+# Data hyperparameters
 data:
   downsample_factor: 1
-  resolution: [32, 32]         # For celebA
-  traj_length: 1000
   normalize: False
 
 # Model hyperparameters
@@ -22,7 +17,7 @@ model:
   root_width_size: 24
   root_depth: 3
   root_activation: "relu"
-  root_final_activation: 1.0    ## a, b, alpha, beta
+  root_final_activation: 1.0
   init_state_layers: null
   input_prev_data: False
   model_type: "wsm"
@@ -57,4 +52,5 @@ training:
   nb_recons_loss_steps: 400
   use_nll_loss: True
   inference_start: 300
-  val_criterion: "mse"  # Options: loss, accuracy
+  val_criterion: "mse"
+  smooth_inference: True

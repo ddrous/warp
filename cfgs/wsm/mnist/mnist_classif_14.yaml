@@ -1,20 +1,15 @@
-# Base configuration file
-
 # General settings
 general:
   seed: 2028
   classification: True
   train: True
-  dataset: "mnist"  # Options: mnist, cifar, lorentz, dynamics
+  dataset: "mnist"
   data_path: "./data/"
-  # save_path: "./runs/250404-175026-Test/"
   save_path: null
 
-# Data hyperparameters (dependent on the dataset)
+# Data hyperparameters
 data:
   downsample_factor: 2
-  resolution: [32, 32]         # For celebA
-  traj_length: 1000
 
 # Model hyperparameters
 model:
@@ -22,7 +17,7 @@ model:
   root_depth: 3
   root_activation: "relu"
   root_final_activation: null
-  init_state_layers: null          ## null to directly learn the initial state
+  init_state_layers: null
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
@@ -44,13 +39,17 @@ optimizer:
     rtol: 1.0e-4
     accum_size: 50
 
-# Training/Inference hyperparameters
+# Training/Inference configurations
 training:
   nb_epochs: 3000
   batch_size: 3072
   autoregressive: False
   print_every: 10
-  checkpoint_every: 10
+  safe_every: 10
+  valid_every: 10
+  stochastic: False
+  val_criterion: "error_rate"
+  smooth_inference: True
   nb_recons_loss_steps: 400
   use_nll_loss: True
   inference_start: 300

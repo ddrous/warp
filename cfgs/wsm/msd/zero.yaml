@@ -1,32 +1,30 @@
-# Base configuration file
-
 # General settings
 general:
-  seed: 2024
-  classification: True
+  seed: 2028
+  classification: False
   train: True
-  dataset: "uea"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/uea/processed/UEA/EthanolConcentration/"
+  dataset: "mass_spring_damper"
+  data_path: "./data/dynamics/mass-spring-damper-2/"
   save_path: null
 
-# Data hyperparameters (dependent on the dataset)
+# Data hyperparameters
 data:
   downsample_factor: 1
-  resolution: [32, 32]         # For celebA
+  resolution: [32, 32]
   traj_length: 1000
-  normalize: True
+  normalize: False
 
 # Model hyperparameters
 model:
-  mlp_width_size: 32
-  mlp_depth: 2
-  activation: "relu"
-  init_state_layers: 2      ## null to directly learn the initial state
+  root_width_size: 48
+  root_depth: 3
+  root_activation: "swish"
+  root_final_activation: 38.0
+  init_state_layers: 2
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
-  dynamic_tanh_init: null     ## a, b, alpha, beta
   time_as_channel: False
   forcing_prob: 0.25
   noise_theta_init: null
@@ -46,11 +44,15 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 6500
-  batch_size: 524
-  autoregressive: False
-  print_every: 100
-  checkpoint_every: 100
+  nb_epochs: 1000
+  batch_size: 1024
+  autoregressive: True
+  stochastic: False
+  print_every: 10
+  save_every: 10
+  valid_every: 10
+  val_criterion: "mse"
   nb_recons_loss_steps: null
   use_nll_loss: False
   inference_start: 100
+  smooth_inference: True

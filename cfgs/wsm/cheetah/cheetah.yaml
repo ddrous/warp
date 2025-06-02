@@ -1,20 +1,15 @@
-# Base configuration file
-
 # General settings
 general:
   seed: 2028
   train: True
   classification: False
-  dataset: "cheetah"  # Options: mnist, cifar, lorentz, dynamics
+  dataset: "cheetah"
   data_path: "./data/dynamics/cheetah/"
-  # save_path: "./runs/250404-175026-Test/"
   save_path: null
 
-# Data hyperparameters (dependent on the dataset)
+# Data hyperparameters
 data:
-  downsample_factor: 1
-  resolution: [32, 32]         # For celebA
-  traj_length: 1000
+  # traj_length: 1000
   normalize: True
 
 # Model hyperparameters
@@ -32,7 +27,6 @@ model:
   forcing_prob: 0.25
   noise_theta_init: null
   std_lower_bound: 1.0e-4
-  rnn_hidden_size: 500          # For GRUs and LSTMs
 
 # Optimizer hyperparameters
 optimizer:
@@ -46,7 +40,7 @@ optimizer:
     rtol: 1.0e-4
     accum_size: 50
 
-# Training/Inference hyperparameters
+# Training/Inference configurations
 training:
   nb_epochs: 200
   batch_size: 300
@@ -59,3 +53,4 @@ training:
   nb_recons_loss_steps: null
   use_nll_loss: True
   inference_start: 50
+  smooth_inference: False

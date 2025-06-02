@@ -1,28 +1,22 @@
-# Base configuration file
-
 # General settings
 general:
-  seed: 2028
-  classification: False
+  seed: 2024
+  classification: True
   train: True
-  dataset: "mass_spring_damper"  # Options: mnist, cifar, lorentz, dynamics
-  data_path: "./data/dynamics/mass-spring-damper-2/"
-  # save_path: "./runs/250404-175026-Test/"
+  dataset: "uea"
+  data_path: "./data/uea/processed/UEA/SelfRegulationSCP1/"
   save_path: null
 
-# Data hyperparameters (dependent on the dataset)
+# Data hyperparameters
 data:
-  downsample_factor: 1
-  resolution: [32, 32]         # For celebA
-  traj_length: 1000
-  normalize: False
+  normalize: True
 
 # Model hyperparameters
 model:
   root_width_size: 48
-  root_depth: 3
-  root_activation: "swish"
-  root_final_activation: 38.0
+  root_depth: 2
+  root_activation: "relu"
+  root_final_activation: null
   init_state_layers: 2
   input_prev_data: False
   model_type: "wsm"
@@ -45,13 +39,17 @@ optimizer:
     rtol: 1.0e-4
     accum_size: 50
 
-# Training/Inference hyperparameters
+# Training/Inference configurations
 training:
-  nb_epochs: 1000
-  batch_size: 1024
-  autoregressive: True
-  print_every: 10
-  checkpoint_every: 10
+  nb_epochs: 5000
+  batch_size: 561
+  autoregressive: False
+  stochastic: False
+  print_every: 100
+  save_every: 100
+  valid_every: 100
+  val_criterion: "error_rate"
+  smooth_inference: True
   nb_recons_loss_steps: null
   use_nll_loss: False
   inference_start: 100

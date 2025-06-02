@@ -1,19 +1,14 @@
-# Base configuration file
-
 # General settings
 general:
   seed: 2024
   classification: True
   train: True
-  dataset: "uea"  # Options: mnist, cifar, lorentz, dynamics
+  dataset: "uea"
   data_path: "./data/uea/processed/UEA/EigenWorms/"
   save_path: null
 
-# Data hyperparameters (dependent on the dataset)
+# Data hyperparameters
 data:
-  downsample_factor: 1
-  resolution: [32, 32]         # For celebA
-  traj_length: 1000
   normalize: False
 
 # Model hyperparameters
@@ -21,8 +16,8 @@ model:
   root_width_size: 128
   root_depth: 1
   root_activation: "relu"
-  root_final_activation: null     ## a, b, alpha, beta
-  init_state_layers: 2        ## null to directly learn the initial state
+  root_final_activation: null
+  init_state_layers: 2
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
@@ -44,7 +39,7 @@ optimizer:
     rtol: 1.0e-4
     accum_size: 50
 
-# Training/Inference hyperparameters
+# Training/Inference configurations
 training:
   nb_epochs: 100
   batch_size: 32
@@ -58,3 +53,4 @@ training:
   nb_recons_loss_steps: null
   use_nll_loss: False
   inference_start: 100
+  smooth_inference: True
