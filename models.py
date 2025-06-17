@@ -844,6 +844,52 @@ class LSTM(eqx.Module):
 
 
 
+##################### FEED-FORWARD MODEL DEFINITION ########################
+
+class FFNN(eqx.Module):
+    """ Feed-Forward Neural Network """
+    data_size: int
+    sequence_length: bool
+    layers: list
+
+    def __init__(self, data_size, key=None):
+        """ Initialize the model """
+
+        self.data_size = data_size
+        self.sequence_length = 699
+
+        num_layers = 3
+        width_size = 1024
+        self.layers = []
+        for i in range(num_layers):
+            if i == 0:
+                in_features = self.sequence_length
+            else:
+                in_features = width_size
+
+            if i == num_layers-1:
+                out_features = self.sequence_length
+            else:
+                out_features = width_size
+
+            key, subkey = jax.random.split(key)
+            layer = eqx.nn.Linear(in_features, out_features, use_bias=True, key=key)
+            self.layers.append(layer)
+
+    def __call__(self, xs, ts, k, inference_start=None):
+        """ Forward pass of the model on batch 
+            """
+
+        def forward(x):
+            """ Forward pass on a single sequence """
+            for layer in self.layers[:-1]:
+                x = layer(x)
+                x = jax.nn.relu(x)
+            x = self.layers[-1](x)
+            return x[...,None]
+
+        return eqx.filter_vmap(forward)(xs.squeeze(-1)) 
+
 
 
 
@@ -919,6 +965,13 @@ def make_model(key, data_size, nb_classes, config, logger):
         }
         model = GRU(key=key, **model_args)
 
+
+    elif model_type == "ffnn":
+        model_args = {
+            "data_size": data_size,
+            # "sequence_length": config['model']['sequence_length'],
+        }
+        model = FFNN(key=key, **model_args)
 
     logger.info(f"Number of learnable parameters in the model: {count_params(model)/1000:3.1f} k")
 

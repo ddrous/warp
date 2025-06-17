@@ -92,6 +92,8 @@ elif model_type == "gru":
     print("\n\n+=+=+=+=+ Training Gated Recurrent Unit Model +=+=+=+=+\n")
 elif model_type == "lstm":
     print("\n\n+=+=+=+=+ Training Long Short Term Memory Model +=+=+=+=+\n")
+elif model_type == "ffnn":
+    print("\n\n+=+=+=+=+ Training Feed-Forward Neural Network Model +=+=+=+=+\n")
 else:
     print("\n\n+=+=+=+=+ Training Unknown Model +=+=+=+=+\n")
     raise ValueError(f"Unknown model type: {model_type}")
@@ -176,7 +178,7 @@ colors = ['r', 'g', 'b', 'c', 'm', 'y']
 dataset = config['general']['dataset']
 image_datasets = ["mnist", "mnist_fashion", "cifar", "celeba", "pathfinder"]
 dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_damper", "cheetah", "electricity", "sine"]
-repeat_datasets = ["lotka"]
+repeat_datasets = ["lotka", "arc_agi"]
 
 res = (width, width, data_size)
 dim0, dim1 = (0, 1)

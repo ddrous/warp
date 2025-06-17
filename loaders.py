@@ -412,6 +412,31 @@ class DynamicsRepeatDataset(TimeSeriesRepeatDataset):
 
 
 
+class ARC_AGIDataset(TimeSeriesRepeatDataset):
+    """
+    For the a ARC-AGI dataset framed as a repeat-copy tasks
+    """
+
+    def __init__(self, data_dir, traj_length, min_max=None):
+        # try:
+        #     in_raw_data = np.load(data_dir+"in.npy")
+        #     out_raw_data = np.load(data_dir+"out.npy")
+        # except:
+        #     raise ValueError(f"Data not loadable at root {data_dir}")
+        in_raw_data = np.load(data_dir+"in.npy")[..., None]
+        out_raw_data = np.load(data_dir+"out.npy")[..., None]
+
+        n_envs, n_timesteps, n_dimensions = in_raw_data.shape
+
+        t_eval = np.linspace(0, 1., n_timesteps)
+
+        self.total_envs = n_envs
+        self.nb_classes = n_envs
+        self.num_steps = n_timesteps
+        self.data_size = n_dimensions
+
+        super().__init__(in_raw_data, out_raw_data, t_eval, traj_prop=1.0)
+
 
 
 
@@ -703,6 +728,22 @@ def make_dataloaders(data_folder, config):
                                 num_workers=24)
         min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
         testloader = NumpyLoader(DynamicsRepeatDataset(data_folder+"test.npz", traj_length=traj_len, min_max=min_max),
+                                    batch_size=batch_size, 
+                                    shuffle=False, 
+                                    num_workers=24)
+        nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
+        print("Training sequence length:", seq_length)
+        min_res = None
+
+    elif dataset in ["arc_agi"]:
+        print(" #### ARC-AGI Dataset ####")
+        traj_len = None
+
+        trainloader = NumpyLoader(ARC_AGIDataset(data_folder+"train_", traj_length=traj_len, min_max=None), 
+                                batch_size=batch_size, 
+                                shuffle=True, 
+                                num_workers=24)
+        testloader = NumpyLoader(ARC_AGIDataset(data_folder+"test_", traj_length=traj_len, min_max=None),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)
