@@ -9,16 +9,17 @@ general:
 
 # Data hyperparameters
 data:
-  resolution: [32, 32]
+  resolution: [64, 64]
   normalize: False
+  positional_encoding: [10, 10]
 
 # Model hyperparameters
 model:
-  root_width_size: 20
-  root_depth: 4
+  root_width_size: 12
+  root_depth: 5
   root_activation: "relu"
   root_final_activation: "tanh"
-  init_state_layers: null
+  init_state_layers: 2
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
@@ -42,8 +43,8 @@ optimizer:
 
 # Training/Inference configurations
 training:
-  nb_epochs: 250
-  batch_size: 1256
+  nb_epochs: 150
+  batch_size: 512
   print_every: 10
   save_every: 10
   valid_every: 10

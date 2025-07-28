@@ -1,32 +1,33 @@
 # General settings
 general:
-  seed: 2024
-  train: True
+  seed: 2028
   classification: False
-  dataset: "celeba"
+  train: True
+  dataset: "mnist"
   data_path: "./data/"
   save_path: null
 
 # Data hyperparameters
 data:
-  resolution: [32, 32]
+  downsample_factor: 2
   normalize: False
+  positional_encoding: [6, 100]
 
 # Model hyperparameters
 model:
-  root_width_size: 20
-  root_depth: 4
-  root_activation: "relu"
+  root_width_size: 10
+  root_depth: 5
+  root_activation: "swish"
   root_final_activation: "tanh"
   init_state_layers: null
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
-  time_as_channel: True
+  time_as_channel: False
   forcing_prob: 0.15
   noise_theta_init: null
-  std_lower_bound: 1.0e-4
+  std_lower_bound: 1.0e-2
 
 # Optimizer hyperparameters
 optimizer:
@@ -42,15 +43,15 @@ optimizer:
 
 # Training/Inference configurations
 training:
-  nb_epochs: 250
-  batch_size: 1256
+  nb_epochs: 100
+  batch_size: 1280
+  autoregressive: True
   print_every: 10
   save_every: 10
   valid_every: 10
-  val_criterion: "mse"
-  autoregressive: True
   stochastic: False
-  nb_recons_loss_steps: null
-  use_nll_loss: True
-  inference_start: 600
+  val_criterion: "mse"
+  use_nll_loss: False
   smooth_inference: True
+  nb_recons_loss_steps: null
+  inference_start: 100

@@ -739,7 +739,7 @@ if not classification:
             # axs[i, nb_cols*j+1].axis('off')
 
             if use_nll_loss:
-                # logger.info(f"Min/Max Uncertainty: {np.min(xs_uncert):.3f}, {np.max(xs_uncert):.3f}")
+                logger.info(f"Min/Max Uncertainty: {np.min(xs_uncert):.3f}, {np.max(xs_uncert):.3f}")
                 if dataset in image_datasets:
                     to_plot = xs_uncert[i*4+j].reshape(res)
                     axs[i, nb_cols*j+2].imshow(to_plot, cmap='gray')

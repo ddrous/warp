@@ -9,7 +9,8 @@ general:
 
 # Data hyperparameters
 data:
-  downsample_factor: 2
+  downsample_factor: 1
+  normalize: False
 
 # Model hyperparameters
 model:

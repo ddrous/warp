@@ -35,7 +35,8 @@ This section outlines the configuration parameters used for training and evaluat
 | `resolution`      | Resolution of input images (for CelebA).             |
 | `downsample_factor`  | Resolution downsampling factor for MNIST.             |
 | `traj_length`  | Unused !     |
-| `normalize`  | Whether to place the data in the [-1,1].     |
+| `normalize`  | Whether to place the data in the range [0,1].     |
+| `positional_encoding`  | Dimension and denominator constant for concatenating \tau with positional encoding.     |
 
 ## Model Parameters
 

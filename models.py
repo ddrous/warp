@@ -28,12 +28,14 @@ class RootMLP(eqx.Module):
                  final_activation=jax.nn.tanh,
                  input_prev_data=False,              ## Whether to inlude as input the previous data point
                  predict_uncertainty=True,           ## Predict the std in addition to the mean
+                 positional_enc_dim=0,               ## Dimension of the positional encoding to be added to the input
                  key=None):
 
         input_dim = 1+data_size if input_prev_data else 1
         output_dim = 2*data_size if predict_uncertainty else data_size
 
-        self.network = eqx.nn.MLP(input_dim, output_dim, width_size, depth, activation, key=key)
+        self.network = eqx.nn.MLP(input_dim+positional_enc_dim, output_dim, width_size, depth, activation, key=key)
+        # self.network = eqx.nn.MLP(1, output_dim, width_size, depth, activation, key=key)
         self.props = (input_dim, output_dim, width_size, depth, activation)
         self.predict_uncertainty = predict_uncertainty
         self.final_activation = final_activation
@@ -63,11 +65,17 @@ class RootMLP(eqx.Module):
             else:
                 pass
 
+            # std = jnp.clip(std, -4, -3)
+            # std = jnp.exp(std)
+
             std = jax.nn.softplus(std)
             if std_lb is not None:
                 std = jnp.clip(std, std_lb, None)
 
             return jnp.concatenate([mean, std], axis=-1)
+
+
+
 
 
 
@@ -81,9 +89,10 @@ class RootMLP_Classif(eqx.Module):
                  width_size, 
                  depth, 
                  activation=jax.nn.relu,
+                 positional_enc_dim=0,               ## Dimension of the positional encoding to be added to the input
                  key=None):
 
-        input_dim = 1
+        input_dim = 1 + positional_enc_dim
         output_dim = nb_classes
 
         self.network = eqx.nn.MLP(input_dim, output_dim, width_size, depth, activation, key=key)
@@ -180,14 +189,16 @@ class WSM(eqx.Module):
                  autoregressive_train=True,
                  stochastic_ar=True,
                  smooth_inference=None,             ## Whether to use smooth inference (i.e. no reparametrization trick at inference)
+                 posional_encoding=None,              ## Positional encoding to be added to the root network input
                  key=None):
 
         keys = jax.random.split(key, num=nb_wsm_layers)
-        builtin_fns = {"relu":jax.nn.relu, "tanh":jax.nn.tanh, 'softplus':jax.nn.softplus, 'swish':jax.nn.swish, "identity": lambda x: x}
+        builtin_fns = {"relu":jax.nn.relu, "tanh":jax.nn.tanh, 'softplus':jax.nn.softplus, 'swish':jax.nn.swish, "identity": lambda x: x, "sin": jnp.sin, "cos": jnp.cos}
         thetas_init = []
         root_utils = []
         As = []
         Bs = []
+        positional_enc_dim = posional_encoding[0] if posional_encoding is not None else 0
         for i in range(nb_wsm_layers):
             if nb_classes is None:          ## Regression problem
                 if isinstance(final_activation, str):
@@ -204,12 +215,14 @@ class WSM(eqx.Module):
                             final_activation=final_activation_fn,
                             input_prev_data=input_prev_data, 
                             predict_uncertainty=predict_uncertainty,
+                            positional_enc_dim=positional_enc_dim,
                             key=keys[i])
             else:                           ## Classification problem
                 root = RootMLP_Classif(nb_classes, 
                             width_size, 
                             depth, 
                             builtin_fns[activation], 
+                            positional_enc_dim=positional_enc_dim,
                             key=keys[i])
 
             params, static = eqx.partition(root, eqx.is_array)
@@ -302,14 +315,14 @@ class WSM(eqx.Module):
                 root_utils = self.root_utils[0]
 
                 if inference_start is not None:
-                    x_t = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
+                    x_t = jnp.where(t_curr[0]<=inference_start/ts_.shape[0], x_true, x_hat)
                 else:
                     # key1, key2 = jax.random.split(key)
                     x_t = jnp.where(jax.random.bernoulli(key, self.forcing_prob), x_true, x_hat)
 
                 if self.time_as_channel:
-                    x_t = jnp.concatenate([x_t, t_curr], axis=-1)
-                    x_prev = jnp.concatenate([x_prev, t_prev], axis=-1)
+                    x_t = jnp.concatenate([x_t, t_curr[:1]], axis=-1)
+                    x_prev = jnp.concatenate([x_prev, t_prev[:1]], axis=-1)
 
                 thet_next = A@thet + B@(x_t - x_prev)     ## Key step
 
@@ -345,7 +358,7 @@ class WSM(eqx.Module):
 
             keys = jax.random.split(k_, xs_.shape[0])
 
-            _, (xs_hat, ) = jax.lax.scan(f, (theta_init, xs_[0], xs_[0], ts_[0:1]), (xs_, ts_[:, None], keys))
+            _, (xs_hat, ) = jax.lax.scan(f, (theta_init, xs_[0], xs_[0], ts_[0]), (xs_, ts_, keys))
 
             return xs_hat
 
@@ -380,14 +393,16 @@ class WSM(eqx.Module):
                         x_hat = x_hat_mean
                     else:
                         x_hat = jax.random.normal(key, x_hat_mean.shape)*x_hat_std + x_hat_mean
-                    x_t = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
+                    # x_t = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
+                    x_t = jnp.where(t_curr[0]<=inference_start/ts_.shape[0], x_true, x_hat)
+                    # print("Shape of things first: ", B.shape, x_hat_mean.shape, x_t.shape, "\n\n\n\n")
                 else:
                     x_hat = jax.random.normal(key, x_hat_mean.shape)*x_hat_std + x_hat_mean
                     x_t = jnp.where(jax.random.bernoulli(key, self.forcing_prob), x_true, x_hat)        ## Sample x_hat from the normal distribution
 
                 if self.time_as_channel:
-                    x_t = jnp.concatenate([x_t, t_curr], axis=-1)
-                    x_prev = jnp.concatenate([x_prev, t_prev], axis=-1)
+                    x_t = jnp.concatenate([x_t, t_curr[:1]], axis=-1)
+                    x_prev = jnp.concatenate([x_prev, t_prev[:1]], axis=-1)
 
                 thet_next = A@thet + B@(x_t - x_prev)     ## Key step
 
@@ -398,6 +413,10 @@ class WSM(eqx.Module):
                 params = unflatten_pytree(thet_next, shapes, treedef)
                 root_fun = eqx.combine(params, static)
                 root_in = t_curr+delta_t
+                # root_in = t_curr
+                # root_in = t_curr[0:1]
+                # print("root_in shape: ", root_in.shape, "x_prev shape: ", x_prev.shape, "x_true shape: ", x_true.shape, "\n\n\n\n")
+                # root_in = jnp.array([0.0])
                 if self.input_prev_data:
                     root_in = jnp.concatenate([root_in, x_prev[:x_true.shape[0]]], axis=-1)
                 x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                  ## Evaluated at the next time step
@@ -415,7 +434,9 @@ class WSM(eqx.Module):
             keys = jax.random.split(k_, xs_.shape[0])
             mu_sigma_init = jnp.concatenate([xs_[0], jnp.zeros_like(xs_[0])], axis=-1)        ## Initial mean and std
 
-            _, (xs_hat, ) = jax.lax.scan(f, (theta_init, mu_sigma_init, xs_[0], ts_[0:1]), (xs_, ts_[:, None], keys))
+            # print("The shape of things is: \n\n", xs_.shape, ts_.shape, mu_sigma_init.shape, k_.shape)
+            # _, (xs_hat, ) = jax.lax.scan(f, (theta_init, mu_sigma_init, xs_[0], ts_[0:1]), (xs_, ts_[:, None], keys))
+            _, (xs_hat, ) = jax.lax.scan(f, (theta_init, mu_sigma_init, xs_[0], ts_[0]), (xs_, ts_, keys))
 
             return xs_hat
 
@@ -442,8 +463,8 @@ class WSM(eqx.Module):
 
                 x_t = x_true
                 if self.time_as_channel:
-                    x_t = jnp.concatenate([t_curr, x_t], axis=-1)
-                    x_prev = jnp.concatenate([t_prev, x_prev], axis=-1)
+                    x_t = jnp.concatenate([t_curr[:1], x_t], axis=-1)
+                    x_prev = jnp.concatenate([t_prev[:1], x_prev], axis=-1)
 
                 thet_next = A@thet + B@(x_t - x_prev)     ## Key step
 
@@ -461,7 +482,7 @@ class WSM(eqx.Module):
             if self.noise_theta_init is not None:
                 theta_init += jax.random.normal(k_, theta_init.shape)*self.noise_theta_init
 
-            _, (theta_outs, ) = jax.lax.scan(f, (theta_init, xs_[0], ts_[0:1]), (xs_, ts_[:, None]))
+            _, (theta_outs, ) = jax.lax.scan(f, (theta_init, xs_[0], ts_[0]), (xs_, ts_))
 
             @eqx.filter_vmap
             def apply_theta(theta, t_curr, x_curr):
@@ -539,8 +560,8 @@ class WSM(eqx.Module):
                     x_t = x_true
                     
                     if self.time_as_channel:
-                        x_t = jnp.concatenate([t_curr, x_t], axis=-1)
-                        x_prev = jnp.concatenate([t_prev, x_prev], axis=-1)
+                        x_t = jnp.concatenate([t_curr[:1], x_t], axis=-1)
+                        x_prev = jnp.concatenate([t_prev[:1], x_prev], axis=-1)
                     
                     thet_next = A @ thet + B @ (x_t - x_prev)  # Key step
                     
@@ -726,14 +747,14 @@ class GRU(eqx.Module):
                 x_true, t_curr, key = input_signal
 
                 if inference_start is not None:
-                    x_t = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
+                    x_t = jnp.where(t_curr[0]<=inference_start/ts_.shape[0], x_true, x_hat)
                 else:
                     # x_t = x_true
                     x_t = jnp.where(jax.random.bernoulli(key, self.forcing_prob), x_true, x_hat)
 
                 if self.time_as_channel:
-                    x_t = jnp.concatenate([t_curr, x_t], axis=-1)
-                    x_prev = jnp.concatenate([t_prev, x_prev], axis=-1)
+                    x_t = jnp.concatenate([t_curr[:1], x_t], axis=-1)
+                    x_prev = jnp.concatenate([t_prev[:1], x_prev], axis=-1)
 
                 h_next = self.cell(x_t, h)
                 x_next = self.decoder(h_next)
@@ -812,13 +833,13 @@ class LSTM(eqx.Module):
                 x_true, t_curr, key = input_signal
 
                 if inference_start is not None:
-                    x_t = jnp.where(t_curr<=inference_start/ts_.shape[0], x_true, x_hat)
+                    x_t = jnp.where(t_curr[0]<=inference_start/ts_.shape[0], x_true, x_hat)
                 else:
                     x_t = jnp.where(jax.random.bernoulli(key, self.forcing_prob), x_true, x_hat)
 
                 if self.time_as_channel:
-                    x_t = jnp.concatenate([t_curr, x_t], axis=-1)
-                    x_prev = jnp.concatenate([t_prev, x_prev], axis=-1)
+                    x_t = jnp.concatenate([t_curr[:1], x_t], axis=-1)
+                    x_prev = jnp.concatenate([t_prev[:1], x_prev], axis=-1)
 
                 hc_next = self.cell(x_t, hc)
                 x_next = self.decoder(hc_next[0])
@@ -921,6 +942,7 @@ def make_model(key, data_size, nb_classes, config, logger):
             "noise_theta_init": config['model']['noise_theta_init'],
             "autoregressive_train": config['training']['autoregressive'],
             "stochastic_ar": config['training']['stochastic'],
+            "posional_encoding": config['data'].get('positional_encoding', False),
         }
 
         if 'smooth_inference' in config['training']:

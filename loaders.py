@@ -24,11 +24,25 @@ class TimeSeriesDataset:
     """
     Base class for any time series dataset, from which the others will inherit
     """
-    def __init__(self, dataset, labels, t_eval, traj_prop=1.0):
+    def __init__(self, dataset, labels, t_eval, traj_prop=1.0, positional_enc=None):
 
         self.dataset = dataset
         n_envs, n_timesteps, n_dimensions = dataset.shape
-        self.t_eval = t_eval
+
+        # self.t_eval = t_eval
+        # Let's replace t_eval of shape (n_envs, n_timesteps, 1) with positional encoding of dimention D
+        if positional_enc is not None:
+            D, PE_cte = positional_enc
+            pos_enc = np.zeros((n_timesteps, D))
+            for pos in range(n_timesteps):
+                for i in range(0, D, 2):
+                    pos_enc[pos, i] = np.sin(pos / (PE_cte ** (i / D)))
+                    if i + 1 < D:
+                        pos_enc[pos, i + 1] = np.cos(pos / (PE_cte ** (i / D)))
+            self.t_eval = np.concatenate((t_eval[:, None], pos_enc), axis=-1)
+        else:
+            self.t_eval = t_eval[:, None]
+
         self.total_envs = n_envs
 
         self.labels = labels
@@ -168,7 +182,7 @@ class MNISTDataset(TimeSeriesDataset):
     For the MNIST dataset, where the time series is the flattened image, pixel-by-pixel
     """
 
-    def __init__(self, data_dir, data_split, mini_res=4, traj_prop=1.0, unit_normalise=False, fashion=False):
+    def __init__(self, data_dir, data_split, mini_res=4, traj_prop=1.0, unit_normalise=False, fashion=False, positional_enc=None):
         self.nb_classes = 10
         self.num_steps = (28//mini_res)**2
         self.data_size = 1
@@ -198,9 +212,18 @@ class MNISTDataset(TimeSeriesDataset):
         dataset, labels = next(iter(torch.utils.data.DataLoader(data, batch_size=len(data), shuffle=False)))
 
         t_eval = np.linspace(0., 1., self.num_steps)
+        # ## t_eval is shape: (n_timesteps, 1). Append the normalised x,y pixel coordinates based on the image size, so that t_eval is shape: (n_timesteps, 3)
+        # pixel_coords = np.zeros((self.num_steps, 2))
+        # for i in range(self.num_steps):
+        #     x = (i % (28//mini_res)) / (28//mini_res - 1)
+        #     y = (i // (28//mini_res)) / (28//mini_res - 1)
+        #     pixel_coords[i, 0] = x
+        #     pixel_coords[i, 1] = y
+        # t_eval = np.concatenate((t_eval[:, None], pixel_coords), axis=-1)
+
         self.total_envs = dataset.shape[0]
 
-        super().__init__(dataset.numpy(), labels.numpy(), t_eval, traj_prop=traj_prop)
+        super().__init__(dataset.numpy(), labels.numpy(), t_eval, traj_prop=traj_prop, positional_enc=positional_enc)
 
 
 
@@ -457,7 +480,8 @@ class CelebADataset(torch.utils.data.Dataset):
                  num_shots=100,
                  resolution=(32, 32),
                  order_pixels=False,
-                 unit_normalise=False):
+                 unit_normalise=False,
+                 positional_enc=None):
 
         if num_shots <= 0:
             raise ValueError("Number of shots must be greater than 0.")
@@ -513,12 +537,23 @@ class CelebADataset(torch.utils.data.Dataset):
         ## Add everything a time series dataset would have
         self.num_steps = self.total_pixels
         self.data_size = self.output_dim
+        self.positional_enc = positional_enc
         self.t_eval = np.linspace(0., 1., self.num_steps)
+        if self.positional_enc is not None:
+            D, PE_cte = self.positional_enc
+            pos_enc = np.zeros((self.num_steps, D))
+            for pos in range(self.num_steps):
+                for i in range(0, D, 2):
+                    pos_enc[pos, i] = np.sin(pos / (PE_cte ** (i / D)))
+                    if i + 1 < D:
+                        pos_enc[pos, i + 1] = np.cos(pos / (PE_cte ** (i / D)))
+            self.t_eval = np.concatenate((self.t_eval[:, None], pos_enc), axis=-1)
+        else:
+            self.t_eval = self.t_eval[:, None]
 
         self.nb_classes = 40                                        ### If using the attributes
         ## labels as NaNs
         self.labels = np.nan * np.ones((self.total_envs,), dtype=int)
-
 
     def get_image(self, filename) -> torch.Tensor:
         img_path = os.path.join(self.data_path+"img_align_celeba/", filename)
@@ -651,6 +686,7 @@ def make_dataloaders(data_folder, config):
     ## Get the parameters
     dataset = config["general"]["dataset"]
     batch_size = config["training"]["batch_size"]
+    positional_enc = config["data"].get("positional_encoding", None)
 
     if dataset in ["mnist", "mnist_fashion"]:
         # ### MNIST Classification (From Sacha Rush's Annotated S4)
@@ -658,11 +694,11 @@ def make_dataloaders(data_folder, config):
         fashion = dataset=="mnist_fashion"
         downsample_factor = config["data"]["downsample_factor"]
 
-        trainloader = NumpyLoader(MNISTDataset(data_folder, data_split="train", mini_res=downsample_factor, traj_prop=1.0, unit_normalise=False, fashion=fashion), 
+        trainloader = NumpyLoader(MNISTDataset(data_folder, data_split="train", mini_res=downsample_factor, traj_prop=1.0, unit_normalise=False, fashion=fashion, positional_enc=positional_enc), 
                                 batch_size=batch_size, 
                                 shuffle=True,
                                 num_workers=24)
-        testloader = NumpyLoader(MNISTDataset(data_folder, data_split="test", mini_res=downsample_factor, traj_prop=1.0, unit_normalise=False, fashion=fashion),
+        testloader = NumpyLoader(MNISTDataset(data_folder, data_split="test", mini_res=downsample_factor, traj_prop=1.0, unit_normalise=False, fashion=fashion, positional_enc=positional_enc),
                                     batch_size=batch_size,
                                     shuffle=False, 
                                     num_workers=24)
@@ -688,11 +724,11 @@ def make_dataloaders(data_folder, config):
         print(" #### CelebA Dataset ####")
         resolution = config["data"]["resolution"]
 
-        trainloader = NumpyLoader(CelebADataset(data_folder+"celeba/", data_split="train", num_shots=np.prod(resolution), resolution=resolution, order_pixels=True, unit_normalise=False), 
+        trainloader = NumpyLoader(CelebADataset(data_folder+"celeba/", data_split="train", num_shots=np.prod(resolution), resolution=resolution, order_pixels=True, unit_normalise=False, positional_enc=positional_enc), 
                                 batch_size=batch_size, 
                                 shuffle=True, 
                                 num_workers=24)
-        testloader = NumpyLoader(CelebADataset(data_folder+"celeba/", data_split="test", num_shots=np.prod(resolution), resolution=resolution, order_pixels=True, unit_normalise=False),
+        testloader = NumpyLoader(CelebADataset(data_folder+"celeba/", data_split="test", num_shots=np.prod(resolution), resolution=resolution, order_pixels=True, unit_normalise=False, positional_enc=positional_enc),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)
