@@ -491,7 +491,8 @@ class WSM(eqx.Module):
                 shapes, treedef, static, _ = root_utils
                 params = unflatten_pytree(theta, shapes, treedef)
                 root_fun = eqx.combine(params, static)
-                root_in = t_curr+delta_t
+                # root_in = t_curr+delta_t
+                root_in = t_curr
 
                 if self.input_prev_data:
                     root_in = jnp.concatenate([root_in, x_curr], axis=-1)
@@ -502,7 +503,7 @@ class WSM(eqx.Module):
                     x_next = root_fun(root_in)                                      ## Evaluated at the next time step
                 return x_next
 
-            xs_hat = apply_theta(theta_outs, ts_[:, None], xs_)
+            xs_hat = apply_theta(theta_outs, ts_, xs_)
 
             return xs_hat
 

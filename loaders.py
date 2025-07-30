@@ -297,7 +297,7 @@ class UEADataset(TimeSeriesDataset):
     For a UEA dataset, with preprocessing done by https://github.com/Benjamin-Walker/log-neural-cdes
     """
 
-    def __init__(self, data_dir, normalize=True, min_max=None):
+    def __init__(self, data_dir, normalize=True, min_max=None, positional_enc=None):
         try:
             raw_data = np.load(data_dir)
         except:
@@ -328,7 +328,7 @@ class UEADataset(TimeSeriesDataset):
         self.num_steps = n_timesteps
         self.data_size = n_dimensions
 
-        super().__init__(dataset, labels, t_eval, traj_prop=1.0)
+        super().__init__(dataset, labels, t_eval, traj_prop=1.0, positional_enc=positional_enc)
 
 
 class PathFinderDataset(UEADataset):
@@ -803,16 +803,16 @@ def make_dataloaders(data_folder, config):
     elif dataset in ["uea"]:
         normalize = config["data"]["normalize"]
 
-        trainloader = NumpyLoader(UEADataset(data_folder+"train.npz", normalize=normalize, min_max=None),
+        trainloader = NumpyLoader(UEADataset(data_folder+"train.npz", normalize=normalize, min_max=None, positional_enc=positional_enc),
                                 batch_size=batch_size, 
                                 shuffle=True, 
                                 num_workers=24)
         min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
-        valloader = NumpyLoader(UEADataset(data_folder+"val.npz", normalize=normalize, min_max=min_max),
+        valloader = NumpyLoader(UEADataset(data_folder+"val.npz", normalize=normalize, min_max=min_max, positional_enc=positional_enc),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)
-        testloader = NumpyLoader(UEADataset(data_folder+"test.npz", normalize=normalize, min_max=min_max),
+        testloader = NumpyLoader(UEADataset(data_folder+"test.npz", normalize=normalize, min_max=min_max, positional_enc=positional_enc),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)
