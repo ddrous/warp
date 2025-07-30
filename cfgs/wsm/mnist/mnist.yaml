@@ -11,6 +11,7 @@ general:
 data:
   downsample_factor: 1
   normalize: False
+  positional_encoding: [0, 100]
 
 # Model hyperparameters
 model:
@@ -43,7 +44,7 @@ optimizer:
 # Training/Inference configurations
 training:
   nb_epochs: 200
-  batch_size: 640
+  batch_size: 128
   autoregressive: True
   print_every: 10
   save_every: 10

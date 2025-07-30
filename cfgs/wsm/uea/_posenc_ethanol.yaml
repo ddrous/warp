@@ -53,3 +53,4 @@ training:
   nb_recons_loss_steps: null
   use_nll_loss: False
   inference_start: 100
+  stochastic: False

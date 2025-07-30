@@ -4,6 +4,7 @@
 general:
   seed: 2028
   train: True
+  classification: False
   dataset: "mnist"  # Options: mnist, cifar, lorentz, dynamics
   data_path: "./data/"
   # save_path: "./runs/250404-175026-Test/"
@@ -14,12 +15,15 @@ data:
   downsample_factor: 1
   resolution: [32, 32]         # For celebA
   traj_length: 1000
+  normalize: False
 
 # Model hyperparameters
 model:
-  mlp_width_size: 24
-  mlp_depth: 3
-  activation: "relu"
+  root_width_size: 24
+  root_depth: 3
+  root_activation: "relu"
+  root_final_activation: "tanh"
+  init_state_layers: null
   input_prev_data: False
   model_type: "gru"
   nb_rnn_layers: 1
@@ -45,10 +49,16 @@ optimizer:
 
 # Training/Inference hyperparameters
 training:
-  nb_epochs: 500
-  batch_size: 520
+  nb_epochs: 200
+  batch_size: 128
   print_every: 10
   checkpoint_every: 10
   nb_recons_loss_steps: 400
   use_nll_loss: True
   inference_start: 300
+  smooth_inference: True
+  stochastic: False
+  val_criterion: "mse"
+  autoregressive: True
+  valid_every: 10
+  save_every: 10
