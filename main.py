@@ -178,10 +178,10 @@ colors = ['r', 'g', 'b', 'c', 'm', 'y']
 dataset = config['general']['dataset']
 image_datasets = ["mnist", "mnist_fashion", "cifar", "celeba", "pathfinder"]
 dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_damper", "cheetah", "electricity", "sine"]
-repeat_datasets = ["lotka", "arc_agi"]
+repeat_datasets = ["lotka", "arc_agi", "icl"]
 
 res = (width, width, data_size)
-dim0, dim1 = (0, 1)
+dim0, dim1 = (0, -1)
 if dim1>= data_size:
     dim1 = 0
     logger.info(f"dim1 is out of bounds. Setting it to 0.")
@@ -268,11 +268,20 @@ def loss_fn(model, batch, key):
             stds = X_recons_[:, :, data_size:]
             loss_r = jnp.log(stds) + 0.5*((X_true_ - means)/stds)**2
         else:
+            # if dataset == "icl__":        ## We only care about the last column, last row
+            #     print("\n\n     Considering the last column, last row of the ICL dataset for the loss ...")
+            #     print("     X_recons_ shape:", X_recons_.shape, "\n\n")
+            #     # loss_r = optax.l2_loss(X_recons_[:, -1,-1], X_true_[:, -1,-1])
+            #     # loss_r = optax.l2_loss(X_recons_[:, -1, :], X_true_[:, -1, :])
+            #     loss_r = optax.l2_loss(X_recons_[:, :, -1], X_true_[:, :, -1])
+            # else:
+            #     loss_r = optax.l2_loss(X_recons_, X_true_)
+
             loss_r = optax.l2_loss(X_recons_, X_true_)
 
         loss = jnp.mean(loss_r)
         return loss, (loss,)
-    
+
     else:           ## Classification task
         (X_true, times), Ys = batch
 
@@ -336,15 +345,18 @@ def eval_on_dataloader(model, dataloader, inference_start, key):
             else:
                 X_gt = X_true
 
+            if use_nll_loss:
+                means_, stds_ = jnp.split(X_recons, 2, axis=-1)
+            else:
+                means_ = X_recons
+
             if val_criterion == "mse":
-                loss_val = optax.l2_loss(X_recons[..., :data_size], X_gt).mean()
+                loss_val = optax.l2_loss(means_, X_gt).mean()
             elif val_criterion == "mae":
-                mloss_valse = optax.l1_loss(X_recons[..., :data_size], X_gt).mean()
+                loss_val = optax.l1_loss(means_, X_gt).mean()       ## TODO: not implemented yet
             elif val_criterion == "rmse":
-                loss_val = optax.root_mean_squared_error(X_recons[..., :data_size], X_gt).mean()
+                loss_val = optax.root_mean_squared_error(means_, X_gt).mean()   ## TODO: not implemented yet
             elif val_criterion == "nll":
-                means_ = X_recons[:, :, :data_size]
-                stds_ = X_recons[:, :, data_size:]
                 loss_val = jnp.log(stds_) + 0.5*((X_gt - means_)/stds_)**2
                 loss_val = jnp.mean(loss_val)
             else:
@@ -738,7 +750,7 @@ if not classification:
                 axs[i, nb_cols*j+1].set_title("Recons", fontsize=40)
             # axs[i, nb_cols*j+1].axis('off')
 
-            if use_nll_loss:
+            if use_nll_loss and dataset not in repeat_datasets:
                 logger.info(f"Min/Max Uncertainty: {np.min(xs_uncert):.3f}, {np.max(xs_uncert):.3f}")
                 if dataset in image_datasets:
                     to_plot = xs_uncert[i*4+j].reshape(res)
@@ -928,3 +940,78 @@ if classification:
 
     plt.draw();
     plt.savefig(plots_folder+"samples_test_labels.png", dpi=100, bbox_inches='tight')
+
+
+# %% Special visualisation for ICL dataset with 1D x and 1D y. PLot a scatter plot, true in green, recons in red (using y_hat)
+
+if dataset == "icl":
+    eval_loader = NumpyLoader(testloader.dataset, batch_size=len(testloader.dataset), shuffle=False)
+
+    batch = next(iter(eval_loader))
+    (xs_true, times), ys_true = batch
+
+    inference_start = config['training']['inference_start']
+    xs_recons = forward_pass(model=model, 
+                        X=xs_true, 
+                        times=times, 
+                        key=test_key, 
+                        inference_start=inference_start)
+
+    xs_recons = xs_recons[:, :, :data_size]
+
+    ## Make the data to plot
+    # print("Shapes are: ", xs_true.shape, ys_true.shape, xs_recons.shape)
+    colors = ['green', 'red', 'blue', 'orange', 'purple', 'cyan', 'magenta', 'yellow', 'pink', 'brown']
+    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+    # for batch_el in range(0, xs_true.shape[0]):
+    for el in range(0, 6):
+        batch_el = np.random.randint(0, xs_true.shape[0], size=1)[0]  # Randomly select a batch element
+        Xs = xs_true[batch_el, :, 0]  # All time steps, first dimension
+        Ys = ys_true[batch_el, :, -1]  # All time steps, last dimension
+        Ys_hat = xs_recons[batch_el, :, -1]
+
+        # print("Xs shape: ", Xs, "\n\n", xs_true[batch_el, :, :])
+
+        ## Order the Xs for better visualisation
+        order = np.argsort(Xs)
+        Xs = Xs[order]
+        Ys = Ys[order]
+        Ys_hat = Ys_hat[order]
+
+        # print("Shapes are: ", Xs.shape, Ys.shape, Ys_hat.shape)
+
+        # ax.scatter(Xs, Ys, color='green', label='True', s=50)
+        # ax.scatter(Xs, Ys_hat, color='red', label='Predicted', s=50, alpha=0.5)
+
+        ## Plot the true with dots, and predicted with square markers. The color should be same. A new color sampled for each batch element
+        color = colors[el % len(colors)]
+        alpha = np.random.uniform(0.75, 1.0)
+        ax.scatter(Xs, Ys, facecolors='none', edgecolors=color, label='True' if el==0 else None, s=25, alpha=0.5)
+        ax.scatter(Xs, Ys_hat, color=color, marker='+', label='Pred' if el==0 else None, s=45, alpha=1)
+
+    ax.set_xlabel(r"$\mathbf{x}$", fontsize=40)
+    ax.set_ylabel(r"$y$", fontsize=40)
+    ax.set_title("ICL Dataset's Keys and Query Points")
+    ax.legend()
+    plt.draw();
+    plt.savefig(plots_folder+"icl_all_keys_plus_query.png", dpi=100, bbox_inches='tight')      
+
+# %% # %% Special visualisation for ICL dataset. But this time, we only consider the query points
+if dataset == "icl":
+    fig, ax = plt.subplots(1, 1, figsize=(10, 10))
+
+    Xs = xs_true[:, -1, 0]  # All time steps, first dimension
+    Ys = ys_true[:, -1, -1]  # All time steps, last dimension
+    Ys_hat = xs_recons[:, -1, -1]
+
+    ax.scatter(Ys, Ys_hat, color="crimson", marker='X', s=80, alpha=0.5)
+
+    ax.set_xlabel(r"$y$", fontsize=40)
+    ax.set_ylabel(r"$\hat{y}$", fontsize=40)
+    ax.set_title("ICL Dataset's Queries Only")
+
+    ## Add a diagonal line
+    ax.plot([np.min(Ys), np.max(Ys)], [np.min(Ys), np.max(Ys)], color='black', linestyle='--', linewidth=2, label="y = $\hat{y}$")
+    ax.legend()
+    plt.draw();
+    plt.savefig(plots_folder+"icl_query_only.png", dpi=100, bbox_inches='tight')

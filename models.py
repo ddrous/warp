@@ -21,21 +21,16 @@ class RootMLP(eqx.Module):
     final_activation: any
 
     def __init__(self, 
-                 data_size, 
+                 input_dim,
+                 output_dim, 
                  width_size, 
                  depth, 
                  activation=jax.nn.relu,
                  final_activation=jax.nn.tanh,
-                 input_prev_data=False,              ## Whether to inlude as input the previous data point
                  predict_uncertainty=True,           ## Predict the std in addition to the mean
-                 positional_enc_dim=0,               ## Dimension of the positional encoding to be added to the input
                  key=None):
 
-        input_dim = 1+data_size if input_prev_data else 1
-        output_dim = 2*data_size if predict_uncertainty else data_size
-
-        self.network = eqx.nn.MLP(input_dim+positional_enc_dim, output_dim, width_size, depth, activation, key=key)
-        # self.network = eqx.nn.MLP(1, output_dim, width_size, depth, activation, key=key)
+        self.network = eqx.nn.MLP(input_dim, output_dim, width_size, depth, activation, key=key)
         self.props = (input_dim, output_dim, width_size, depth, activation)
         self.predict_uncertainty = predict_uncertainty
         self.final_activation = final_activation
@@ -189,7 +184,8 @@ class WSM(eqx.Module):
                  autoregressive_train=True,
                  stochastic_ar=True,
                  smooth_inference=None,             ## Whether to use smooth inference (i.e. no reparametrization trick at inference)
-                 posional_encoding=None,              ## Positional encoding to be added to the root network input
+                 positional_encoding=None,              ## Positional encoding to be added to the root network input
+                 preferred_output_dim=None,              ## Output dimension to be used by the root network (e.g. for classification, in-context learning, etc.)
                  key=None):
 
         keys = jax.random.split(key, num=nb_wsm_layers)
@@ -198,7 +194,7 @@ class WSM(eqx.Module):
         root_utils = []
         As = []
         Bs = []
-        positional_enc_dim = posional_encoding[0] if posional_encoding is not None else 0
+        positional_enc_dim = positional_encoding[0] if positional_encoding is not None else 0
         for i in range(nb_wsm_layers):
             if nb_classes is None:          ## Regression problem
                 if isinstance(final_activation, str):
@@ -208,14 +204,19 @@ class WSM(eqx.Module):
                 else:
                     final_activation_fn = None
 
-                root = RootMLP(data_size, 
+                input_dim = 1+positional_enc_dim+data_size if input_prev_data else 1+positional_enc_dim
+                output_dim = 2*data_size if predict_uncertainty else data_size
+
+                ## Check if provided root_output dimension in yaml
+                output_dim = preferred_output_dim if (preferred_output_dim is not None) else output_dim
+
+                root = RootMLP(input_dim, 
+                            output_dim,
                             width_size, 
                             depth, 
                             builtin_fns[activation], 
                             final_activation=final_activation_fn,
-                            input_prev_data=input_prev_data, 
                             predict_uncertainty=predict_uncertainty,
-                            positional_enc_dim=positional_enc_dim,
                             key=keys[i])
             else:                           ## Classification problem
                 root = RootMLP_Classif(nb_classes, 
@@ -943,7 +944,8 @@ def make_model(key, data_size, nb_classes, config, logger):
             "noise_theta_init": config['model']['noise_theta_init'],
             "autoregressive_train": config['training']['autoregressive'],
             "stochastic_ar": config['training']['stochastic'],
-            "posional_encoding": config['data'].get('positional_encoding', False),
+            "positional_encoding": config['model'].get('positional_encoding', False),
+            "preferred_output_dim": config['model'].get('root_output_dim', None),
         }
 
         if 'smooth_inference' in config['training']:
