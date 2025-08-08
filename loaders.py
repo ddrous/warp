@@ -664,6 +664,7 @@ class ICLDataset(torch.utils.data.Dataset):
         # self.t_eval = np.linspace(0., 1., seq_len*(x_dim+1))[:, None]  ## Shape: (N, 1)
 
         if positional_enc is not None:
+            print("Using positional encoding with D =", positional_enc[0], "and PE_cte =", positional_enc[1], "\n\n", flush=True)
             D, PE_cte = positional_enc
             pos_enc = np.zeros((self.seq_len, D))
             for pos in range(self.seq_len):
@@ -768,7 +769,7 @@ def make_dataloaders(data_folder, config):
     ## Get the parameters
     dataset = config["general"]["dataset"]
     batch_size = config["training"]["batch_size"]
-    positional_enc = config["data"].get("positional_encoding", None)
+    positional_enc = config["model"].get("positional_encoding", None)
 
     if dataset in ["mnist", "mnist_fashion"]:
         # ### MNIST Classification (From Sacha Rush's Annotated S4)

@@ -990,9 +990,9 @@ if dataset == "icl":
         ax.scatter(Xs, Ys_hat, color=color, marker='+', label='Pred' if el==0 else None, s=45, alpha=1)
 
     ax.set_xlabel(r"$\mathbf{x}$", fontsize=40)
-    ax.set_ylabel(r"$y$", fontsize=40)
+    ax.set_ylabel(r"$y, \hat{y}$", fontsize=40)
     ax.set_title("ICL Dataset's Keys and Query Points")
-    ax.legend()
+    ax.legend(fontsize=30)
     plt.draw();
     plt.savefig(plots_folder+"icl_all_keys_plus_query.png", dpi=100, bbox_inches='tight')      
 
@@ -1011,7 +1011,7 @@ if dataset == "icl":
     ax.set_title("ICL Dataset's Queries Only")
 
     ## Add a diagonal line
-    ax.plot([np.min(Ys), np.max(Ys)], [np.min(Ys), np.max(Ys)], color='black', linestyle='--', linewidth=2, label="y = $\hat{y}$")
+    ax.plot([np.min(Ys), np.max(Ys)], [np.min(Ys), np.max(Ys)], color='black', linestyle='--', linewidth=2, label="$y = \hat{y}$")
     ax.legend()
     plt.draw();
     plt.savefig(plots_folder+"icl_query_only.png", dpi=100, bbox_inches='tight')

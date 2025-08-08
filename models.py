@@ -277,7 +277,7 @@ class WSM(eqx.Module):
     def __call__(self, xs, ts, k, inference_start=None):
         """ Forward pass of the model on batch of sequences
             xs: (batch, time, data_size)
-            ts: (batch, time)
+            ts: (batch, time, dim)
             k:  (key_dim)
             inference_start: whether/when to use the model in autoregressive mode
             """
@@ -298,7 +298,7 @@ class WSM(eqx.Module):
     def ar_call(self, xs, ts, k, inference_start=None):
         """ Forward pass of the model on batch of sequences, ==autoregressively==
             xs: (batch, time, data_size)
-            ts: (batch, time)
+            ts: (batch, time, dim)
             k:  (key_dim)
             inference_start: whether/when to use the model in autoregressive mode
             """
@@ -448,7 +448,7 @@ class WSM(eqx.Module):
     def non_ar_call(self, xs, ts, k):
         """ Forward pass of the model on batch of sequences, ==recurrent, but non-autoregressively==
             xs: (batch, time, data_size)
-            ts: (batch, time)
+            ts: (batch, time, dim)
             k:  (key_dim)
             """
 
@@ -487,7 +487,7 @@ class WSM(eqx.Module):
 
             @eqx.filter_vmap
             def apply_theta(theta, t_curr, x_curr):
-                delta_t = ts_[1] - ts_[0]
+                # delta_t = ts_[1] - ts_[0]
                 root_utils = self.root_utils[0]
                 shapes, treedef, static, _ = root_utils
                 params = unflatten_pytree(theta, shapes, treedef)
