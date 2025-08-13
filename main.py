@@ -162,7 +162,7 @@ print("Total number training samples:", len(trainloader.dataset))
 batch = next(iter(trainloader))
 (in_sequence, times), output = batch
 logger.info(f"Input sequence shape: {in_sequence.shape}")
-logger.info(f"Labels/OutputSequence shape: {output.shape}")
+logger.info(f"Labels/Output Sequence shape: {output.shape}")
 logger.info(f"Seq length: {seq_length}")
 logger.info(f"Data size: {data_size}")
 logger.info(f"Min/Max in the dataset: {np.min(in_sequence), np.max(in_sequence)}")
@@ -268,11 +268,10 @@ def loss_fn(model, batch, key):
             stds = X_recons_[:, :, data_size:]
             loss_r = jnp.log(stds) + 0.5*((X_true_ - means)/stds)**2
         else:
-            # if dataset == "icl__":        ## We only care about the last column, last row
+            # if dataset == "icl":        ## We only care about the last column, last row
             #     print("\n\n     Considering the last column, last row of the ICL dataset for the loss ...")
-            #     print("     X_recons_ shape:", X_recons_.shape, "\n\n")
+            #     # print("     X_recons_ shape:", X_recons_.shape, "\n\n")
             #     # loss_r = optax.l2_loss(X_recons_[:, -1,-1], X_true_[:, -1,-1])
-            #     # loss_r = optax.l2_loss(X_recons_[:, -1, :], X_true_[:, -1, :])
             #     loss_r = optax.l2_loss(X_recons_[:, :, -1], X_true_[:, :, -1])
             # else:
             #     loss_r = optax.l2_loss(X_recons_, X_true_)
@@ -573,7 +572,7 @@ if len(val_losses) > 0:
     ax_ = ax.twinx()
     epochs_ids = (np.arange(0, nb_epochs, valid_every).tolist() + [nb_epochs-1])[:len(val_losses)]
     val_steps_ids = (np.array(epochs_ids)+1) * trainloader.num_batches      ## Convert epochs to train steps
-    ax_ = sbplot(val_steps_ids, val_losses, ".-", color=val_col, label=f"Valid", y_label=f'{val_criterion.upper()}', ax=ax_, y_scale="linear", linewidth=3);
+    ax_ = sbplot(val_steps_ids, val_losses, ".-", color=val_col, label=f"Valid", y_label=f'{val_criterion.upper()}', ax=ax_, y_scale="linear" if val_criterion in ["nll", "cce", "error_rate"] else "log", linewidth=3);
     ax_.legend(fontsize=16, loc='upper right')
     ax_.yaxis.label.set_color(val_col)
 
@@ -960,7 +959,6 @@ if dataset == "icl":
     xs_recons = xs_recons[:, :, :data_size]
 
     ## Make the data to plot
-    # print("Shapes are: ", xs_true.shape, ys_true.shape, xs_recons.shape)
     colors = ['green', 'red', 'blue', 'orange', 'purple', 'cyan', 'magenta', 'yellow', 'pink', 'brown']
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
     # for batch_el in range(0, xs_true.shape[0]):
@@ -970,26 +968,19 @@ if dataset == "icl":
         Ys = ys_true[batch_el, :, -1]  # All time steps, last dimension
         Ys_hat = xs_recons[batch_el, :, -1]
 
-        # print("Xs shape: ", Xs, "\n\n", xs_true[batch_el, :, :])
-
         ## Order the Xs for better visualisation
         order = np.argsort(Xs)
         Xs = Xs[order]
         Ys = Ys[order]
         Ys_hat = Ys_hat[order]
 
-        # print("Shapes are: ", Xs.shape, Ys.shape, Ys_hat.shape)
-
-        # ax.scatter(Xs, Ys, color='green', label='True', s=50)
-        # ax.scatter(Xs, Ys_hat, color='red', label='Predicted', s=50, alpha=0.5)
-
-        ## Plot the true with dots, and predicted with square markers. The color should be same. A new color sampled for each batch element
+        ## Plot the true with dots, and predicted with + markers.
         color = colors[el % len(colors)]
         alpha = np.random.uniform(0.75, 1.0)
         ax.scatter(Xs, Ys, facecolors='none', edgecolors=color, label='True' if el==0 else None, s=25, alpha=0.5)
         ax.scatter(Xs, Ys_hat, color=color, marker='+', label='Pred' if el==0 else None, s=45, alpha=1)
 
-    ax.set_xlabel(r"$\mathbf{x}$", fontsize=40)
+    ax.set_xlabel(r"$\mathbf{x}_0$", fontsize=40)
     ax.set_ylabel(r"$y, \hat{y}$", fontsize=40)
     ax.set_title("ICL Dataset's Keys and Query Points")
     ax.legend(fontsize=30)
@@ -1006,12 +997,12 @@ if dataset == "icl":
 
     ax.scatter(Ys, Ys_hat, color="crimson", marker='X', s=80, alpha=0.5)
 
-    ax.set_xlabel(r"$y$", fontsize=40)
-    ax.set_ylabel(r"$\hat{y}$", fontsize=40)
+    ax.set_xlabel(r"$y_q$", fontsize=40)
+    ax.set_ylabel(r"$\hat{y}_q$", fontsize=40)
     ax.set_title("ICL Dataset's Queries Only")
 
     ## Add a diagonal line
-    ax.plot([np.min(Ys), np.max(Ys)], [np.min(Ys), np.max(Ys)], color='black', linestyle='--', linewidth=2, label="$y = \hat{y}$")
+    ax.plot([np.min(Ys), np.max(Ys)], [np.min(Ys), np.max(Ys)], color='black', linestyle='--', linewidth=2, label="$y_q = \hat{y}_q$")
     ax.legend()
     plt.draw();
     plt.savefig(plots_folder+"icl_query_only.png", dpi=100, bbox_inches='tight')

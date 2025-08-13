@@ -348,6 +348,7 @@ class WSM(eqx.Module):
                 # return (thet_next, x_next_mean, x_prev_next, t_curr), (x_next, )
 
                 return (thet_next, x_next_mean, x_hat, t_curr), (x_next, )
+                # return (thet_next, x_next_mean, x_true, t_curr), (x_next, )
 
             if self.init_state_layers is None:
                 theta_init = self.thetas_init[0]
@@ -454,6 +455,8 @@ class WSM(eqx.Module):
 
         def forward(xs_, ts_, k_):
             """ Forward pass on a single sequence """
+
+            ## Apply a convolution here!
 
             def f(carry, input_signal):
                 thet, x_prev, t_prev = carry

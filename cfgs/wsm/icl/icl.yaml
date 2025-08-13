@@ -10,24 +10,24 @@ general:
 # Data hyperparameters
 data:
   normalize: False
-  sequence_length: 32
+  sequence_length: 128
   data_dim: 1
 
 # Model hyperparameters
 model:
   root_width_size: 24
   root_depth: 3
-  root_activation: "softplus"
+  root_activation: "relu"
   root_final_activation: null
   root_output_dim: 1    ## If set, then careful with the NLL loss, and its splitting into means and stds.
   positional_encoding: [0, 5]    # [32, 5]
-  init_state_layers: 2
+  init_state_layers: null
   input_prev_data: False
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
   time_as_channel: False
-  forcing_prob: 0.15
+  forcing_prob: 0.5
   noise_theta_init: null
   std_lower_bound: 1.0e-4
 
@@ -45,12 +45,12 @@ optimizer:
 
 # Training/Inference configurations
 training:
-  nb_epochs: 3000
-  batch_size: 512
+  nb_epochs: 5000
+  batch_size: 32
   autoregressive: False
-  print_every: 10
-  save_every: 10
-  valid_every: 10
+  print_every: 100
+  save_every: 100
+  valid_every: 100
   stochastic: False
   val_criterion: "mse"
   nb_recons_loss_steps: null
