@@ -135,6 +135,36 @@ class GradualMLP(eqx.Module):
         return y
 
 
+class ConvNet1D(eqx.Module):
+    """ Convolutional network for 1D data, e.g. time series """
+    layers: eqx.Module
+    activation: any
+
+    def __init__(self, in_channels, out_channels, hidden_channels, kernel_size, n_layers=2, activation=jax.nn.relu, key=None):
+        keys = jax.random.split(key, n_layers)
+        self.layers = []
+        self.activation = activation
+        self.layers.append(eqx.nn.Conv1d(in_channels, hidden_channels, kernel_size, padding="SAME", key=keys[0]))
+
+        for i in range(1, n_layers):
+            self.layers.append(eqx.nn.Conv1d(hidden_channels, hidden_channels, kernel_size, padding="SAME", key=keys[i]))
+
+        self.layers.append(eqx.nn.Conv1d(hidden_channels, out_channels, kernel_size, padding="SAME", key=keys[-1]))
+
+    def __call__(self, x):
+        """ Forward pass of the convolutional network
+            x: (batch, in_channels, time)
+            Returns: (batch, out_channels, time)
+        """
+        y = x
+        for layer in self.layers:
+            y = layer(y)
+            if self.activation is not None:
+                y = self.activation(y)
+        return y
+
+
+
 
 
 
@@ -165,6 +195,9 @@ class WSM(eqx.Module):
     stochastic_ar: bool
     smooth_inference: bool
 
+    conv_embedding: eqx.Module
+    conv_de_embedding: eqx.Module
+
     def __init__(self, 
                  data_size, 
                  width_size, 
@@ -186,6 +219,7 @@ class WSM(eqx.Module):
                  smooth_inference=None,             ## Whether to use smooth inference (i.e. no reparametrization trick at inference)
                  positional_encoding=None,              ## Positional encoding to be added to the root network input
                  preferred_output_dim=None,              ## Output dimension to be used by the root network (e.g. for classification, in-context learning, etc.)
+                 conv_embedding=None,               ## Convolutional embedding properties to be applied to the input sequences
                  key=None):
 
         keys = jax.random.split(key, num=nb_wsm_layers)
@@ -194,6 +228,57 @@ class WSM(eqx.Module):
         root_utils = []
         As = []
         Bs = []
+
+        if conv_embedding is not None:
+            out_chans, kernel_size = conv_embedding
+            print("Using convolutional embedding with out_chans: ", out_chans, " and kernel_size: ", kernel_size)
+            # self.conv_embedding = eqx.nn.Conv1d(in_channels=data_size,
+            #                                     out_channels=out_chans,
+            #                                     kernel_size=kernel_size,
+            #                                     padding="SAME",
+            #                                     # padding=0,
+            #                                     use_bias=False,
+            #                                     key=keys[0])
+            # seq_length = 32
+            self.conv_embedding = eqx.nn.Conv1d(in_channels=1,
+                                                out_channels=1,
+                                                kernel_size=kernel_size,
+                                                padding=((kernel_size - 1, 0),), # Causal padding
+                                                # padding=0,
+                                                use_bias=False,
+                                                key=keys[0])
+            ## Initialise the kernel at 1s to get an initial cumsum
+            # print("THid id ythe conv enbedding kernel: ", self.conv_embedding)
+            # self.conv_embedding = eqx.tree_at(lambda x: x.weight, self.conv_embedding, jnp.ones_like(self.conv_embedding.weight))
+
+            # self.conv_embedding = ConvNet1D(in_channels=data_size-1,
+            #                                 out_channels=out_chans-1,
+            #                                 hidden_channels=128,
+            #                                 kernel_size=kernel_size,
+            #                                 n_layers=1,
+            #                                 activation=builtin_fns[activation],
+            #                                 key=keys[0])
+
+            # self.conv_de_embedding = eqx.nn.Conv1d(in_channels=1,
+            #                                         out_channels=1,
+            #                                         kernel_size=2,
+            #                                         padding='VALID', # No padding
+            #                                         use_bias=False,
+            #                                         key=key,)
+
+            self.conv_de_embedding = eqx.nn.Conv1d(in_channels=1,
+                                                    out_channels=1,
+                                                    kernel_size=kernel_size,
+                                                    padding=((kernel_size - 1, 0),), # Causal padding
+                                                    use_bias=False,
+                                                    key=key,)
+            # diff_kernel = jnp.array([[[-1., 1.]]])
+            # self.conv_de_embedding = eqx.tree_at(lambda x: x.weight, self.conv_de_embedding, diff_kernel)
+
+        else:
+            self.conv_embedding = None
+            self.conv_de_embedding = None
+
         positional_enc_dim = positional_encoding[0] if positional_encoding is not None else 0
         for i in range(nb_wsm_layers):
             if nb_classes is None:          ## Regression problem
@@ -204,7 +289,11 @@ class WSM(eqx.Module):
                 else:
                     final_activation_fn = None
 
-                input_dim = 1+positional_enc_dim+data_size if input_prev_data else 1+positional_enc_dim
+                if conv_embedding is None:
+                    input_dim = 1+positional_enc_dim+data_size if input_prev_data else 1+positional_enc_dim
+                else:
+                    input_dim = 1+positional_enc_dim+out_chans if input_prev_data else 1+positional_enc_dim
+                    # input_dim = 1+positional_enc_dim+data_size-1 if input_prev_data else 1+positional_enc_dim
                 output_dim = 2*data_size if predict_uncertainty else data_size
 
                 ## Check if provided root_output dimension in yaml
@@ -233,12 +322,16 @@ class WSM(eqx.Module):
             if init_state_layers is None:
                 thetas_init.append(weights)                              ## The latent space of the model
             else:
-                thetas_init.append(GradualMLP(data_size, weights.shape[0], init_state_layers, builtin_fns[activation], key=keys[0]))
+                theta_init_in_dim = data_size if conv_embedding is None else out_chans
+                thetas_init.append(GradualMLP(theta_init_in_dim, weights.shape[0], init_state_layers, builtin_fns[activation], key=keys[0]))
 
             latent_size = weights.shape[0]
             As.append(jnp.eye(latent_size))                             ## The most stable matrix: identity
 
-            B_out_dim = data_size+1 if time_as_channel else data_size
+            if conv_embedding is None:
+                B_out_dim = data_size+1 if time_as_channel else data_size
+            else:
+                B_out_dim = out_chans+1 if time_as_channel else out_chans
             B = jnp.zeros((latent_size, B_out_dim))
             # B += jax.random.normal(keys[i], B.shape)*1e-3             ## TODO Initial perturbation to avoid getting stuck at 0 ?
             Bs.append(B)
@@ -456,7 +549,25 @@ class WSM(eqx.Module):
         def forward(xs_, ts_, k_):
             """ Forward pass on a single sequence """
 
-            ## Apply a convolution here!
+            ## Apply a convolution to xs_ here (channel first)
+            if self.conv_embedding is not None:
+                # last_feat = xs_[:, -1:]  ## Keep the last feature (e.g. y_t) as it is
+                # other_feats = xs_[:, :-1]  ## Keep all other features (e.g. x_t) to be transformed
+                # xs_ = self.conv_embedding(other_feats.T).T
+                # xs_ = jnp.concatenate([xs_, last_feat], axis=-1)  ## Add the last feature back to the input signal
+
+                # xs_ = self.conv_embedding(xs_.T).T
+                # print("\n\nShape of xs_ before conv embedding: ", xs_.shape)
+                # xs_ = self.conv_embedding(xs_.T).T
+
+                ## VEctorise the convolutional embedding and apply along channels
+                # xs_ = eqx.filter_vmap(self.conv_embedding)(xs_.T[:, None, :])[:, 0, :].T  ## Apply the convolutional embedding to the input signal
+                # xs_ = eqx.filter_vmap(jax.lax.stop_gradient(self.conv_embedding))(xs_.T[:, None, :])[:, 0, :].T
+                # xs_ = eqx.filter_vmap(self.conv_embedding)(xs_.T[:, None, :])[:, 0, :].T
+                xs_ = self.conv_embedding(xs_.T).T
+
+                # print("\n\nShape of xs_ after conv embedding: ", xs_.shape, flush=True)
+                # xs_ = xs_[:ts.shape[0]]  ## Apply the convolution to the input signal, and keep only the first ts.shape[0] time steps
 
             def f(carry, input_signal):
                 thet, x_prev, t_prev = carry
@@ -471,6 +582,8 @@ class WSM(eqx.Module):
                     x_prev = jnp.concatenate([t_prev[:1], x_prev], axis=-1)
 
                 thet_next = A@thet + B@(x_t - x_prev)     ## Key step
+                # thet_next = A@thet + B@(x_t-x_prev) + jnp.sum(x_t*x_prev)
+                # thet_next = (jnp.eye(thet.shape[0]) - t_curr[0]**2)@thet + t_curr[0]*B@(x_t - x_prev)     ## Key step
 
                 if self.weights_lim is not None:
                     thet_next = jnp.clip(thet_next, -self.weights_lim, self.weights_lim)
@@ -508,6 +621,23 @@ class WSM(eqx.Module):
                 return x_next
 
             xs_hat = apply_theta(theta_outs, ts_, xs_)
+            # if self.conv_embedding is not None:
+            #     xs_hat = apply_theta(theta_outs, ts_, other_feats)
+
+            ## Apply the de-embedding convolution if needed
+            if self.conv_de_embedding is not None:
+                # print("Print the shape of xs_hat: ", xs_hat.shape, "\n\n\n", flush=True)
+                # xs_hat_ = self.conv_de_embedding(xs_hat.T[:, None, :])[:, 0, :].T
+                # xs_hat_ = eqx.filter_vmap(self.conv_de_embedding)(xs_hat.T[:, None, :])[:, 0, :].T
+                # xs_hat_ = eqx.filter_vmap(jax.lax.stop_gradient(self.conv_de_embedding))(xs_hat.T[:, None, :])[:, 0, :].T
+                # xs_hat_ = eqx.filter_vmap(self.conv_de_embedding)(xs_hat.T[:, None, :])[:, 0, :].T
+                # xs_hat = jnp.concatenate([xs_hat[0:1], xs_hat_], axis=0)            ## Concat with the first time steps of xs_hat
+                # xs_hat = xs_hat_           ## Same type of convolution as the embedding
+
+                xs_hat = self.conv_de_embedding(xs_hat.T[:, :])[:, :].T
+
+            # ## This is actually the cumsum, let; s return the first element plus the difference
+            # xs_hat = jnp.concatenate([xs_hat[0:1], xs_hat[1:] - xs_hat[:-1]], axis=0)
 
             return xs_hat
 
@@ -949,6 +1079,7 @@ def make_model(key, data_size, nb_classes, config, logger):
             "stochastic_ar": config['training']['stochastic'],
             "positional_encoding": config['model'].get('positional_encoding', False),
             "preferred_output_dim": config['model'].get('root_output_dim', None),
+            "conv_embedding": config['model'].get('conv_embedding', None),
         }
 
         if 'smooth_inference' in config['training']:

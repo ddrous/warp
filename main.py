@@ -272,7 +272,12 @@ def loss_fn(model, batch, key):
             #     print("\n\n     Considering the last column, last row of the ICL dataset for the loss ...")
             #     # print("     X_recons_ shape:", X_recons_.shape, "\n\n")
             #     # loss_r = optax.l2_loss(X_recons_[:, -1,-1], X_true_[:, -1,-1])
-            #     loss_r = optax.l2_loss(X_recons_[:, :, -1], X_true_[:, :, -1])
+            #     # loss_r = optax.l2_loss(X_recons_[:, :, -1], X_true_[:, :, -1])
+
+            #     ## Using key, randomly select between the last and one before last time step
+            #     inside = jax.random.randint(key, (1,), 0, X_recons_.shape[1]-1)[0]
+            #     index = jnp.where(jax.random.uniform(key, (1,)) < 0.5, inside, -1)
+            #     loss_r = optax.l2_loss(X_recons_[:, index, -1], X_true_[:, index, -1])
             # else:
             #     loss_r = optax.l2_loss(X_recons_, X_true_)
 

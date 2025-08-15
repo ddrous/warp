@@ -1,6 +1,6 @@
 # General settings
 general:
-  seed: 2026
+  seed: 2024
   classification: False
   train: True
   dataset: "icl"
@@ -10,19 +10,21 @@ general:
 # Data hyperparameters
 data:
   normalize: False
-  sequence_length: 128
-  data_dim: 1
+  sequence_length: 32
+  data_dim: 8
 
 # Model hyperparameters
 model:
-  root_width_size: 24
-  root_depth: 3
+  root_width_size: 32
+  root_depth: 5
   root_activation: "relu"
   root_final_activation: null
-  root_output_dim: 1    ## If set, then careful with the NLL loss, and its splitting into means and stds.
-  positional_encoding: [0, 5]    # [32, 5]
+  root_output_dim: 1              ## If set, then careful with the NLL loss, and its splitting into means and stds.
+  positional_encoding: [0, 5]     # [32, 5]
   init_state_layers: null
-  input_prev_data: False
+  input_prev_data: True
+  # conv_embedding: [9, 32]         ## Convolutional embedding output size, then kernel size if None then no convolution is applied.
+  conv_embedding: null
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
@@ -45,8 +47,8 @@ optimizer:
 
 # Training/Inference configurations
 training:
-  nb_epochs: 5000
-  batch_size: 32
+  nb_epochs: 10000
+  batch_size: 512
   autoregressive: False
   print_every: 100
   save_every: 100
