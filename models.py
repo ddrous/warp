@@ -240,10 +240,10 @@ class WSM(eqx.Module):
             #                                     use_bias=False,
             #                                     key=keys[0])
             # seq_length = 32
-            self.conv_embedding = eqx.nn.Conv1d(in_channels=1,
-                                                out_channels=1,
+            self.conv_embedding = eqx.nn.Conv1d(in_channels=data_size,
+                                                out_channels=out_chans,
                                                 kernel_size=kernel_size,
-                                                padding=((kernel_size - 1, 0),), # Causal padding
+                                                padding=((kernel_size-1, 0),), # Causal padding
                                                 # padding=0,
                                                 use_bias=False,
                                                 key=keys[0])
@@ -259,19 +259,20 @@ class WSM(eqx.Module):
             #                                 activation=builtin_fns[activation],
             #                                 key=keys[0])
 
-            # self.conv_de_embedding = eqx.nn.Conv1d(in_channels=1,
-            #                                         out_channels=1,
-            #                                         kernel_size=2,
-            #                                         padding='VALID', # No padding
-            #                                         use_bias=False,
-            #                                         key=key,)
-
             self.conv_de_embedding = eqx.nn.Conv1d(in_channels=1,
                                                     out_channels=1,
-                                                    kernel_size=kernel_size,
-                                                    padding=((kernel_size - 1, 0),), # Causal padding
+                                                    kernel_size=3,
+                                                    # padding='VALID', # No padding
+                                                    padding='SAME', # No padding
                                                     use_bias=False,
                                                     key=key,)
+
+            # self.conv_de_embedding = eqx.nn.Conv1d(in_channels=1,
+            #                                         out_channels=1,
+            #                                         kernel_size=kernel_size,
+            #                                         padding=((kernel_size-1, 0),), # Causal padding
+            #                                         use_bias=False,
+            #                                         key=key,)
             # diff_kernel = jnp.array([[[-1., 1.]]])
             # self.conv_de_embedding = eqx.tree_at(lambda x: x.weight, self.conv_de_embedding, diff_kernel)
 
@@ -329,10 +330,10 @@ class WSM(eqx.Module):
             As.append(jnp.eye(latent_size))                             ## The most stable matrix: identity
 
             if conv_embedding is None:
-                B_out_dim = data_size+1 if time_as_channel else data_size
+                B_in_dim = data_size+1 if time_as_channel else data_size
             else:
-                B_out_dim = out_chans+1 if time_as_channel else out_chans
-            B = jnp.zeros((latent_size, B_out_dim))
+                B_in_dim = out_chans+1 if time_as_channel else out_chans
+            B = jnp.zeros((latent_size, B_in_dim))
             # B += jax.random.normal(keys[i], B.shape)*1e-3             ## TODO Initial perturbation to avoid getting stuck at 0 ?
             Bs.append(B)
 
@@ -630,11 +631,14 @@ class WSM(eqx.Module):
                 # xs_hat_ = self.conv_de_embedding(xs_hat.T[:, None, :])[:, 0, :].T
                 # xs_hat_ = eqx.filter_vmap(self.conv_de_embedding)(xs_hat.T[:, None, :])[:, 0, :].T
                 # xs_hat_ = eqx.filter_vmap(jax.lax.stop_gradient(self.conv_de_embedding))(xs_hat.T[:, None, :])[:, 0, :].T
+
                 # xs_hat_ = eqx.filter_vmap(self.conv_de_embedding)(xs_hat.T[:, None, :])[:, 0, :].T
                 # xs_hat = jnp.concatenate([xs_hat[0:1], xs_hat_], axis=0)            ## Concat with the first time steps of xs_hat
-                # xs_hat = xs_hat_           ## Same type of convolution as the embedding
 
-                xs_hat = self.conv_de_embedding(xs_hat.T[:, :])[:, :].T
+                xs_hat = eqx.filter_vmap(self.conv_de_embedding)(xs_hat.T[:, None, :])[:, 0, :].T
+
+                # xs_hat = xs_hat_           ## Same type of convolution as the embedding
+                # xs_hat = self.conv_de_embedding(xs_hat.T).T
 
             # ## This is actually the cumsum, let; s return the first element plus the difference
             # xs_hat = jnp.concatenate([xs_hat[0:1], xs_hat[1:] - xs_hat[:-1]], axis=0)

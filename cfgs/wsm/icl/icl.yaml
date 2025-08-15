@@ -10,8 +10,8 @@ general:
 # Data hyperparameters
 data:
   normalize: False
-  sequence_length: 32
-  data_dim: 8
+  sequence_length: 128
+  data_dim: 32
 
 # Model hyperparameters
 model:
