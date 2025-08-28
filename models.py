@@ -230,7 +230,7 @@ class WSM(eqx.Module):
         Bs = []
 
         if conv_embedding is not None:
-            out_chans, kernel_size = conv_embedding
+            out_chans, kernel_size = conv_embedding[0], conv_embedding[1]
             print("Using convolutional embedding with out_chans: ", out_chans, " and kernel_size: ", kernel_size)
             # self.conv_embedding = eqx.nn.Conv1d(in_channels=data_size,
             #                                     out_channels=out_chans,
@@ -240,11 +240,20 @@ class WSM(eqx.Module):
             #                                     use_bias=False,
             #                                     key=keys[0])
             # seq_length = 32
+
+            ## Define the padding depending on whether causal or not
+            causal_conv = False if len(conv_embedding) < 3 else (conv_embedding[2] == 1)
+            if causal_conv:
+                print("Using causal convolution")
+                padding = ((kernel_size-1, 0),)  ## Causal padding
+            else:
+                print("Using non-causal convolution")
+                padding = "SAME"                 ## Non-causal padding
+
             self.conv_embedding = eqx.nn.Conv1d(in_channels=data_size,
                                                 out_channels=out_chans,
                                                 kernel_size=kernel_size,
-                                                padding=((kernel_size-1, 0),), # Causal padding
-                                                # padding=0,
+                                                padding=padding,
                                                 use_bias=False,
                                                 key=keys[0])
             ## Initialise the kernel at 1s to get an initial cumsum
@@ -299,6 +308,8 @@ class WSM(eqx.Module):
 
                 ## Check if provided root_output dimension in yaml
                 output_dim = preferred_output_dim if (preferred_output_dim is not None) else output_dim
+
+                # print("\n\nUsing WSM layer ", i, " with input_dim: ", input_dim, " and output_dim: ", output_dim, flush=True)
 
                 root = RootMLP(input_dim, 
                             output_dim,

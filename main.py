@@ -178,7 +178,7 @@ colors = ['r', 'g', 'b', 'c', 'm', 'y']
 dataset = config['general']['dataset']
 image_datasets = ["mnist", "mnist_fashion", "cifar", "celeba", "pathfinder"]
 dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_damper", "cheetah", "electricity", "sine"]
-repeat_datasets = ["lotka", "arc_agi", "icl"]
+repeat_datasets = ["lotka", "arc_agi", "icl", "traffic"]
 
 res = (width, width, data_size)
 dim0, dim1 = (0, -1)
@@ -357,9 +357,11 @@ def eval_on_dataloader(model, dataloader, inference_start, key):
             if val_criterion == "mse":
                 loss_val = optax.l2_loss(means_, X_gt).mean()
             elif val_criterion == "mae":
-                loss_val = optax.l1_loss(means_, X_gt).mean()       ## TODO: not implemented yet
+                # loss_val = optax.l1_loss(means_, X_gt).mean()       ## TODO: not implemented yet
+                loss_val = jnp.mean(jnp.abs(means_ - X_gt))
             elif val_criterion == "rmse":
-                loss_val = optax.root_mean_squared_error(means_, X_gt).mean()   ## TODO: not implemented yet
+                # loss_val = optax.root_mean_squared_error(means_, X_gt).mean()   ## TODO: not implemented yet
+                loss_val = jnp.sqrt(jnp.mean((means_ - X_gt)**2))
             elif val_criterion == "nll":
                 loss_val = jnp.log(stds_) + 0.5*((X_gt - means_)/stds_)**2
                 loss_val = jnp.mean(loss_val)
@@ -691,11 +693,12 @@ if not classification:
     fig, axs = plt.subplots(4, 4*nb_cols, figsize=(16*3, 16), sharex=True, constrained_layout=True)
 
     batch = next(iter(visloader))
-    (xs_true, times), labels = batch
+    (xs_ins, times), xs_outs_labs = batch
+    xs_true = xs_outs_labs if dataset in repeat_datasets else xs_ins
 
     inference_start = config['training']['inference_start']
     xs_recons = forward_pass(model=model, 
-                        X=xs_true, 
+                        X=xs_ins, 
                         times=times, 
                         key=test_key, 
                         inference_start=inference_start)
@@ -711,7 +714,7 @@ if not classification:
         for j in range(4):
             x = xs_true[(i*4+j)%nb_examples]
             x_recons = xs_recons[(i*4+j)%nb_examples]
-            x_full = labels[(i*4+j)%nb_examples]
+            x_full = xs_true[(i*4+j)%nb_examples]
 
             min_0, max_0 = min(np.min(x[:, dim0]), np.min(x_recons[:, dim0])), max(np.max(x[:, dim0]), np.max(x_recons[:, dim0]))
             min_1, max_1 = min(np.min(x[:, dim1]), np.min(x_recons[:, dim1])), max(np.max(x[:, dim1]), np.max(x_recons[:, dim1]))
@@ -781,11 +784,12 @@ if not classification:
     eval_loader = NumpyLoader(testloader.dataset, batch_size=len(testloader.dataset), shuffle=False)
 
     batch = next(iter(eval_loader))
-    (xs_true, times), labels = batch
+    (xs_ins, times), xs_out_labs = batch
+    xs_true = xs_out_labs if dataset in repeat_datasets else xs_ins
 
     print("Inferance starts at: ", inference_start)
     xs_recons = forward_pass(model=model, 
-                        X=xs_true, 
+                        X=xs_ins, 
                         times=times, 
                         key=test_key, 
                         inference_start=inference_start)
@@ -833,8 +837,8 @@ if not classification and config['data']['normalize']:
         xs_true_unorm = unormalize_data(xs_true, min_max)
 
         ## Plot a few samples of the unormalized data
-        plot_dim = np.random.randint(0, data_size, size=2)[0]
-        plot_id = np.random.randint(0, len(xs_true_unorm), size=1)[0]
+        plot_dim = np.random.randint(0, xs_recons_unorm.shape[-1], size=2)[0]
+        plot_id = np.random.randint(0, xs_true_unorm.shape[0], size=1)[0]
         fig, (ax, ax2) = plt.subplots(1, 2, figsize=(10, 5), sharex=True)
         ax.plot(xs_true_unorm[plot_id, :, plot_dim], "r-", lw=1, label="True")
         ax.plot(xs_recons_unorm[plot_id, :, plot_dim], "r-", lw=3, label="Recons")

@@ -1,0 +1,61 @@
+# General settings
+general:
+  seed: 2024
+  classification: False
+  train: True
+  dataset: "traffic"
+  data_path: "./data/traffic/"
+  save_path: null
+
+# Data hyperparameters
+data:
+  normalize: True
+  sequence_length: 24
+  data_dim: 170
+
+# Model hyperparameters
+model:
+  root_width_size: 64
+  root_depth: 0
+  root_activation: "relu"
+  root_final_activation: null
+  root_output_dim: null              ## If set, then careful with the NLL loss, and its splitting into means and stds.
+  positional_encoding: [0, 5]     # [32, 5]
+  init_state_layers: null
+  input_prev_data: False
+  # conv_embedding: [9, 32]         ## Convolutional embedding output size, then kernel size if None then no convolution is applied.
+  conv_embedding: null
+  model_type: "wsm"
+  nb_rnn_layers: 1
+  weights_lim: null
+  time_as_channel: False
+  forcing_prob: 0.5
+  noise_theta_init: null
+  std_lower_bound: 1.0e-4
+
+# Optimizer hyperparameters
+optimizer:
+  init_lr: 1.0e-5
+  gradients_lim: 1.0e-7
+  on_plateau:
+    factor: 0.5
+    min_scale: 1.0e-2
+    patience: 20
+    cooldown: 0
+    rtol: 1.0e-4
+    accum_size: 50
+
+# Training/Inference configurations
+training:
+  nb_epochs: 500
+  batch_size: 256
+  autoregressive: True
+  print_every: 10
+  save_every: 10
+  valid_every: 10
+  stochastic: True
+  val_criterion: "mae"
+  nb_recons_loss_steps: null
+  use_nll_loss: True
+  inference_start: 16     ## Should be None if non-autoregressive training.
+  smooth_inference: False

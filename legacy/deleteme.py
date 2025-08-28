@@ -26,4 +26,4 @@ def plot_positional_encoding(L, B, D):
     plt.show()
 
 # Example usage
-plot_positional_encoding(L=32, B=1, D=6)
+plot_positional_encoding(L=6, B=1, D=10)

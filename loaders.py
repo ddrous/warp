@@ -352,12 +352,26 @@ class TimeSeriesRepeatDataset:
     """
     Base class for any time series repeat-copy dataset, from which several others will inherit
     """
-    def __init__(self, in_dataset, out_dataset, t_eval, traj_prop=1.0):
+    def __init__(self, in_dataset, out_dataset, t_eval, positional_enc=None, traj_prop=1.0):
 
         self.in_dataset = in_dataset            ## Input sequences
         self.out_datasets = out_dataset         ## Output sequences
         n_envs, n_timesteps, n_dimensions = in_dataset.shape
-        self.t_eval = t_eval
+        # self.t_eval = t_eval
+
+        # Let's replace t_eval of shape (n_envs, n_timesteps, 1) with positional encoding of dimention D
+        if positional_enc is not None:
+            D, PE_cte = positional_enc
+            pos_enc = np.zeros((n_timesteps, D))
+            for pos in range(n_timesteps):
+                for i in range(0, D, 2):
+                    pos_enc[pos, i] = np.sin(pos / (PE_cte ** (i / D)))
+                    if i + 1 < D:
+                        pos_enc[pos, i + 1] = np.cos(pos / (PE_cte ** (i / D)))
+            self.t_eval = np.concatenate((t_eval[:, None], pos_enc), axis=-1)
+        else:
+            self.t_eval = t_eval[:, None]
+
         self.total_envs = n_envs
 
         if traj_prop < 0 or traj_prop > 1:
@@ -432,6 +446,59 @@ class DynamicsRepeatDataset(TimeSeriesRepeatDataset):
         self.data_size = n_dimensions
 
         super().__init__(in_raw_data, out_raw_data, t_eval, traj_prop=1.0)
+
+
+class TrafficDataset(TimeSeriesRepeatDataset):
+    """
+    For the PEMS08 dataset: https://github.com/LiuAoyu1998/STIDGCN
+    """
+
+    def __init__(self, data_dir, traj_length, positional_enc, min_max=None):
+        try:
+            raw_data = np.load(data_dir)
+            in_raw_data = raw_data["x"]
+            out_raw_data = raw_data["y"]
+
+            ## Flatten the last two dimensions
+            in_raw_data = in_raw_data[..., 0].reshape(in_raw_data.shape[0], in_raw_data.shape[1], -1)
+            out_raw_data = out_raw_data.reshape(out_raw_data.shape[0], out_raw_data.shape[1], -1)
+
+            ## Concat in and ourt along time dimension
+            in_raw_data = np.concatenate((in_raw_data, out_raw_data), axis=1)
+            out_raw_data = in_raw_data
+
+            # print(f"Loaded input traffic data with shape {in_raw_data.shape} from {data_dir}")
+            # print(f"Loaded output traffic data with shape {out_raw_data.shape} from {data_dir}")
+
+        except:
+            raise ValueError(f"Data not loadable at {data_dir}")
+
+        ## Normalise the dataset between 0 and 1
+        if min_max is not None:
+            self.min_data = min_max[0]
+            self.max_data = min_max[1]
+        else:
+            self.min_data = np.min(out_raw_data)
+            self.max_data = np.max(out_raw_data)
+
+        in_raw_data = (in_raw_data - self.min_data) / (self.max_data - self.min_data)
+        out_raw_data = (out_raw_data - self.min_data) / (self.max_data - self.min_data)
+
+        ## Put things between -1 and 1
+        in_raw_data = (in_raw_data - 0.5) / 0.5
+        out_raw_data = (out_raw_data - 0.5) / 0.5
+
+        n_envs, n_timesteps, n_dimensions = in_raw_data.shape
+
+        # t_eval = raw_t_eval[:traj_length]
+        t_eval = np.linspace(0, 1., n_timesteps)
+
+        self.total_envs = n_envs
+        self.nb_classes = n_envs
+        self.num_steps = n_timesteps
+        self.data_size = n_dimensions
+
+        super().__init__(in_raw_data, out_raw_data, t_eval, positional_enc, traj_prop=1.0)
 
 
 
@@ -989,6 +1056,27 @@ def make_dataloaders(data_folder, config):
                                 num_workers=24)
         min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
         testloader = NumpyLoader(DynamicsRepeatDataset(data_folder+"test.npz", traj_length=traj_len, min_max=min_max),
+                                    batch_size=batch_size, 
+                                    shuffle=False, 
+                                    num_workers=24)
+        nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
+        print("Training sequence length:", seq_length)
+        min_res = None
+
+    elif dataset in ["traffic"]:
+        print(" #### Traffic Dataset ####")
+        traj_len = None
+
+        trainloader = NumpyLoader(TrafficDataset(data_folder+"train.npz", traj_length=traj_len, min_max=None, positional_enc=positional_enc), 
+                                batch_size=batch_size, 
+                                shuffle=True, 
+                                num_workers=24)
+        min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
+        valloader = NumpyLoader(TrafficDataset(data_folder+"val.npz", traj_length=traj_len, min_max=min_max, positional_enc=positional_enc),
+                                    batch_size=batch_size, 
+                                    shuffle=False, 
+                                    num_workers=24)
+        testloader = NumpyLoader(TrafficDataset(data_folder+"test.npz", traj_length=traj_len, min_max=min_max, positional_enc=positional_enc),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)
