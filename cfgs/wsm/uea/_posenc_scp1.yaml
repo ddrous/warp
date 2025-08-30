@@ -1,6 +1,6 @@
 # General settings
 general:
-  seed: 2024
+  seed: 20093
   classification: True
   train: True
   dataset: "uea"
@@ -10,14 +10,16 @@ general:
 # Data hyperparameters
 data:
   normalize: True
-  positional_encoding: [10, 10]
 
 # Model hyperparameters
 model:
-  root_width_size: 16
+  root_width_size: 32
   root_depth: 2
   root_activation: "relu"
   root_final_activation: null
+  root_output_dim: 2
+  positional_encoding: [10, 10]
+  conv_embedding: [128, 1024, 0]
   init_state_layers: 2
   input_prev_data: False
   model_type: "wsm"

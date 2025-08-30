@@ -1,6 +1,6 @@
 # General settings
 general:
-  seed: 2026
+  seed: 202
   classification: False
   train: True
   dataset: "traffic"
@@ -20,7 +20,7 @@ model:
   root_activation: "relu"
   root_final_activation: null
   root_output_dim: 170              ## If set, then careful with the NLL loss, and its splitting into means and stds.
-  positional_encoding: [6, 10]     # Dimension of positional encoding, then denominator constant.
+  # positional_encoding: [6, 10]     # Dimension of positional encoding, then denominator constant.
   positional_encoding: null
   init_state_layers: 2
   input_prev_data: False
@@ -48,7 +48,7 @@ optimizer:
 
 # Training/Inference configurations
 training:
-  nb_epochs: 3000
+  nb_epochs: 1000
   batch_size: 128
   autoregressive: False
   print_every: 100

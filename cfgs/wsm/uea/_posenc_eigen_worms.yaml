@@ -10,7 +10,6 @@ general:
 # Data hyperparameters
 data:
   normalize: False
-  positional_encoding: [20, 20]
 
 # Model hyperparameters
 model:
@@ -20,6 +19,11 @@ model:
   root_final_activation: null
   init_state_layers: 2
   input_prev_data: False
+  root_output_dim: 5
+  positional_encoding: [20, 20]
+  # positional_encoding: null
+  # conv_embedding: [128, 1024, 0]
+  conv_embedding: null
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null
@@ -42,13 +46,13 @@ optimizer:
 
 # Training/Inference configurations
 training:
-  nb_epochs: 1000
+  nb_epochs: 5000
   batch_size: 16
   autoregressive: False
   stochastic: False
-  print_every: 1
-  save_every: 1
-  valid_every: 1
+  print_every: 100
+  save_every: 100
+  valid_every: 100
   val_criterion: "error_rate"
   checkpoint_every: 10
   nb_recons_loss_steps: null
