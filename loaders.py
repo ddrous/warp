@@ -563,6 +563,60 @@ class TrafficDataset(TimeSeriesRepeatDataset):
 
 
 
+class MitsuiDataset(TimeSeriesRepeatDataset):
+    """
+    For a Mitsui Kagle challenge 2025: https://www.kaggle.com/competitions/mitsui-commodity-prediction-challenge/overview
+    """
+
+    def __init__(self, data_dir, partition, normalize=True, min_max=None, positional_enc=None):
+        
+        ## Load raw X and raw y, then make it into a dataset of shape (n_envs, timesteps, features)
+        raw_X = np.load(data_dir+f"X.npy")              ## Shape: (1, 1916, 557)
+        raw_y = np.load(data_dir+f"y_lag1.npy")         ## Shape: (1, 1916, 106)
+
+        ## Nan to zero
+        raw_X = np.nan_to_num(raw_X, nan=0.0, posinf=0.0, neginf=0.0)
+        raw_y = np.nan_to_num(raw_y, nan=0.0, posinf=0.0, neginf=0.0)
+
+        ## We don't use the last 89 timesteps, as they are reserved for the test set
+        if partition == "train":                        ## Make samples of length 1827-(1916-1827)=1739
+            Xs = []
+            ys = []
+            for i in range(0, 89):
+                Xs.append(raw_X[:, i:i+1739, :])
+                ys.append(raw_y[None, i:i+1739, :])
+        else:
+            Xs = [raw_X[:, 89:, :]]                    ## Make one sample of length 1739
+            ys = [raw_y[None, 89:, :]]
+
+        Xs = np.concatenate(Xs, axis=0)
+        ys = np.concatenate(ys, axis=0)
+
+        if min_max is not None:
+            self.min_data = min_max[0]
+            self.max_data = min_max[1]
+        else:
+            self.min_data = np.min(Xs, axis=(0, 1), keepdims=True)
+            self.max_data = np.max(Xs, axis=(0, 1), keepdims=True)
+
+        if normalize:
+            Xs = (Xs - self.min_data) / (self.max_data - self.min_data)
+            Xs = (Xs - 0.5) / 0.5
+
+        n_envs, n_timesteps, n_dimensions = Xs.shape
+
+        t_eval = np.linspace(0., 1., n_timesteps)
+
+        self.total_envs = n_envs
+        # self.nb_classes = int(np.max(labels)) + 1
+        self.nb_classes = 106
+        self.num_steps = n_timesteps
+        self.data_size = n_dimensions
+
+        super().__init__(Xs, ys, t_eval, traj_prop=1.0, positional_enc=positional_enc)
+
+
+
 class ARC_AGIDataset(TimeSeriesRepeatDataset):
     """
     For the a ARC-AGI dataset framed as a repeat-copy tasks
@@ -1138,6 +1192,28 @@ def make_dataloaders(data_folder, config):
                                     shuffle=False, 
                                     num_workers=24)
         testloader = NumpyLoader(TrafficDataset(data_folder+"test.npz", traj_length=traj_len, min_max=min_max, positional_enc=positional_enc),
+                                    batch_size=batch_size, 
+                                    shuffle=False, 
+                                    num_workers=24)
+        nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
+        print("Training sequence length:", seq_length)
+        min_res = None
+
+    elif dataset in ["mitsui"]:
+        print(" #### Mitsui & Co. Dataset ####")
+        traj_len = None
+        normalize = config["data"]["normalize"]
+
+        trainloader = NumpyLoader(MitsuiDataset(data_folder, partition="train", normalize=normalize, min_max=None, positional_enc=positional_enc), 
+                                batch_size=batch_size, 
+                                shuffle=True, 
+                                num_workers=24)
+        min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
+        valloader = NumpyLoader(MitsuiDataset(data_folder, partition="val", normalize=normalize, min_max=min_max, positional_enc=positional_enc),
+                                    batch_size=batch_size, 
+                                    shuffle=False, 
+                                    num_workers=24)
+        testloader = NumpyLoader(MitsuiDataset(data_folder, partition="test", normalize=normalize, min_max=min_max, positional_enc=positional_enc),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)

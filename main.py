@@ -178,7 +178,7 @@ colors = ['r', 'g', 'b', 'c', 'm', 'y']
 dataset = config['general']['dataset']
 image_datasets = ["mnist", "mnist_fashion", "cifar", "celeba", "pathfinder"]
 dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_damper", "cheetah", "electricity", "sine"]
-repeat_datasets = ["lotka", "arc_agi", "icl", "traffic"]
+repeat_datasets = ["lotka", "arc_agi", "icl", "traffic", "mitsui"]
 
 res = (width, width, data_size)
 dim0, dim1 = (0, -1)
@@ -839,8 +839,13 @@ if not classification and config['data']['normalize']:
 
     if hasattr(testloader.dataset, "min_data") and hasattr(testloader.dataset, "max_data"):
         min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
-        xs_recons_unorm = unormalize_data(xs_recons, min_max)
-        xs_true_unorm = unormalize_data(xs_true, min_max)
+
+        if dataset != "mitsui":
+            xs_recons_unorm = unormalize_data(xs_recons, min_max)
+            xs_true_unorm = unormalize_data(xs_true, min_max)
+        else:
+            xs_recons_unorm = xs_recons
+            xs_true_unorm = xs_true
 
         ## Plot a few samples of the unormalized data
         plot_dim = np.random.randint(0, xs_recons_unorm.shape[-1], size=2)[0]
