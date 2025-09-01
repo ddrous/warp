@@ -340,8 +340,69 @@ class PathFinderDataset(UEADataset):
 
 
 
+class LibriBrainDataset(TimeSeriesDataset):
+    """
+    For a LibriBrain competition 2025: https://eval.ai/web/challenges/challenge-page/2504/overview
+    """
 
+    def __init__(self, data_dir, partition, normalize=True, min_max=None, positional_enc=None):
 
+        ## Check if the npz file already exists
+        if os.path.exists(f"{data_dir}/{partition}.npz"):
+            print(f"Loading preprocessed {partition} dataset from {data_dir}/{partition}.npz")
+            raw_data = np.load(f"{data_dir}/{partition}.npz")
+            dataset = raw_data["data"]
+            labels = raw_data["labels"]
+        else:
+            print(f"Preprocessing {partition} dataset from raw data in {data_dir}")
+            from pnpl.datasets import LibriBrainPhoneme, GroupedDataset
+            raw_data = LibriBrainPhoneme(data_path=f"{data_dir}",
+                                            #   include_run_keys = [("0",str(i),"Sherlock1","1") for i in range(1, 2)], 
+                                            partition=partition,
+                                            tmin=0.0,
+                                            tmax=0.5)
+
+            if partition in ["train", "validation", "test"]:
+                print("Averaging samples with same label to reduce noise...")
+                raw_averaged_data = GroupedDataset(raw_data, grouped_samples=100)       ## Average every 100 samples with same label, to reduce the dataset noise
+            else:
+                raw_averaged_data = raw_data
+
+            samples = []
+            labels = []
+            for i in range(len(raw_averaged_data)):
+                data, label = raw_averaged_data[i]        ## Shape: (features, timesteps), (int)
+                samples.append(data.T)
+                labels.append(label)
+            dataset = np.stack(samples, axis=0)             ## Shape: (n_envs, timesteps, features)
+            labels = np.array(labels, dtype=np.int32)
+
+            ## Save this dataset in npz format for future use
+            print(f"Saved {dataset.shape[0]} samples of shape {dataset.shape[1:]} from {data_dir} for the {partition} partition.", flush=True)
+            np.savez_compressed(f"{data_dir}/{partition}.npz", data=dataset, labels=labels)
+
+        if min_max is not None:
+            self.min_data = min_max[0]
+            self.max_data = min_max[1]
+        else:
+            self.min_data = np.min(dataset, axis=(0, 1), keepdims=True)
+            self.max_data = np.max(dataset, axis=(0, 1), keepdims=True)
+
+        if normalize:
+            dataset = (dataset - self.min_data) / (self.max_data - self.min_data)
+            dataset = (dataset - 0.5) / 0.5
+
+        n_envs, n_timesteps, n_dimensions = dataset.shape
+
+        t_eval = np.linspace(0., 1., n_timesteps)
+
+        self.total_envs = n_envs
+        # self.nb_classes = int(np.max(labels)) + 1
+        self.nb_classes = 39
+        self.num_steps = n_timesteps
+        self.data_size = n_dimensions
+
+        super().__init__(dataset, labels, t_eval, traj_prop=1.0, positional_enc=positional_enc)
 
 
 
@@ -1154,6 +1215,27 @@ def make_dataloaders(data_folder, config):
                                     shuffle=False, 
                                     num_workers=24)
         testloader = NumpyLoader(UEADataset(data_folder+"test.npz", normalize=normalize, min_max=min_max, positional_enc=positional_enc),
+                                    batch_size=batch_size, 
+                                    shuffle=False, 
+                                    num_workers=24)
+        nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
+        print("Training sequence length:", seq_length)
+        min_res = None
+
+    elif dataset in ["libribrain"]:
+        normalize = config["data"]["normalize"]
+
+        trainloader = NumpyLoader(LibriBrainDataset(data_folder, partition="train", normalize=normalize, min_max=None, positional_enc=positional_enc),
+                                batch_size=batch_size, 
+                                shuffle=True, 
+                                num_workers=24)
+        min_max = (trainloader.dataset.min_data, trainloader.dataset.max_data)
+        valloader = NumpyLoader(LibriBrainDataset(data_folder, partition="validation", normalize=normalize, min_max=min_max, positional_enc=positional_enc),
+        # valloader = NumpyLoader(LibriBrainDataset(data_folder, partition="test", normalize=normalize, min_max=min_max, positional_enc=positional_enc),
+                                    batch_size=batch_size, 
+                                    shuffle=False, 
+                                    num_workers=24)
+        testloader = NumpyLoader(LibriBrainDataset(data_folder, partition="test", normalize=normalize, min_max=min_max, positional_enc=positional_enc),
                                     batch_size=batch_size, 
                                     shuffle=False, 
                                     num_workers=24)

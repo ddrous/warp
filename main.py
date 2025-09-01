@@ -377,6 +377,12 @@ def eval_on_dataloader(model, dataloader, inference_start, key):
                 ## ==== Let "cce" be the complement accuracy instead (the lower the better) ===
                 loss_val = jnp.mean(jnp.argmax(Y_hat[:, -1], axis=-1) == X_labs_outs)
                 loss_val = 1 - loss_val
+            elif val_criterion == "f1_score": ## F1_score, but MACRO, as below (but with JAX)
+            # from torchmetrics import F1Score
+            # f1_macro = F1Score(task="multiclass", average="macro", num_classes=len(disp_labels)).to(module.device)
+                preds = jnp.argmax(Y_hat[:, -1], axis=-1)
+                f1_macro = f1_score_macro(y_true=X_labs_outs, y_pred=preds, nb_classes=nb_classes)
+                loss_val = 1 - f1_macro
             else:
                 raise ValueError(f"Unknown validation criterion for classification: {val_criterion}")
 
@@ -881,16 +887,21 @@ if classification:
     evalloader = NumpyLoader(testloader.dataset, batch_size=config["training"]["batch_size"], shuffle=False)
 
     accs = []
+    f1s = []
     for i, batch in enumerate(evalloader):
         (in_sequence, times), output = batch
         Y_hat_raw = forward_pass(model, in_sequence, times, main_key)
         Y_hat = jnp.argmax(Y_hat_raw, axis=-1)
         acc = jnp.mean(Y_hat[:, -1] == output)
+        f1 = f1_score_macro(y_true=output, y_pred=Y_hat[:, -1], nb_classes=nb_classes)
 
         accs.append(acc)
+        f1s.append(f1)
 
     accuracy = np.mean(accs)
     logger.info(f"Test set accuracy: {accuracy:.4f}")
+    f1_macro = np.mean(f1s)
+    logger.info(f"Test set F1-macro: {f1_macro:.4f}")
 
     ## Visualise a few model logits (the first 16 sequences)
     visloader = NumpyLoader(testloader.dataset, batch_size=16, shuffle=True)

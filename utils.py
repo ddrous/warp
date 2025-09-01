@@ -99,6 +99,20 @@ def seconds_to_hours(seconds):
     return hours, minutes, seconds
 
 
+def f1_score_macro(y_true, y_pred, nb_classes):
+    """ Compute the macro F1 score. """
+    f1s = []
+    for cls in range(nb_classes):
+        tp = jnp.sum((y_pred == cls) & (y_true == cls))
+        fp = jnp.sum((y_pred == cls) & (y_true != cls))
+        fn = jnp.sum((y_pred != cls) & (y_true == cls))
+        precision = tp / (tp + fp + 1e-8)
+        recall = tp / (tp + fn + 1e-8)
+        f1 = 2 * (precision * recall) / (precision + recall + 1e-8)
+        f1s.append(f1)
+    f1_macro = jnp.mean(jnp.array(f1s))
+    return f1_macro
+
 
 def make_run_folder(parent_path='./runs/'):
     """ Create a new folder for the run. """
