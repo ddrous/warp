@@ -1031,3 +1031,52 @@ if dataset == "icl":
     ax.legend()
     plt.draw();
     plt.savefig(plots_folder+"icl_query_only.png", dpi=100, bbox_inches='tight')
+
+
+# %% Plot only the 89 final times steps, across a few channels of my choosing.
+import seaborn as sns
+
+if dataset == "mitsui":
+    channels = [i for i in range(10)]  # Channels to plot
+    # channels = np.random.randint(0, 106, size=10)  # Randomly select 5 channels to plot
+    plot_start = -240  # Start plotting from this time step to the end
+    forecast_start = -89  # Start of the forecast (inference) period
+
+    eval_loader = NumpyLoader(testloader.dataset, batch_size=1, shuffle=False)
+    batch = next(iter(eval_loader))
+    (xs_true, times), ys_true = batch
+    ys_recons = forward_pass(model=model
+                        , X=xs_true
+                        , times=times
+                        , key=test_key
+                        , inference_start=inference_start)
+    times = np.arange(1916+plot_start, 1916+1)              # Adjust times to be in days
+
+    sns.set(style="whitegrid")
+    fig, axs = plt.subplots(len(channels), 1, figsize=(8, 3*len(channels)), sharex=True)
+
+    for i, ch in enumerate(channels):
+        ax = axs[i] if len(channels)>1 else axs
+
+        ts = times[plot_start:]  # All time steps from plot_start to the end
+        Ys = ys_true[0, plot_start:, ch]  # All time steps from plot_start to the end, channel ch
+        Ys_hat = ys_recons[0, plot_start:, ch]
+
+        color = 'royalblue'
+        ax.plot(ts, Ys, color=color, lw=2, alpha=0.5, label="True" if (i==0) else None)
+        ax.plot(ts, Ys_hat, color='crimson', lw=1, alpha=0.9, label="Pred" if (i==0) else None)
+
+        ## Highlight the test period of interest (not leaked in the training set)
+        ax.axvspan(times[forecast_start], times[-1], color='grey', alpha=0.3, label="Test Region" if i==0 else None)
+
+        ax.set_ylabel(f"Target {ch}", fontsize=16)
+        ax.grid()
+
+        if i==0:
+            ax.set_title("Mitsui Targets Prediction", fontsize=30)
+        if i==len(channels)-1:
+            ax.set_xlabel("Days", fontsize=20)
+        if i==0:
+            ax.legend(fontsize=16, loc='lower left')
+
+

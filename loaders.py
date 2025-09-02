@@ -572,22 +572,88 @@ class MitsuiDataset(TimeSeriesRepeatDataset):
         
         ## Load raw X and raw y, then make it into a dataset of shape (n_envs, timesteps, features)
         raw_X = np.load(data_dir+f"X.npy")              ## Shape: (1, 1916, 557)
-        raw_y = np.load(data_dir+f"y_lag1.npy")         ## Shape: (1, 1916, 106)
+        raw_y = np.load(data_dir+f"y_lag1.npy")[None, ...]         ## Shape: (1, 1916, 106)
 
-        ## Nan to zero
-        raw_X = np.nan_to_num(raw_X, nan=0.0, posinf=0.0, neginf=0.0)
-        raw_y = np.nan_to_num(raw_y, nan=0.0, posinf=0.0, neginf=0.0)
+        # ## Nan to zero
+        # raw_X = np.nan_to_num(raw_X, nan=0.0, posinf=0.0, neginf=0.0)
+        # raw_y = np.nan_to_num(raw_y, nan=0.0, posinf=0.0, neginf=0.0)
+
+        ## Replace NaNs with the mean of each feature
+        # col_means = np.nanmean(raw_X[:, :1827], axis=1)
+        # ## Checks nans and ints
+        # inds = np.where(np.isnan(raw_X) | np.isinf(raw_X))
+        # raw_X[inds] = np.take(col_means, inds[2])
+
+        # col_means = np.nanmean(raw_y[:, :1827], axis=1)
+        # inds = np.where(np.isnan(raw_y) | np.isinf(raw_y))
+        # raw_y[inds] = np.take(col_means, inds[2])
+
+        ## Replace all NaNs with the mean value over the previous timestep
+        lookback = 1
+        for i in range(0, raw_X.shape[1]):
+            # nan_inds = np.isnan(raw_X[0, i, :]) | np.isinf(raw_X[0, i, :])
+            # mean_val = np.nanmean(raw_X[0, max(0, i-lookback):i, :], axis=0)
+            # raw_X[0, i, :][nan_inds] = mean_val[nan_inds]
+
+            if i == 0:
+                for chan in range(raw_X.shape[2]):
+                    if np.isnan(raw_X[0, i, chan]) or np.isinf(raw_X[0, i, chan]):
+                        raw_X[0, i, chan] = 0.0
+            else:
+                for chan in range(raw_X.shape[2]):
+                    if np.isnan(raw_X[0, i, chan]) or np.isinf(raw_X[0, i, chan]):
+                        # Replace with the mean of the previous lookback values
+                        mean_val = np.nanmean(raw_X[0, max(0, i-lookback):i, chan])
+                        raw_X[0, i, chan] = mean_val
+
+        # for i in range(1, raw_y.shape[1]):
+        #     nan_inds = np.isnan(raw_y[:, i, :]) | np.isinf(raw_y[:, i, :])
+        #     raw_y[:, i, :][nan_inds] = raw_y[:, i-1, :][nan_inds]
+        for i in range(0, raw_y.shape[1]):
+            # nan_inds = np.isnan(raw_y[0, i, :]) | np.isinf(raw_y[0, i, :])
+            # mean_val = np.nanmean(raw_y[0, max(0, i-lookback):i, :], axis=0)
+            # raw_y[0, i, :][nan_inds] = mean_val[nan_inds]
+            if i == 0:
+                for chan in range(raw_y.shape[2]):
+                    if np.isnan(raw_y[0, i, chan]) or np.isinf(raw_y[0, i, chan]):
+                        raw_y[0, i, chan] = 0.0
+            else:
+                for chan in range(raw_y.shape[2]):
+                    if np.isnan(raw_y[0, i, chan]) or np.isinf(raw_y[0, i, chan]):
+                        # Replace with the mean of the previous lookback values
+                        mean_val = np.nanmean(raw_y[0, max(0, i-lookback):i, chan])
+                        raw_y[0, i, chan] = mean_val
+
+        # print("Is there any NaN or Inf left in raw_X?", np.isnan(raw_X[:,0]).any() or np.isinf(raw_X[:,0]).any())
+        # print("Timessetps where there is any NaN or Inf left in raw_X:", np.where(np.isnan(raw_X), np.isinf(raw_X))[1])
 
         ## We don't use the last 89 timesteps, as they are reserved for the test set
+        # if partition == "train":                        ## Make samples of length 1827-(1916-1827)=1739
+        #     Xs = []
+        #     ys = []
+        #     for i in range(0, 89):
+        #         Xs.append(raw_X[:, i:i+1739, :])
+        #         ys.append(raw_y[None, i:i+1739, :])
+        # else:
+        #     Xs = [raw_X[:, 89:, :]]                    ## Make one sample of length 1739
+        #     ys = [raw_y[None, 89:, :]]
+
+        seq_len = 1739
+        # seq_len = 200
         if partition == "train":                        ## Make samples of length 1827-(1916-1827)=1739
             Xs = []
             ys = []
-            for i in range(0, 89):
-                Xs.append(raw_X[:, i:i+1739, :])
-                ys.append(raw_y[None, i:i+1739, :])
+            for i in range(0, 1827):
+                if i + seq_len <= 1827:
+                    Xs.append(raw_X[:, i:i+seq_len, :])
+                    ys.append(raw_y[:, i:i+seq_len, :])
+                else:
+                    break
         else:
-            Xs = [raw_X[:, 89:, :]]                    ## Make one sample of length 1739
-            ys = [raw_y[None, 89:, :]]
+            Xs = [raw_X[:, -seq_len:, :]]
+            ys = [raw_y[:, -seq_len:, :]]
+
+        # print(f"Loaded {len(Xs)} samples of shape {Xs[0].shape} from {data_dir} for the {partition} partition.", flush=True)
 
         Xs = np.concatenate(Xs, axis=0)
         ys = np.concatenate(ys, axis=0)
