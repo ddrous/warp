@@ -16,10 +16,10 @@ data:
 # Model hyperparameters
 model:
   root_width_size: 32
-  root_depth: 1
+  root_depth: 0
   root_activation: "relu"
   root_final_activation: null
-  root_output_dim: 106              ## If set, then careful with the NLL loss, and its splitting into means and stds.
+  root_output_dim: 424              ## If set, then careful with the NLL loss, and its splitting into means and stds.
   # positional_encoding: [6, 10]     # Dimension of positional encoding, then denominator constant.
   positional_encoding: null
   init_state_layers: 2
@@ -48,7 +48,7 @@ optimizer:
 
 # Training/Inference configurations
 training:
-  nb_epochs: 2000
+  nb_epochs: 4000
   batch_size: 16
   autoregressive: False
   print_every: 10

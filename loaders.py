@@ -572,7 +572,12 @@ class MitsuiDataset(TimeSeriesRepeatDataset):
         
         ## Load raw X and raw y, then make it into a dataset of shape (n_envs, timesteps, features)
         raw_X = np.load(data_dir+f"X.npy")              ## Shape: (1, 1916, 557)
-        raw_y = np.load(data_dir+f"y_lag1.npy")[None, ...]         ## Shape: (1, 1916, 106)
+        # raw_y = np.load(data_dir+f"y_lag4.npy")[None, ...]         ## Shape: (1, 1916, 106)
+
+        raw_y = []
+        for i in range(4):
+            raw_y.append(np.load(data_dir+f"y_lag{i+1}.npy")[None, ...])         ## Shape: (1, 1916, 106)
+        raw_y = np.concatenate(raw_y, axis=-1)    ## Shape: (1, 1916, 424)
 
         # ## Nan to zero
         # raw_X = np.nan_to_num(raw_X, nan=0.0, posinf=0.0, neginf=0.0)
@@ -645,6 +650,7 @@ class MitsuiDataset(TimeSeriesRepeatDataset):
             ys = []
             for i in range(0, 1827):
                 if i + seq_len <= 1827:
+                # if i + seq_len <= 1916:
                     Xs.append(raw_X[:, i:i+seq_len, :])
                     ys.append(raw_y[:, i:i+seq_len, :])
                 else:

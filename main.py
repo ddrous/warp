@@ -1010,7 +1010,7 @@ if dataset == "icl":
     ax.set_title("ICL Dataset's Keys and Query Points")
     ax.legend(fontsize=30)
     plt.draw();
-    plt.savefig(plots_folder+"icl_all_keys_plus_query.png", dpi=100, bbox_inches='tight')      
+    plt.savefig(plots_folder+"icl_all_keys_plus_query.png", dpi=100, bbox_inches='tight')
 
 # %% # %% Special visualisation for ICL dataset. But this time, we only consider the query points
 if dataset == "icl":
@@ -1079,4 +1079,7 @@ if dataset == "mitsui":
         if i==0:
             ax.legend(fontsize=16, loc='lower left')
 
+    plt.tight_layout()
+    plt.draw();
+    plt.savefig(plots_folder+"mitsui_targets.png", dpi=100, bbox_inches='tight')
 
