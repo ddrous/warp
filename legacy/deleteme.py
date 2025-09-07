@@ -3,7 +3,7 @@
 # sequence length (L) = 256
 # batch size (B) = 1
 # embedding dimension (D) = 2
-Cte = 5**1
+Cte = 10**1
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,4 +26,4 @@ def plot_positional_encoding(L, B, D):
     plt.show()
 
 # Example usage
-plot_positional_encoding(L=6, B=1, D=10)
+plot_positional_encoding(L=125, B=1, D=12)

@@ -99,21 +99,6 @@ def seconds_to_hours(seconds):
     return hours, minutes, seconds
 
 
-def f1_score_macro(y_true, y_pred, nb_classes):
-    """ Compute the macro F1 score. """
-    f1s = []
-    for cls in range(nb_classes):
-        tp = jnp.sum((y_pred == cls) & (y_true == cls))
-        fp = jnp.sum((y_pred == cls) & (y_true != cls))
-        fn = jnp.sum((y_pred != cls) & (y_true == cls))
-        precision = tp / (tp + fp + 1e-8)
-        recall = tp / (tp + fn + 1e-8)
-        f1 = 2 * (precision * recall) / (precision + recall + 1e-8)
-        f1s.append(f1)
-    f1_macro = jnp.mean(jnp.array(f1s))
-    return f1_macro
-
-
 def make_run_folder(parent_path='./runs/'):
     """ Create a new folder for the run. """
     if not os.path.exists(parent_path):
@@ -231,3 +216,254 @@ def sbplot(*args,
         ax.set_xlim(xlim)
     plt.tight_layout()
     return ax
+
+
+
+
+
+############## Metrics ####################
+
+# import numpy as np
+from scipy.stats import spearmanr, pearsonr
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+def _ensure_2d(a):
+    """Return (n_samples, n_targets) shaped array."""
+    a = np.asarray(a)
+    if a.ndim == 1:
+        a = a.reshape(-1, 1)
+    return a
+
+
+def _valid_mask_pair(y_true_col):
+    """Mask where y_true is finite (not NaN/inf). y_pred NaNs will be set to zero."""
+    return np.isfinite(y_true_col) 
+
+
+def rank_correlation(y_true_col, y_pred_col):
+    """Spearman rank correlation for a single target column with proper masking."""
+    y_true_col = np.asarray(y_true_col)
+    y_pred_col = np.asarray(y_pred_col)
+
+    # Only mask based on y_true, set y_pred NaNs to zero
+    mask = _valid_mask_pair(y_true_col)
+    if mask.sum() < 2:
+        return np.nan  # need at least 2 points for correlation
+
+    y_pred_masked = y_pred_col[mask]
+    y_pred_masked = np.where(np.isfinite(y_pred_masked), y_pred_masked, 0.0)
+    
+    corr = spearmanr(y_true_col[mask], y_pred_masked).correlation
+    # spearmanr can still return nan if constant arrays
+    return corr if np.isfinite(corr) else np.nan
+
+
+def shape_ratio(y):
+    """Calculate shape ratio (mean / std) ignoring NaNs; returns NaN if undefined."""
+    y = np.asarray(y, dtype=float)
+    y = y[np.isfinite(y)]  # drop NaN/inf
+    if y.size == 0:
+        return np.nan
+    std = np.std(y)
+    if std == 0:
+        return np.nan
+    return np.mean(y) / std
+
+
+def custom_metric(y_true, y_pred):
+    """
+    Per-target Spearman correlations (with masking) -> shape ratio of those correlations.
+    """
+    y_true = _ensure_2d(y_true)
+    y_pred = _ensure_2d(y_pred)
+
+    if y_true.shape != y_pred.shape:
+        raise ValueError(f"Shape mismatch: y_true {y_true.shape} vs y_pred {y_pred.shape}")
+
+    correlations = []
+    for i in range(y_true.shape[1]):
+        corr = rank_correlation(y_true[:, i], y_pred[:, i])
+        correlations.append(corr)
+
+    # print(len(correlations), "correlations computed.")
+
+    return shape_ratio(np.array(correlations, dtype=float))
+
+
+def custom_metric_abs(y_true, y_pred):
+    """
+    Per-target Spearman correlations (with masking) -> shape ratio of those correlations.
+    """
+    y_true = _ensure_2d(y_true)
+    y_pred = _ensure_2d(y_pred)
+
+    if y_true.shape != y_pred.shape:
+        raise ValueError(f"Shape mismatch: y_true {y_true.shape} vs y_pred {y_pred.shape}")
+
+    correlations = []
+    for i in range(y_true.shape[1]):
+        corr = rank_correlation(y_true[:, i], y_pred[:, i])
+        correlations.append(corr)
+
+    # print(len(correlations), "correlations computed.")
+
+    return np.abs(np.mean(correlations, dtype=float))         ## Between 0 and 1
+
+def _metric_per_target(y_true, y_pred, metric_fn, min_points=1):
+    """
+    Compute a sklearn metric per target after masking, then return the nan-mean across targets.
+    metric_fn signature: (y_true_1d, y_pred_1d) -> float
+    """
+    y_true = _ensure_2d(y_true)
+    y_pred = _ensure_2d(y_pred)
+
+    if y_true.shape != y_pred.shape:
+        raise ValueError(f"Shape mismatch: y_true {y_true.shape} vs y_pred {y_pred.shape}")
+
+    vals = []
+    for i in range(y_true.shape[1]):
+        yt = y_true[:, i]
+        yp = y_pred[:, i]
+        mask = _valid_mask_pair(yt)
+        if mask.sum() >= min_points:
+            try:
+                # Set NaN predictions to zero for masked data
+                yp_masked = yp[mask]
+                yp_masked = np.where(np.isfinite(yp_masked), yp_masked, 0.0)
+                vals.append(metric_fn(yt[mask], yp_masked))
+            except Exception:
+                vals.append(np.nan)
+        else:
+            vals.append(np.nan)
+    # average across targets, ignoring NaNs
+    return float(np.nanmean(vals)) if np.any(np.isfinite(vals)) else np.nan
+
+
+def calculate_metrics(y_true, y_pred, prefix=""):
+    """
+    Calculate comprehensive evaluation metrics, masking NaNs/inf PER TARGET.
+    Returns scalar metrics averaged across targets.
+    """
+    y_true = _ensure_2d(y_true)
+    y_pred = _ensure_2d(y_pred)
+
+    if y_true.shape != y_pred.shape:
+        raise ValueError(f"Shape mismatch: y_true {y_true.shape} vs y_pred {y_pred.shape}")
+
+    metrics = {}
+
+    # Standard regression metrics (per target, then average)
+    metrics[f"{prefix}mse"] = _metric_per_target(y_true, y_pred, mean_squared_error, min_points=1)
+    metrics[f"{prefix}mae"] = _metric_per_target(y_true, y_pred, mean_absolute_error, min_points=1)
+    # r2 needs at least 2 points
+    metrics[f"{prefix}r2"]  = _metric_per_target(y_true, y_pred, r2_score, min_points=2)
+
+    # Custom metric (shape ratio of per-target Spearman correlations)
+    metrics[f"{prefix}custom_metric"] = custom_metric(y_true, y_pred)
+
+    # Sign accuracy per target, then average
+    def _sign_acc(yt, yp):
+        m = _valid_mask_pair(yt)
+        if m.sum() == 0:
+            return np.nan
+        yp_masked = yp[m]
+        yp_masked = np.where(np.isfinite(yp_masked), yp_masked, 0.0)
+        return float(np.mean(np.sign(yt[m]) == np.sign(yp_masked)))
+
+    metrics[f"{prefix}sign_accuracy"] = _metric_per_target(y_true, y_pred, _sign_acc, min_points=1)
+
+    return metrics
+
+
+def evaluate_model_by_lag(y_pred, y_true, model_name="Model"):
+    """Evaluate model performance across lags, averaging metrics across targets within each lag."""
+
+    ## Build y_true and y_pred dicts by splitting the last dimension into 4 lags
+    y_true_vals = np.split(y_true, 4, axis=-1)
+    y_pred_vals = np.split(y_pred, 4, axis=-1)
+    y_true_dict = {f"lag_{i+1}": y_true_vals[i] for i in range(4)}
+    y_pred_dict = {f"lag_{i+1}": y_pred_vals[i] for i in range(4)}
+
+    results = {}
+    for lag in [1, 2, 3, 4]:
+        lag_key = f"lag_{lag}"
+        if lag_key in y_true_dict and lag_key in y_pred_dict:
+            y_true = y_true_dict[lag_key]
+            y_pred = y_pred_dict[lag_key]
+            lag_metrics = calculate_metrics(y_true, y_pred, f"lag{lag}_")
+            results.update(lag_metrics)
+
+            # Pretty print (guard NaNs)
+            mse = lag_metrics.get(f"lag{lag}_mse", np.nan)
+            mae = lag_metrics.get(f"lag{lag}_mae", np.nan)
+            r2  = lag_metrics.get(f"lag{lag}_r2", np.nan)
+            sa  = lag_metrics.get(f"lag{lag}_sign_accuracy", np.nan)
+            cm  = lag_metrics.get(f"lag{lag}_custom_metric", np.nan)
+            print(f"{model_name} - Lag {lag}: "
+                f"MSE={mse:.6f} | MAE={mae:.6f} | R²={r2:.4f} | "
+                f"Sign Acc={sa:.4f} | Custom Metric={cm:.4f}")
+    return results
+
+
+def mitsui_metric(y_pred, y_true):
+    """ Returns only the custom metric defined above, across the batch.
+    y_true and y_pred are (batch_size, time_steps, 4*106) arrays. """
+
+    ## Focus on the final 89 steps
+    y_true = y_true[:, -89:, :]
+    y_pred = y_pred[:, -89:, :]
+
+    sum_metric = 0.0
+    for i in range(y_true.shape[0]):
+        y_true_vals = np.split(y_true[i], 4, axis=-1)
+        y_pred_vals = np.split(y_pred[i], 4, axis=-1)
+
+        y_true_dict = {f"lag_{j+1}": y_true_vals[j] for j in range(4)}
+        y_pred_dict = {f"lag_{j+1}": y_pred_vals[j] for j in range(4)}
+        for lag in [1, 2, 3, 4]:
+            lag_key = f"lag_{lag}"
+            if lag_key in y_true_dict and lag_key in y_pred_dict:
+                y_true_lag = y_true_dict[lag_key]
+                y_pred_lag = y_pred_dict[lag_key]
+                # lag_metric = custom_metric(y_true_lag, y_pred_lag)
+                lag_metric = custom_metric_abs(y_true_lag, y_pred_lag)
+                sum_metric += lag_metric if np.isfinite(lag_metric) else 0.0
+
+    avg_metric = sum_metric / (y_true.shape[0] * 4)
+
+    return avg_metric
+
+    ## Jus retutn the correct metric between the two arrays
+    # return np.correlate(y_true.flatten(), y_pred.flatten()) / (np.linalg.norm(y_true.flatten()) * np.linalg.norm(y_pred.flatten()))
+    # return pearsonr(y_true.flatten(), y_pred.flatten())[0]
+
+
+def log_return(data, lag=1):
+    """Calculate log returns with specified lag; pad front with NaNs to keep length."""
+    data = np.asarray(data, dtype=float)
+    if data.size == 0 or lag <= 0:
+        return np.full(data.shape, np.nan, dtype=float)
+    if data.size <= lag:
+        return np.full(data.shape, np.nan, dtype=float)
+    log_ret = np.log(data[lag:] / data[:-lag])
+    return np.concatenate([np.full(lag, np.nan, dtype=float), log_ret])
+
+
+
+
+
+
+
+def f1_score_macro(y_true, y_pred, nb_classes):
+    """ Compute the macro F1 score. """
+    f1s = []
+    for cls in range(nb_classes):
+        tp = jnp.sum((y_pred == cls) & (y_true == cls))
+        fp = jnp.sum((y_pred == cls) & (y_true != cls))
+        fn = jnp.sum((y_pred != cls) & (y_true == cls))
+        precision = tp / (tp + fp + 1e-8)
+        recall = tp / (tp + fn + 1e-8)
+        f1 = 2 * (precision * recall) / (precision + recall + 1e-8)
+        f1s.append(f1)
+    f1_macro = jnp.mean(jnp.array(f1s))
+    return f1_macro

@@ -1,6 +1,6 @@
 # General settings
 general:
-  seed: 2024
+  seed: 2025
   classification: False
   train: True
   dataset: "mitsui"
@@ -11,20 +11,20 @@ general:
 data:
   normalize: True
   sequence_length: 512
-  data_dim: 557
+  data_dim: 981
 
 # Model hyperparameters
 model:
-  root_width_size: 32
-  root_depth: 0
-  root_activation: "relu"
+  root_width_size: 8
+  root_depth: 1
+  root_activation: "sin"
   root_final_activation: null
   root_output_dim: 424              ## If set, then careful with the NLL loss, and its splitting into means and stds.
   # positional_encoding: [6, 10]     # Dimension of positional encoding, then denominator constant.
   positional_encoding: null
   init_state_layers: 2
-  input_prev_data: False
-  conv_embedding: [1024, 32, 1]         ## Convolutional embedding output size, then kernel size, and whether causal or not
+  input_prev_data: True
+  conv_embedding: [256, 1024, 1]         ## Convolutional embedding output size, then kernel size, and whether causal or not
   # conv_embedding: null
   model_type: "wsm"
   nb_rnn_layers: 1
@@ -48,7 +48,7 @@ optimizer:
 
 # Training/Inference configurations
 training:
-  nb_epochs: 4000
+  nb_epochs: 5000
   batch_size: 16
   autoregressive: False
   print_every: 10

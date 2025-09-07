@@ -643,8 +643,8 @@ class MitsuiDataset(TimeSeriesRepeatDataset):
         #     Xs = [raw_X[:, 89:, :]]                    ## Make one sample of length 1739
         #     ys = [raw_y[None, 89:, :]]
 
-        seq_len = 1739
-        # seq_len = 200
+        # seq_len = 1739
+        seq_len = 1024
         if partition == "train":                        ## Make samples of length 1827-(1916-1827)=1739
             Xs = []
             ys = []
@@ -663,6 +663,16 @@ class MitsuiDataset(TimeSeriesRepeatDataset):
 
         Xs = np.concatenate(Xs, axis=0)
         ys = np.concatenate(ys, axis=0)
+
+        ## Downsample the data to speed up training ?
+        Xs = np.concatenate((Xs[::5, :, :], Xs[-1:, :, :]), axis=0).astype(np.float32)
+        ys = np.concatenate((ys[::5, :, :], ys[-1:, :, :]), axis=0).astype(np.float32)
+        print(f"Downsampled to {Xs.shape[0]} samples of shape {Xs[0].shape} from {data_dir} for the {partition} partition.", flush=True)
+
+        ## Concatenate the input and output along the feature dimension
+        Xs = np.concatenate((Xs, ys), axis=-1)
+        ## Zero our the last bottom right corner (the output at the last 1 timestep)
+        Xs[:, -1:, -ys.shape[-1]:] = 0.0
 
         if min_max is not None:
             self.min_data = min_max[0]
