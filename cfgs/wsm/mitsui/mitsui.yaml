@@ -1,6 +1,6 @@
 # General settings
 general:
-  seed: 2025
+  seed: 2026
   classification: False
   train: True
   dataset: "mitsui"

@@ -13,17 +13,17 @@ data:
 
 # Model hyperparameters
 model:
-  root_width_size: 48
+  root_width_size: 16
   root_depth: 1
-  root_activation: "relu"
+  root_activation: "sin"
   root_final_activation: null
   root_output_dim: 39
-  positional_encoding: [12, 10]
-  # positional_encoding: null
+  # positional_encoding: [12, 10]
+  positional_encoding: null
   init_state_layers: 1
   input_prev_data: False
-  # conv_embedding: [64, 250, 0]
-  conv_embedding: null
+  conv_embedding: [512, 250, 0]
+  # conv_embedding: null
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: null

@@ -181,7 +181,7 @@ dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_d
 repeat_datasets = ["lotka", "arc_agi", "icl", "traffic", "mitsui"]
 
 res = (width, width, data_size)
-dim0, dim1 = (0, -1)
+dim0, dim1 = (-1, -1)
 if dim1>= data_size:
     dim1 = 0
     logger.info(f"dim1 is out of bounds. Setting it to 0.")
@@ -1041,7 +1041,7 @@ import seaborn as sns
 if dataset == "mitsui":
     # channels = [i for i in range(10)]  # Channels to plot
     channels = np.random.randint(106*0, 106*1, size=20)  # Randomly select 5 channels to plot
-    plot_start = -240  # Start plotting from this time step to the end
+    plot_start = -120  # Start plotting from this time step to the end
     forecast_start = -89  # Start of the forecast (inference) period
 
     eval_loader = NumpyLoader(testloader.dataset, batch_size=1, shuffle=False)
@@ -1118,8 +1118,9 @@ if dataset == "mitsui":
     predictions = []
     truths = []
     for step in range(1, 90):
-        input_xs = jnp.concatenate([train_xs[:, step:], test_xs[:, :step]], axis=1)
-        input_xs = input_xs.at[:, -1:, -test_ys.shape[-1]:].set(0.0)
+        input_xs = np.concatenate([train_xs[:, step:], test_xs[:, :step]], axis=1)
+        # input_xs = input_xs.at[:, -1:, -test_ys.shape[-1]:].set(0.0)
+        input_xs[:, -1:, -test_ys.shape[-1]:] = 0.0
 
         ys_recons = forward_pass(model=model
                                 , X=input_xs
@@ -1133,20 +1134,23 @@ if dataset == "mitsui":
     truths = jnp.stack(truths, axis=1)
     print("Shapes of the final predictions and truths:", predictions.shape, truths.shape)
 
-#%% Just for plotting
-if dataset == "mitsui":
-    # plot_start = -120
-    channels = np.random.randint(106*0, 106*4, size=20)     # Randomly select 5 channels to plot
+
+    # channels = np.random.randint(106*0, 106*4, size=20)     # Randomly select 5 channels to plot
     times = np.arange(1916+plot_start, 1916+1)              # Adjust times to be in days
     sns.set(style="whitegrid")
     fig, axs = plt.subplots(len(channels), 1, figsize=(8, 3*len(channels)), sharex=True)
+
+    ## Remake the proper ys_recons and ys_true for plotting
+    ys_recons_plot = jnp.concatenate([ys_recons[:, -1024+89:, :], predictions], axis=1)
+    ys_true_plot = jnp.concatenate([test_ys[:, -1024+89:, :], truths], axis=1)
+    print("Shapes for plotting:", ys_recons_plot.shape, ys_true_plot.shape, test_ys.shape, truths.shape)
 
     for i, ch in enumerate(channels):
         ax = axs[i] if len(channels)>1 else axs
 
         ts = times[plot_start:]  # All time steps from plot_start to the end
-        Ys = ys_true[0, plot_start:, ch]  # All time steps from plot_start to the end, channel ch
-        Ys_hat = ys_recons[0, plot_start:, ch]
+        Ys = ys_true_plot[0, plot_start:, ch]  # All time steps from plot_start to the end, channel ch
+        Ys_hat = ys_recons_plot[0, plot_start:, ch]
 
         color = 'royalblue'
         ax.plot(ts, Ys, color=color, lw=2, alpha=0.5, label="True" if (i==0) else None)
@@ -1169,9 +1173,100 @@ if dataset == "mitsui":
     plt.draw();
     plt.savefig(plots_folder+"mitsui_targets_recursive.png", dpi=100, bbox_inches='tight')
 
-    preds = predictions
-    thruth = truths
+    preds = predictions[0]
+    thruth = truths[0]
     print("These are the shapes:", thruth.shape, preds.shape)
     metrics_results = evaluate_model_by_lag(preds, thruth, "WARP")
 
 # %%
+
+
+
+
+
+#%% Let's do a best of both wordls approach
+if dataset == "mitsui":
+
+    eval_loader = NumpyLoader(testloader.dataset, batch_size=1, shuffle=False)
+    eval_batch = next(iter(eval_loader))
+    (test_xs, test_times), test_ys = eval_batch
+    print("Shapes:", train_xs.shape, test_xs.shape)
+
+    ## Make a copy of test_xs for later
+    test_xs_orig = test_xs.copy()
+    test_xs[:, -89:, -test_ys.shape[-1]:] = 0.0
+
+    ## This is where we start the superrecurvive calculations to use the entire history available
+    predictions = []
+    truths = []
+    for step in range(0, 89):
+        # test_xs[:, -89+step:, -test_ys.shape[-1]:] = 0.0
+
+        ys_recons = forward_pass(model=model
+                                , X=test_xs
+                                , times=train_times
+                                , key=test_key
+                                , inference_start=None)
+        
+        if step==0:
+            ys_recons_orig = ys_recons.copy()
+        
+        # test_xs[:, -89+step:-89+step-1, -test_ys.shape[-1]:] = test_xs_orig[:, -89+step:-89+step-1, -test_ys.shape[-1]:]
+        rep_start = 1024 - 89 + step
+        test_xs[:, rep_start:rep_start+1, -test_ys.shape[-1]:] = test_xs_orig[:, rep_start:rep_start+1, -test_ys.shape[-1]:]
+
+        predictions.append(ys_recons[0, rep_start:rep_start+1, :])
+        # predictions.append(ys_recons[0, -1:, :])
+        # truths.append(test_ys[0:, -89+step:-89+step-1])
+
+    predictions = jnp.stack(predictions, axis=1)
+    # truths = jnp.stack(truths, axis=1)
+    truths = test_ys[:, -89: , :]
+    print("Shapes of the final predictions and truths:", predictions.shape, truths.shape)
+
+#%% Just for plotting
+if dataset == "mitsui":
+    # plot_start = -120
+    # channels = np.random.randint(106*0, 106*4, size=20)     # Randomly select 5 channels to plot
+    times = np.arange(1916+plot_start, 1916+1)              # Adjust times to be in days
+    sns.set(style="whitegrid")
+    fig, axs = plt.subplots(len(channels), 1, figsize=(8, 3*len(channels)), sharex=True)
+
+    ## Remake the proper ys_recons and ys_true for plotting
+    ys_recons_plot = jnp.concatenate([ys_recons_orig[:, -1024+89:, :], predictions], axis=1)
+    ys_true_plot = jnp.concatenate([test_ys[:, -1024+89:, :], truths], axis=1)
+    print("Shapes for plotting:", ys_recons_plot.shape, ys_true_plot.shape, test_ys.shape, truths.shape)
+
+    for i, ch in enumerate(channels):
+        ax = axs[i] if len(channels)>1 else axs
+
+        ts = times[plot_start:]  # All time steps from plot_start to the end
+        Ys = ys_true_plot[0, plot_start:, ch]  # All time steps from plot_start to the end, channel ch
+        Ys_hat = ys_recons_plot[0, plot_start:, ch]
+
+        color = 'royalblue'
+        ax.plot(ts, Ys, color=color, lw=2, alpha=0.5, label="True" if (i==0) else None)
+        ax.plot(ts, Ys_hat, color='crimson', lw=1, alpha=0.9, label="Pred" if (i==0) else None)
+
+        ## Highlight the test period of interest (not leaked in the training set)
+        ax.axvspan(times[forecast_start], times[-1], color='grey', alpha=0.3, label="Test Region" if i==0 else None)
+
+        ax.set_ylabel(f"Target {ch}", fontsize=16)
+        ax.grid()
+
+        if i==0:
+            ax.set_title("Mitsui Targets Prediction (Para-Recur)", fontsize=30)
+        if i==len(channels)-1:
+            ax.set_xlabel("Days", fontsize=20)
+        if i==0:
+            ax.legend(fontsize=16, loc='lower left')
+
+    plt.tight_layout()
+    plt.draw();
+    plt.savefig(plots_folder+"mitsui_targets_para_recurs.png", dpi=100, bbox_inches='tight')
+
+    preds = predictions[0]
+    thruth = truths[0]
+    print("These are the shapes:", thruth.shape, preds.shape)
+    metrics_results = evaluate_model_by_lag(preds, thruth, "WARP")
+

@@ -649,8 +649,8 @@ class MitsuiDataset(TimeSeriesRepeatDataset):
             Xs = []
             ys = []
             for i in range(0, 1827):
-                if i + seq_len <= 1827:
-                # if i + seq_len <= 1916:
+                # if i + seq_len <= 1827:
+                if i + seq_len <= 1916:
                     Xs.append(raw_X[:, i:i+seq_len, :])
                     ys.append(raw_y[:, i:i+seq_len, :])
                 else:
@@ -672,7 +672,38 @@ class MitsuiDataset(TimeSeriesRepeatDataset):
         ## Concatenate the input and output along the feature dimension
         Xs = np.concatenate((Xs, ys), axis=-1)
         ## Zero our the last bottom right corner (the output at the last 1 timestep)
-        Xs[:, -1:, -ys.shape[-1]:] = 0.0
+        Xs[:, -1:, -ys.shape[-1]:] = 0.0                ## Shape: (Batch_size, 1024, 981)
+
+        def lags_to_mask():
+            """
+            Create a lag mask for the given targets based on their lag values.
+            """
+            max_lag = 4 + 1
+            n_targets = 424
+        
+            # Initialize mask with zeros
+            lag_mask = np.zeros((max_lag, n_targets), dtype=int)        ## Shape: (5, 424)
+            l = 1
+            # Fill the mask based on lag values
+            for j in range(n_targets):
+                if j % 106 == 0 and j > 0:
+                    l += 1
+                for i in range(max_lag-l-1):
+                    lag_mask[i, j] = 1
+
+            return lag_mask
+
+        mask = lags_to_mask()
+
+        # print("Lag mask shape:", mask.shape)
+        # print(mask.T)
+
+        ## Repeat mask along the batch and time dimensions
+        batch_mask = np.repeat(mask[None, :, :], Xs.shape[0], axis=0)      ## Shape: (Batch_size, 5, 424)
+        Xs[:, -5:, -ys.shape[-1]:] = Xs[:, -5:, -ys.shape[-1]:]*batch_mask
+
+        # Xs = Xs[:, -20:, :]
+        # ys = ys[:, -20:, :]
 
         if min_max is not None:
             self.min_data = min_max[0]
@@ -682,8 +713,18 @@ class MitsuiDataset(TimeSeriesRepeatDataset):
             self.max_data = np.max(Xs, axis=(0, 1), keepdims=True)
 
         if normalize:
+
+            # ## Iterate over the channels, and print the channel with absolute difference < 1e-6, print the value as value
+            # for i in range(Xs.shape[-1]):
+            #     if np.abs(self.max_data[0, 0, i]-self.min_data[0, 0, i]) < 1e-6:
+            #         print(f"Channel {i} has almost no variation: max={self.max_data[0, 0, i]}, min={self.min_data[0, 0, i]}")
+            #         # print(f"Values in this channel: {Xs[0, :, i]}")
+
             Xs = (Xs - self.min_data) / (self.max_data - self.min_data)
+            # Xs = (Xs - self.min_data) / (self.max_data - self.min_data + 1e-6)
             Xs = (Xs - 0.5) / 0.5
+
+            # print(f"Absolute value of the difference between max and min in Xs after normalisation: {np.abs(self.max_data-self.min_data)}")
 
         n_envs, n_timesteps, n_dimensions = Xs.shape
 
