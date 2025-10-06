@@ -665,8 +665,16 @@ class MitsuiDataset(TimeSeriesRepeatDataset):
         ys = np.concatenate(ys, axis=0)
 
         ## Downsample the data to speed up training ?
-        Xs = np.concatenate((Xs[::5, :, :], Xs[-1:, :, :]), axis=0).astype(np.float32)
-        ys = np.concatenate((ys[::5, :, :], ys[-1:, :, :]), axis=0).astype(np.float32)
+        new_nb_intances = Xs.shape[0]//5 + 1
+        ## Randomly select new_nb_instances indices from Xs
+        indices = np.sort(np.random.choice(np.arange(Xs.shape[0]), new_nb_intances-1, replace=False))
+        indices = np.concatenate((indices, [Xs.shape[0]-1]))
+
+        Xs = Xs[indices, :, :].astype(np.float32)
+        ys = ys[indices, :, :].astype(np.float32)
+
+        # Xs = np.concatenate((Xs[::5, :, :], Xs[-1:, :, :]), axis=0).astype(np.float32)
+        # ys = np.concatenate((ys[::5, :, :], ys[-1:, :, :]), axis=0).astype(np.float32)
         print(f"Downsampled to {Xs.shape[0]} samples of shape {Xs[0].shape} from {data_dir} for the {partition} partition.", flush=True)
 
         ## Concatenate the input and output along the feature dimension

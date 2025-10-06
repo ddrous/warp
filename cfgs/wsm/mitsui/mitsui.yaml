@@ -10,7 +10,7 @@ general:
 # Data hyperparameters
 data:
   normalize: True
-  sequence_length: 512
+  sequence_length: 1024
   data_dim: 981
 
 # Model hyperparameters
@@ -22,7 +22,7 @@ model:
   root_output_dim: 424              ## If set, then careful with the NLL loss, and its splitting into means and stds.
   # positional_encoding: [6, 10]     # Dimension of positional encoding, then denominator constant.
   positional_encoding: null
-  init_state_layers: 2
+  init_state_layers: 1
   input_prev_data: True
   conv_embedding: [256, 1024, 1]         ## Convolutional embedding output size, then kernel size, and whether causal or not
   # conv_embedding: null
