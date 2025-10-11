@@ -178,7 +178,8 @@ colors = ['r', 'g', 'b', 'c', 'm', 'y']
 dataset = config['general']['dataset']
 image_datasets = ["mnist", "mnist_fashion", "cifar", "celeba", "pathfinder"]
 dynamics_datasets = ["lorentz63", "lorentz96", "lotka", "trends", "mass_spring_damper", "cheetah", "electricity", "sine"]
-repeat_datasets = ["lotka", "arc_agi", "icl", "traffic", "mitsui"]
+repeat_datasets = ["lotka", "arc_agi", "icl", "traffic", "mitsui", "comphy"]
+video_datasets = ["comphy"]
 
 res = (width, width, data_size)
 dim0, dim1 = (-1, -1)
@@ -218,7 +219,28 @@ plt.suptitle(f"{dataset.upper()} Training Samples", fontsize=20)
 plt.draw();
 plt.savefig(plots_folder+"samples_train.png", dpi=100, bbox_inches='tight')
 
+#%% PLot for the comphy image frames
 
+if dataset in video_datasets:
+    # frames = output[0]  ## (time, H*W*3)
+    frames = in_sequence[0]  ## (time, H*W*3)
+    mini_res = config["data"].get("mini_res", 1)        # width was called mini_res
+    H, W = 320//mini_res, 480//mini_res
+    frames = frames.reshape(frames.shape[0], H, W, 3)
+    num_frames = frames.shape[0]
+    print("Shapes of the frames:", frames.shape)
+    skip = 5
+    plt.figure(figsize=(50, 5))
+    for i, f_id in enumerate(range(0, num_frames, skip)):
+        if f_id < len(frames):
+            # print("all variables:", i, f_id, num_frames, frames.shape, num_frames//skip)
+            plt.subplot(1, 1+num_frames//skip, i+1)
+            plt.imshow((frames[f_id]+1)/2)
+            plt.axis('off')
+
+    # plt.suptitle(f"COMPHY Sample Frames", fontsize=20)
+    plt.draw();
+    plt.savefig(plots_folder+"samples_comphy.png", dpi=100, bbox_inches='tight')
 
 # %% Define the model and loss function
 
@@ -643,14 +665,15 @@ if config["model"]["model_type"] == "wsm":
     plt.draw();
     plt.savefig(plots_folder+"A_theta_histograms.png", dpi=100, bbox_inches='tight')
 
-    ## PLot all values of B in a lineplot (all dimensions)
-    if not isinstance(model.Bs[0], eqx.nn.Linear):
-        fig, ax = plt.subplots(1, 1, figsize=(10, 4))
-        ax.plot(model.Bs[0], label="Values of B")
-        ax.set_title("Values of B")
-        ax.set_xlabel("Dimension")
-        plt.draw();
-        plt.savefig(plots_folder+"B_values.png", dpi=100, bbox_inches='tight')
+    if dataset != "comphy":
+        ## PLot all values of B in a lineplot (all dimensions)
+        if not isinstance(model.Bs[0], eqx.nn.Linear):
+            fig, ax = plt.subplots(1, 1, figsize=(10, 4))
+            ax.plot(model.Bs[0], label="Values of B")
+            ax.set_title("Values of B")
+            ax.set_xlabel("Dimension")
+            plt.draw();
+            plt.savefig(plots_folder+"B_values.png", dpi=100, bbox_inches='tight')
 
     ## Print the untrained and trained matrices A as imshows with same range
     fig, axs = plt.subplots(1, 2, figsize=(20, 10))
@@ -693,7 +716,7 @@ if config["model"]["model_type"] == "wsm":
 
 # %% Visualising a few reconstruction samples (for regression tasks)
 
-if not classification:
+if not classification and dataset != "comphy":
     visloader = NumpyLoader(testloader.dataset, batch_size=16, shuffle=True)
     nb_examples = len(visloader.dataset)    ## Actual number of examples in the dataset
 
@@ -788,7 +811,7 @@ if not classification:
 
 #%% Evaluate the model on the entire test set (for regression tasks)
 
-if not classification:
+if not classification and dataset != "comphy":
     eval_loader = NumpyLoader(testloader.dataset, batch_size=len(testloader.dataset), shuffle=False)
 
     batch = next(iter(eval_loader))
@@ -1270,3 +1293,78 @@ if dataset == "mitsui":
     print("These are the shapes:", thruth.shape, preds.shape)
     metrics_results = evaluate_model_by_lag(preds, thruth, "WARP")
 
+
+
+#%% Just for plotting the comphy visualise, similar to the below code:
+
+# if dataset=="comphy":
+#     frames = output[0]  ## (time, H*W*3)
+#     num_frames = frames.shape[0]
+#     skip = 5
+#     plt.figure(figsize=(15, 5))
+#     for i, f_id in enumerate(range(0, num_frames, skip)):
+#         if f_id < len(frames):
+#             plt.subplot(1, num_frames // skip, i + 1)
+#             plt.imshow(frames[f_id])
+#             plt.axis('off')
+
+if dataset in video_datasets:
+    eval_loader = NumpyLoader(testloader.dataset, batch_size=1, shuffle=False)
+    eval_batch = next(iter(eval_loader))
+    (test_xs, test_times), test_ys = eval_batch
+    print("Shapes:", test_xs.shape, test_ys.shape)
+
+    ys_recons = forward_pass(model=model
+                            , X=test_xs
+                            , times=test_times
+                            , key=test_key
+                            , inference_start=None)
+
+    ## Plot the 
+    H, W = 320//mini_res, 480//mini_res
+    res = (H, W, 3)
+
+    frames_true = test_xs[0].reshape(-1, H, W, 3)
+    frames_recons = ys_recons[0].reshape(-1, H, W, 3)
+
+    num_frames = frames_true.shape[0]
+    skip = 5
+    # plt.figure(figsize=(50, 5))
+    # for i, f_id in enumerate(range(0, num_frames, skip)):
+    #     if f_id < len(frames_true):
+    #         plt.subplot(2, 1+num_frames//skip, i + 1)
+    #         plt.imshow((frames_true[f_id]+1)/2)
+    #         plt.axis('off')
+    #         # if i==0:
+    #         #     plt.title("True", fontsize=8)
+
+    #         plt.subplot(2, 1+num_frames//skip, i+1+ 1+num_frames//skip)
+    #         plt.imshow((frames_recons[f_id]+1)/2)
+    #         plt.axis('off')
+    #         # if i==0:
+    #         #     plt.title("Recons", fontsize=8)
+
+    ## Use axis instead of subplots
+    num_plots = num_frames//skip + 1
+    fig, axs = plt.subplots(2, num_plots, figsize=(6*num_plots, 10))
+    for i, f_id in enumerate(range(0, num_frames, skip)):
+        if f_id < len(frames_true):
+            ax = axs[0, i] if len(axs.shape)>1 else axs[0]
+            ax.imshow((frames_true[f_id]+1)/2)
+            ax.axis('off')
+
+            ax = axs[1, i] if len(axs.shape)>1 else axs[1]
+            ax.imshow((frames_recons[f_id]+1)/2)
+            ax.axis('off')
+
+    # # plt.suptitle("Comphy Dataset - True vs Reconstructed", fontsize=20)
+    # plt.tight_layout()
+    # plt.draw()
+    # plt.savefig(plots_folder+"comphy_true_vs_recons.png", dpi=100, bbox_inches='tight');
+
+    ### Remove all the white space between the images
+    plt.subplots_adjust(wspace=0, hspace=0)
+    # plt.suptitle("Comphy Dataset - True vs Reconstructed", fontsize=20)
+    plt.tight_layout()
+    plt.draw()
+    plt.savefig(plots_folder+"comphy_true_vs_recons.png", dpi=100, bbox_inches='tight');

@@ -748,6 +748,258 @@ class MitsuiDataset(TimeSeriesRepeatDataset):
 
 
 
+
+import cv2
+def video_to_frames(video_path, normalize=False, mini_res=1):
+    """
+    Load a video from the specified path and convert it into a sequence of frames.
+
+    Parameters:
+    video_path (str): Path to the video file.
+    normalize (bool): Whether to normalize pixel values to the range [-1, 1].
+
+    Returns:
+    np.ndarray: A 3D numpy array where each slice along the first axis is a frame.
+    """
+
+    cap = cv2.VideoCapture(video_path)
+    frames = []
+
+
+    # It's also good practice to check if the video opened successfully
+    if not cap.isOpened():
+        print(f"!!!!!!!!!!!!!! ERROR: Could not open video file: {video_path}", flush=True)
+        # Return an empty array or raise an error to handle it gracefully
+        # This will prevent the `frame` from being None and crashing cvtColor
+        return np.zeros((50, 40, 60, 3), dtype=np.float32)  # Assuming a default shape
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        # Convert BGR to RGB
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        ## Resize the frame if mini_res > 1
+        if mini_res > 1:
+            frame = cv2.resize(frame, (frame.shape[1]//mini_res, frame.shape[0]//mini_res), interpolation=cv2.INTER_AREA)
+
+        frames.append(frame)
+
+    cap.release()
+    array = np.array(frames) / 255.0  # Normalize pixel values to [0, 1] (must happen)
+    if normalize:
+        array = (array - 0.5) / 0.5  # Further normalize to [-1, 1]
+    return array
+
+
+
+
+
+# # class ComphyDataset(TimeSeriesRepeatDataset):
+# class ComphyDataset(TimeSeriesDataset):
+#     """
+#     For the ComPhy dataset: https://physicalconceptreasoner.github.io
+#     """
+
+#     def __init__(self, data_dir, partition, mini_res=2, normalize=True, positional_enc=None):
+
+#         prefix = "" if partition=="train" else "test_"
+#         data_foler_refs = f"{data_dir}{prefix}reference/"
+#         data_foler_tgts = f"{data_dir}{prefix}target/"
+
+#         max_seqs = 600 if partition=="train" else 10
+
+#         ## List every folder in data_folder_refs, and for each folder, list every folder inside
+#         all_sequences = []
+#         for folder in os.listdir(data_foler_refs):
+#             folder_path = os.path.join(data_foler_refs, folder)
+#             if os.path.isdir(folder_path):
+#                 for subfolder in os.listdir(folder_path):
+#                     subfolder_path = os.path.join(folder_path, subfolder)
+#                     # if os.path.isdir(subfolder_path):
+#                     #     all_refs.append(subfolder_path)
+
+#                     refs_base_path = subfolder_path
+#                     ## Each subfolder has 4 mp4 files, convert to npy arrays and load them all
+#                     sequence = []
+#                     for i in [2,3,1,0]:
+#                         ref_path = os.path.join(refs_base_path, f"{i}.mp4")
+
+#                         ## Check the the file exists. If not, put a zero array of shape the last one in the sequence
+#                         if not os.path.exists(ref_path):
+#                             if len(sequence) > 0:
+#                                 sequence.append(np.zeros_like(sequence[0]))
+#                             else:
+#                                 print(f"Warning: file {ref_path} does not exist, and no previous frames to copy shape from. Just adding zeros.", flush=True)
+#                                 # sequence.append(np.zeros((5, 64*64*3)))   ## Shape: (5, H*W*3)
+#                         else:
+#                             frames = video_to_frames(ref_path, normalize=normalize, mini_res=mini_res)    ## Shape: (n_frames, H, W, 3)
+#                             # print("SHapes of the frame:", frames.shape, "folfder:", folder, "subfolder:", subfolder, "video:", i)
+#                             sequence.append(frames.reshape(frames.shape[0], -1))   ## Shape: (n_frames, H*W*3)
+
+#                         ## Add zero frames of shape (5, H*W*3) between each video
+#                         sequence.append(np.zeros((5, frames.shape[1]*frames.shape[2]*frames.shape[3])))
+
+#                     ## Add the target video at the end of the sequence
+#                     # tgt_path = os.path.join(data_foler_tgts, folder, subfolder, ".mp4")
+#                     tgt_path = data_foler_tgts + folder + "/" + subfolder + ".mp4"
+#                     tgt_frames = video_to_frames(tgt_path, normalize=normalize, mini_res=mini_res)
+
+#                     # print("Shapes of the sequence:", tgt_frames.shape, "folfder:", folder, "subfolder:", subfolder, "video:", tgt_path, flush=True)
+#                     sequence.append(tgt_frames.reshape(tgt_frames.shape[0], -1))
+
+#                     sequence = np.concatenate(sequence, axis=0)   ## Shape: (total_frames, H*W*3)
+#                     all_sequences.append(sequence)
+
+#                     # print(f"Done loading sequence from folder {folder}, subfolder {subfolder}, with shape {sequence.shape}", flush=True)
+
+#                     # break
+#             # break
+
+#                     ### Stop after 100 sequences 
+#                     if len(all_sequences) >= max_seqs:
+#                         break
+#             print(f"Done loading folder {folder}, total sequences so far: {len(all_sequences)}", flush=True)
+
+#             if len(all_sequences) >= max_seqs:
+#                 break
+
+#         # print("Shape of everthing in all_sequences:", [s.shape for s in all_sequences], flush=True)
+
+#         ys = np.stack(all_sequences, axis=0).astype(np.float32)   ## Shape: (n_envs, total_frames, H*W*3)
+
+#         # target_window = 25
+#         # Xs = ys.copy()
+#         # Xs[:, -target_window:, :] = 0.0
+
+#         Xs = ys
+#         n_envs, n_timesteps, n_dimensions = Xs.shape
+#         ys = np.ones(n_envs, dtype=np.int32) * 0   ## Dummy labels of shape (n_envs,)
+
+#         t_eval = np.linspace(0., 1., n_timesteps)
+
+#         self.total_envs = n_envs
+#         self.nb_classes = 1
+#         self.num_steps = n_timesteps
+#         self.data_size = n_dimensions
+
+#         super().__init__(Xs, ys, t_eval, traj_prop=1.0, positional_enc=positional_enc)
+
+
+
+# class ComphyDataset(TimeSeriesRepeatDataset):
+class ComphyDataset(TimeSeriesDataset):
+    """
+    For the ComPhy dataset: https://physicalconceptreasoner.github.io
+    """
+
+    def __init__(self, data_dir, partition, mini_res=2, normalize=True, positional_enc=None):
+
+        prefix = "" if partition=="train" else "test_"
+        data_foler_refs = f"{data_dir}{prefix}reference/"
+        data_foler_tgts = f"{data_dir}{prefix}target/"
+
+        all_refs_files = []
+        all_tgts_files = []
+
+        for folder in os.listdir(data_foler_refs):
+            folder_path = os.path.join(data_foler_refs, folder)
+            if os.path.isdir(folder_path):
+                for subfolder in os.listdir(folder_path):
+                    subfolder_path = os.path.join(folder_path, subfolder)
+                    all_refs_files.append(subfolder_path)
+
+                    tgt_path = data_foler_tgts + folder + "/" + subfolder
+                    all_tgts_files.append(tgt_path)
+
+            print(f"Done loading folder all file names", flush=True)
+
+        self.refs_files = all_refs_files
+        self.tgts_files = all_tgts_files
+
+        # self.total_envs = len(all_refs_files) if partition=="train" else 100
+        self.total_envs = 128
+        self.true_total_envs = len(all_refs_files) if partition=="train" else self.total_envs
+        # self.true_total_envs = len(all_refs_files)
+
+        self.nb_classes = 1
+
+        self.normalize = normalize
+        self.mini_res = mini_res
+
+        self.num_steps = 347
+        self.data_size = (320//mini_res)*(480//mini_res)*3  ## Hardcoded for now, to be improved
+
+
+    def __getitem__(self, idx):
+
+        ## Replace idx by a random index
+        idx = np.random.randint(0, self.true_total_envs)
+
+        refs_base_path = self.refs_files[idx]
+        tgt_path = self.tgts_files[idx]
+
+        sequence = []
+        for i in [0,1,2,3]:
+            ref_path = os.path.join(refs_base_path, f"{i}.mp4")
+
+            ## Check the the file exists. If not, put a zero array of shape the last one in the sequence
+            if not os.path.exists(ref_path):
+                if len(sequence) > 0:
+                    # sequence.append(np.zeros_like(sequence[0]))
+                    sequence.append(np.zeros((50, self.data_size)))
+                    # print(f"Warning: file {ref_path} does not exist, adding zeros of shape {sequence[0].shape}", flush=True)
+                    print(f"Warning: file {ref_path} does not exist, adding zeros of shape {(50, self.data_size)}", flush=True)
+                # else:
+                #     print(f"Warning: file {ref_path} does not exist, and no previous frames to copy shape from. Just adding zeros.", flush=True)
+                    # sequence.append(np.zeros((5, 64*64*3)))   ## Shape: (5, H*W*3)
+            else:
+                frames = video_to_frames(ref_path, normalize=self.normalize, mini_res=self.mini_res)    ## Shape: (n_frames, H, W, 3)
+                sequence.append(frames.reshape(frames.shape[0], -1))   ## Shape: (n_frames, H*W*3)
+
+            ## Add zero frames of shape (5, H*W*3) between each video
+            sequence.append(np.zeros((5, self.data_size)))
+
+        tgt_frames = video_to_frames(tgt_path+".mp4", normalize=self.normalize, mini_res=self.mini_res)         ## Shape: (127, H, W, 3)
+        # print("Loaded target video from path:", tgt_path+".mp4", "with shape:", tgt_frames.shape, flush=True)
+
+        # print("Shapes of the sequence:", tgt_frames.shape, "folfder:", folder, "subfolder:", subfolder, "video:", tgt_path, flush=True)
+        sequence.append(tgt_frames.reshape(tgt_frames.shape[0], -1))
+
+        sequence = np.concatenate(sequence, axis=0)   ## Shape: (total_frames, H*W*3)
+        # print("SHapes of the sequence:", sequence.shape, "folfder:", flush=True)
+        # exit(0)
+
+        # --- ADD THIS LOGIC ---
+        fixed_length = 347 # Or whatever your target length is
+        current_length = sequence.shape[0]
+        
+        if current_length >= fixed_length:
+            # Trim longer sequences
+            sequence = sequence[:fixed_length, :]
+        elif current_length < fixed_length:
+            # Pad shorter sequences with zeros
+            padding_needed = fixed_length - current_length
+            # Create a padding array of shape (padding_needed, feature_size)
+            padding = np.zeros((padding_needed, sequence.shape[1]), dtype=sequence.dtype)
+            sequence = np.concatenate([sequence, padding])
+        # --- END OF NEW LOGIC ---
+
+        # self.num_steps, self.data_size = sequence.shape
+        t_eval = np.linspace(0., 1., self.num_steps)[:, None]
+
+        # return (sequence, t_eval), np.array([0], dtype=np.int32)   ## Dummy label of shape (1,)
+
+        in_sequence = sequence.copy()
+        in_sequence[-50:, :] = 0.0
+        return (in_sequence, t_eval), sequence   ## Dummy label of shape (1,)
+
+    def __len__(self):
+        return self.total_envs
+
+
+
 class ARC_AGIDataset(TimeSeriesRepeatDataset):
     """
     For the a ARC-AGI dataset framed as a repeat-copy tasks
@@ -1351,6 +1603,29 @@ def make_dataloaders(data_folder, config):
         nb_classes, seq_length, data_size = trainloader.dataset.nb_classes, trainloader.dataset.num_steps, trainloader.dataset.data_size
         print("Training sequence length:", seq_length)
         min_res = None
+
+    elif dataset in ["comphy"]:
+        print(" #### Comphy Dataset ####")
+        traj_len = None
+        normalize = config["data"]["normalize"]
+        down_scale = config["data"].get("mini_res", 1)
+
+        trainloader = NumpyLoader(ComphyDataset(data_folder, partition="train", normalize=normalize, mini_res=down_scale, positional_enc=positional_enc), 
+                                batch_size=batch_size, 
+                                shuffle=True, 
+                                num_workers=24)
+        # valloader = NumpyLoader(ComphyDataset(data_folder, partition="val", normalize=normalize, mini_res=down_scale, positional_enc=positional_enc),
+        #                             batch_size=batch_size, 
+        #                             shuffle=False, 
+        #                             num_workers=24)
+        testloader = NumpyLoader(ComphyDataset(data_folder, partition="test", normalize=normalize, mini_res=down_scale, positional_enc=positional_enc),
+                                    batch_size=batch_size, 
+                                    shuffle=False, 
+                                    num_workers=24)
+        nb_classes, seq_length, data_size = 1, trainloader.dataset.num_steps, trainloader.dataset.data_size
+        print("Training sequence length:", seq_length)
+        min_res = down_scale
+
 
     elif dataset in ["arc_agi"]:
         print(" #### ARC-AGI Dataset ####")

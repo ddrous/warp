@@ -50,6 +50,7 @@ class RootMLP(eqx.Module):
             return out
 
         else:
+            # print("Output shape before split: ", out.shape, flush=True)
             mean, std = jnp.split(out, 2, axis=-1)
 
             if self.final_activation is not None:
@@ -119,6 +120,7 @@ class GradualMLP(eqx.Module):
         elif hidden_layers == 1:
             ## half
             hidden_size = int(0.5*input_dim + 0.5*output_dim)
+            print("All variables: input_dim, hidden_size, output_dim: ", input_dim, hidden_size, output_dim, flush=True)
             in_layer = eqx.nn.Linear(input_dim, hidden_size, key=keys[0])
             out_layer = eqx.nn.Linear(hidden_size, output_dim, key=keys[1])
             self.layers = [in_layer, activation, out_layer]
@@ -306,8 +308,13 @@ class WSM(eqx.Module):
                     # input_dim = 1+positional_enc_dim+data_size-1 if input_prev_data else 1+positional_enc_dim
                 output_dim = 2*data_size if predict_uncertainty else data_size
 
+                input_dim = 3             #@TODO: just for Comphy data
+                output_dim = 6            #@TODO: just for Comphy data
+
                 ## Check if provided root_output dimension in yaml
-                output_dim = preferred_output_dim if (preferred_output_dim is not None) else output_dim
+                if preferred_output_dim is not None:
+                    output_dim = preferred_output_dim
+                    print("Using preferred output dimension: ", output_dim, flush=True)
 
                 # print("\n\nUsing WSM layer ", i, " with input_dim: ", input_dim, " and output_dim: ", output_dim, flush=True)
 
@@ -338,12 +345,14 @@ class WSM(eqx.Module):
                 thetas_init.append(GradualMLP(theta_init_in_dim, weights.shape[0], init_state_layers, builtin_fns[activation], key=keys[0]))
 
             latent_size = weights.shape[0]
+            print("Latent size of WSM layer ", i, ": ", latent_size, "input_dim: ", input_dim, "output_dim: ", output_dim, flush=True)
             As.append(jnp.eye(latent_size))                             ## The most stable matrix: identity
 
             if conv_embedding is None:
                 B_in_dim = data_size+1 if time_as_channel else data_size
             else:
                 B_in_dim = out_chans+1 if time_as_channel else out_chans
+            print("B_in_dim: ", B_in_dim, " latent_size: ", latent_size, "data_size: ", data_size, flush=True)
             B = jnp.zeros((latent_size, B_in_dim))
             # B += jax.random.normal(keys[i], B.shape)*1e-3             ## TODO Initial perturbation to avoid getting stuck at 0 ?
             Bs.append(B)
@@ -438,10 +447,28 @@ class WSM(eqx.Module):
                 shapes, treedef, static, _ = root_utils
                 params = unflatten_pytree(thet_next, shapes, treedef)
                 root_fun = eqx.combine(params, static)
-                root_in = t_curr+delta_t
-                if self.input_prev_data:
-                    root_in = jnp.concatenate([root_in, x_prev[:x_true.shape[0]]], axis=-1)
-                x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                  ## Evaluated at the next time step
+
+                # root_in = t_curr+delta_t
+                # if self.input_prev_data:
+                #     root_in = jnp.concatenate([root_in, x_prev[:x_true.shape[0]]], axis=-1)
+                # x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                  ## Evaluated at the next time step
+
+                ###############################
+                down_factor = 8
+                H, W = 320//down_factor, 480//down_factor
+                xs_coords = jnp.linspace(-1, 1, W)
+                ys_coords = jnp.linspace(-1, 1, H)
+                xs_grid, ys_grid = jnp.meshgrid(xs_coords, ys_coords)
+                coords = jnp.stack([xs_grid, ys_grid], axis=-1).reshape(-1, 2)  ## (H*W, 2)
+
+                ## Expand t_curr to match coords shape
+                t_curr = jnp.repeat(t_curr[None, :]+delta_t, coords.shape[0], axis=0)   ## Shape (H*W, 1)
+                root_in = jnp.concatenate([t_curr, coords], axis=-1)  ## Shape (H*W, 3)
+                x_next = eqx.filter_vmap(root_fun, in_axes=(0, None, None))(root_in, self.std_lower_bound, self.dtanh_params)       ## Shape (H*W, 3)
+
+                ## Split in two along the last dimension, and combine again to make sure
+                x_next = jnp.concat([arr.flatten() for arr in jnp.split(x_next, 2, axis=-1)])
+                ###############################
 
                 x_next_mean = x_next[:x_true.shape[0]]
 
@@ -524,9 +551,27 @@ class WSM(eqx.Module):
                 # root_in = t_curr[0:1]
                 # print("root_in shape: ", root_in.shape, "x_prev shape: ", x_prev.shape, "x_true shape: ", x_true.shape, "\n\n\n\n")
                 # root_in = jnp.array([0.0])
-                if self.input_prev_data:
-                    root_in = jnp.concatenate([root_in, x_prev[:x_true.shape[0]]], axis=-1)
-                x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                  ## Evaluated at the next time step
+
+                # if self.input_prev_data:
+                #     root_in = jnp.concatenate([root_in, x_prev[:x_true.shape[0]]], axis=-1)
+                # x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                  ## Evaluated at the next time step
+
+                ###############################
+                down_factor = 8
+                H, W = 320//down_factor, 480//down_factor
+                xs_coords = jnp.linspace(-1, 1, W)
+                ys_coords = jnp.linspace(-1, 1, H)
+                xs_grid, ys_grid = jnp.meshgrid(xs_coords, ys_coords)
+                coords = jnp.stack([xs_grid, ys_grid], axis=-1).reshape(-1, 2)  ## (H*W, 2)
+
+                ## Expand t_curr to match coords shape
+                t_curr_s = jnp.repeat(t_curr[None, :]+delta_t, coords.shape[0], axis=0)   ## Shape (H*W, 1)
+                root_in = jnp.concatenate([t_curr_s, coords], axis=-1)  ## Shape (H*W, 3)
+                x_next = eqx.filter_vmap(root_fun, in_axes=(0, None, None))(root_in, self.std_lower_bound, self.dtanh_params)       ## Shape (H*W, 3)
+
+                ## Split in two along the last dimension, and combine again to make sure
+                x_next = jnp.concat([arr.flatten() for arr in jnp.split(x_next, 2, axis=-1)])
+                ###############################
 
                 return (thet_next, x_next, x_hat, t_curr), (x_next, )
 
@@ -613,47 +658,67 @@ class WSM(eqx.Module):
 
             _, (theta_outs, ) = jax.lax.scan(f, (theta_init, xs_[0], ts_[0]), (xs_, ts_))
 
+            #################################################################################
+            # @eqx.filter_vmap
+            # def apply_theta(theta, t_curr, x_curr):
+            #     # delta_t = ts_[1] - ts_[0]
+            #     root_utils = self.root_utils[0]
+            #     shapes, treedef, static, _ = root_utils
+            #     params = unflatten_pytree(theta, shapes, treedef)
+            #     root_fun = eqx.combine(params, static)
+            #     # root_in = t_curr+delta_t
+            #     root_in = t_curr
+
+            #     if self.input_prev_data:
+            #         root_in = jnp.concatenate([root_in, x_curr], axis=-1)
+
+            #     if not self.classification:
+            #         x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                                 ## Evaluated at the next time step
+            #     else:
+            #         x_next = root_fun(root_in)                                      ## Evaluated at the next time step
+            #     return x_next
+
+            # xs_hat = apply_theta(theta_outs, ts_, xs_)
+            #################################################
+
+
+            ####### In some cases, we might apply theta to video; in which case theta takes x,y coords as input ###
+            ## Define the x,y coords here, with Hight, and Weight = 320, 480
+            down_factor = 8
+            H, W = 320//down_factor, 480//down_factor
+            xs_coords = jnp.linspace(-1, 1, W)
+            ys_coords = jnp.linspace(-1, 1, H)
+            xs_grid, ys_grid = jnp.meshgrid(xs_coords, ys_coords)
+            coords = jnp.stack([xs_grid, ys_grid], axis=-1).reshape(-1, 2)  ## (H*W, 2)
+
             @eqx.filter_vmap
-            def apply_theta(theta, t_curr, x_curr):
-                # delta_t = ts_[1] - ts_[0]
+            def apply_theta(theta, t_curr):
                 root_utils = self.root_utils[0]
                 shapes, treedef, static, _ = root_utils
                 params = unflatten_pytree(theta, shapes, treedef)
                 root_fun = eqx.combine(params, static)
-                # root_in = t_curr+delta_t
-                root_in = t_curr
 
-                if self.input_prev_data:
-                    root_in = jnp.concatenate([root_in, x_curr], axis=-1)
+                ## Expand t_curr to match coords shape
+                t_curr = jnp.repeat(t_curr[None, :], coords.shape[0], axis=0)   ## Shape (H*W, 1)
 
-                if not self.classification:
-                    x_next = root_fun(root_in, self.std_lower_bound, self.dtanh_params)                                                 ## Evaluated at the next time step
-                else:
-                    x_next = root_fun(root_in)                                      ## Evaluated at the next time step
+                root_in = jnp.concatenate([t_curr, coords], axis=-1)  ## Shape (H*W, 3)
+
+                x_next = eqx.filter_vmap(root_fun)(root_in)       ## Shape (H*W, 3)
+            
+                ## Rehaspe to (H, W, 3)
+                # x_next = x_next.reshape(H, W, -1)
+                # return x_next.flatten()
+
+                ## Split in two along the last dimension, and combine again to make sure
+                x_next = jnp.concat([arr.flatten() for arr in jnp.split(x_next, 2, axis=-1)])
                 return x_next
 
-            xs_hat = apply_theta(theta_outs, ts_, xs_)
-            # if self.conv_embedding is not None:
-            #     xs_hat = apply_theta(theta_outs, ts_, other_feats)
+            xs_hat = apply_theta(theta_outs, ts_)    ## (time, H*W*3)
+            #################################################
 
             ## Apply the de-embedding convolution if needed
             if self.conv_de_embedding is not None:
-                # print("Print the shape of xs_hat: ", xs_hat.shape, "\n\n\n", flush=True)
-                # xs_hat_ = self.conv_de_embedding(xs_hat.T[:, None, :])[:, 0, :].T
-                # xs_hat_ = eqx.filter_vmap(self.conv_de_embedding)(xs_hat.T[:, None, :])[:, 0, :].T
-                # xs_hat_ = eqx.filter_vmap(jax.lax.stop_gradient(self.conv_de_embedding))(xs_hat.T[:, None, :])[:, 0, :].T
-
-                # xs_hat_ = eqx.filter_vmap(self.conv_de_embedding)(xs_hat.T[:, None, :])[:, 0, :].T
-                # xs_hat = jnp.concatenate([xs_hat[0:1], xs_hat_], axis=0)            ## Concat with the first time steps of xs_hat
-
                 xs_hat = eqx.filter_vmap(self.conv_de_embedding)(xs_hat.T[:, None, :])[:, 0, :].T
-
-                # xs_hat = xs_hat_           ## Same type of convolution as the embedding
-                # xs_hat = self.conv_de_embedding(xs_hat.T).T
-
-            # ## This is actually the cumsum, let; s return the first element plus the difference
-            # xs_hat = jnp.concatenate([xs_hat[0:1], xs_hat[1:] - xs_hat[:-1]], axis=0)
-
             return xs_hat
 
         ## Batched version of the forward pass
