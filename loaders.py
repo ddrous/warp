@@ -928,7 +928,7 @@ class ComphyDataset(TimeSeriesDataset):
         self.normalize = normalize
         self.mini_res = mini_res
 
-        self.num_steps = 347
+        self.num_steps = 127
         self.data_size = (320//mini_res)*(480//mini_res)*3  ## Hardcoded for now, to be improved
 
 
@@ -944,22 +944,22 @@ class ComphyDataset(TimeSeriesDataset):
         for i in [0,1,2,3]:
             ref_path = os.path.join(refs_base_path, f"{i}.mp4")
 
-            ## Check the the file exists. If not, put a zero array of shape the last one in the sequence
-            if not os.path.exists(ref_path):
-                if len(sequence) > 0:
-                    # sequence.append(np.zeros_like(sequence[0]))
-                    sequence.append(np.zeros((50, self.data_size)))
-                    # print(f"Warning: file {ref_path} does not exist, adding zeros of shape {sequence[0].shape}", flush=True)
-                    print(f"Warning: file {ref_path} does not exist, adding zeros of shape {(50, self.data_size)}", flush=True)
-                # else:
-                #     print(f"Warning: file {ref_path} does not exist, and no previous frames to copy shape from. Just adding zeros.", flush=True)
-                    # sequence.append(np.zeros((5, 64*64*3)))   ## Shape: (5, H*W*3)
-            else:
-                frames = video_to_frames(ref_path, normalize=self.normalize, mini_res=self.mini_res)    ## Shape: (n_frames, H, W, 3)
-                sequence.append(frames.reshape(frames.shape[0], -1))   ## Shape: (n_frames, H*W*3)
+            # ## Check the the file exists. If not, put a zero array of shape the last one in the sequence
+            # if not os.path.exists(ref_path):
+            #     if len(sequence) > 0:
+            #         # sequence.append(np.zeros_like(sequence[0]))
+            #         sequence.append(np.zeros((50, self.data_size)))
+            #         # print(f"Warning: file {ref_path} does not exist, adding zeros of shape {sequence[0].shape}", flush=True)
+            #         print(f"Warning: file {ref_path} does not exist, adding zeros of shape {(50, self.data_size)}", flush=True)
+            #     # else:
+            #     #     print(f"Warning: file {ref_path} does not exist, and no previous frames to copy shape from. Just adding zeros.", flush=True)
+            #         # sequence.append(np.zeros((5, 64*64*3)))   ## Shape: (5, H*W*3)
+            # else:
+            #     frames = video_to_frames(ref_path, normalize=self.normalize, mini_res=self.mini_res)    ## Shape: (n_frames, H, W, 3)
+            #     sequence.append(frames.reshape(frames.shape[0], -1))   ## Shape: (n_frames, H*W*3)
 
-            ## Add zero frames of shape (5, H*W*3) between each video
-            sequence.append(np.zeros((5, self.data_size)))
+            # ## Add zero frames of shape (5, H*W*3) between each video
+            # sequence.append(np.zeros((5, self.data_size)))
 
         tgt_frames = video_to_frames(tgt_path+".mp4", normalize=self.normalize, mini_res=self.mini_res)         ## Shape: (127, H, W, 3)
         # print("Loaded target video from path:", tgt_path+".mp4", "with shape:", tgt_frames.shape, flush=True)
@@ -972,9 +972,9 @@ class ComphyDataset(TimeSeriesDataset):
         # exit(0)
 
         # --- ADD THIS LOGIC ---
-        fixed_length = 347 # Or whatever your target length is
+        fixed_length = 127 # Or whatever your target length is
         current_length = sequence.shape[0]
-        
+
         if current_length >= fixed_length:
             # Trim longer sequences
             sequence = sequence[:fixed_length, :]
@@ -992,7 +992,7 @@ class ComphyDataset(TimeSeriesDataset):
         # return (sequence, t_eval), np.array([0], dtype=np.int32)   ## Dummy label of shape (1,)
 
         in_sequence = sequence.copy()
-        in_sequence[-50:, :] = 0.0
+        in_sequence[-47:, :] = 0.0
         return (in_sequence, t_eval), sequence   ## Dummy label of shape (1,)
 
     def __len__(self):

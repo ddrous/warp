@@ -10,7 +10,7 @@ general:
 # Data hyperparameters
 data:
   normalize: True
-  sequence_length: 347
+  sequence_length: 127
   data_dim: 3
   mini_res: 8        ## Factor to reduce the resolution of the video frames (1: original, 2: half, 3: third, etc.)
 
@@ -20,12 +20,12 @@ model:
   root_depth: 5
   root_activation: "sin"
   root_final_activation: null
-  root_output_dim: 6
+  root_output_dim: 3
   positional_encoding: null
-  init_state_layers: 0           ## Number of hidden layers in the MLP to generate the initial hidden state of the RNN   
+  init_state_layers: 1           ## Number of hidden layers in the MLP to generate the initial hidden state of the RNN   
   input_prev_data: False
-  # conv_embedding: [256, 3, 1]
-  conv_embedding: null
+  conv_embedding: [256, 64, 1]
+  # conv_embedding: null
   model_type: "wsm"
   nb_rnn_layers: 1
   weights_lim: 0.5
@@ -57,6 +57,6 @@ training:
   stochastic: False
   val_criterion: "mse"
   nb_recons_loss_steps: null
-  use_nll_loss: True
+  use_nll_loss: False
   inference_start: null     ## Should be None if non-autoregressive training.
   smooth_inference: True

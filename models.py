@@ -704,14 +704,14 @@ class WSM(eqx.Module):
                 root_in = jnp.concatenate([t_curr, coords], axis=-1)  ## Shape (H*W, 3)
 
                 x_next = eqx.filter_vmap(root_fun)(root_in)       ## Shape (H*W, 3)
-            
-                ## Rehaspe to (H, W, 3)
-                # x_next = x_next.reshape(H, W, -1)
-                # return x_next.flatten()
 
-                ## Split in two along the last dimension, and combine again to make sure
-                x_next = jnp.concat([arr.flatten() for arr in jnp.split(x_next, 2, axis=-1)])
-                return x_next
+                # Rehaspe to (H, W, 3)
+                x_next = x_next.reshape(H, W, -1)
+                return x_next.flatten()
+
+                # ## Split in two along the last dimension, and combine again to make sure
+                # x_next = jnp.concat([arr.flatten() for arr in jnp.split(x_next, 2, axis=-1)])
+                # return x_next
 
             xs_hat = apply_theta(theta_outs, ts_)    ## (time, H*W*3)
             #################################################
